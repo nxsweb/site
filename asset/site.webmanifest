@@ -1,0 +1,31 @@
+{
+  "name": "NEXUS - 유닛도감 · 체크리스트 · 빌더",
+  "short_name": "NEXUS",
+  "description": "유닛도감, 체크리스트, 빌더를 제공하는 NEXUS 통합 웹",
+  "lang": "ko",
+  "start_url": "../",
+  "scope": "../",
+  "display": "browser",
+  "background_color": "#030813",
+  "theme_color": "#030813",
+  "icons": [
+    {
+      "src": "android-chrome-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "android-chrome-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
