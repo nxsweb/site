@@ -2,7 +2,7 @@
 <html lang="ko" class="nexus-booting">
 <head>
     <script>
-        window.APP_VERSION = "NXSBuild-V3";
+        window.APP_VERSION = "NXSBuild-V4";
         window.NEXUS_ANDROID_APP = false; // GitHub Pages 웹 배포에서는 기존 버전 확인을 유지한다.
         window.NEXUS_BUILD_VERSION = window.APP_VERSION;
         // 독립창의 실행 모드는 메인 화면의 마지막 탭 설정과 분리한다.
@@ -387,7 +387,7 @@
                 <div class="gh-title-wrap">
                     <div class="gh-title" id="ghTitleText">
                         <span class="gh-title-mainline">개복디 넥서스</span>
-                        <span class="gh-title-subline">by VAERON<span id="ghTitleVersion"></span></span>
+                        <span class="gh-title-subline"><button type="button" class="gh-creator-trigger" data-action="openCreatorInfo" aria-haspopup="dialog" aria-controls="creatorInfoDialog" title="제작자 정보">by VAERON</button><span id="ghTitleVersion"></span></span>
                     </div>
                 </div>
             </div>
@@ -409,6 +409,16 @@
             </div>
         </div>
     </header>
+    <dialog id="creatorInfoDialog" class="gh-creator-dialog" aria-labelledby="creatorInfoTitle" aria-describedby="creatorInfoDescription">
+        <div class="gh-creator-card">
+            <button type="button" class="gh-creator-close" data-action="closeCreatorInfo" aria-label="제작자 정보 닫기">×</button>
+            <div class="gh-creator-profile">
+                <img class="gh-creator-icon" data-nexus-asset="./asset/vaeron.png" src="./asset/vaeron.png" loading="lazy" width="76" height="76" alt="VAERON 로고" decoding="async">
+                <div class="gh-creator-identity"><span class="gh-creator-overline">CREATOR &amp; DEVELOPER</span><h2 id="creatorInfoTitle">VAERON</h2><p id="creatorInfoDescription">NEXUS · BUILD 제작 및 관리</p></div>
+            </div>
+            <div class="gh-creator-details"><div><span class="gh-creator-overline">BATTLE.NET · BATTLETAG</span><strong>VAERON<span class="gh-creator-hash">#3787</span></strong></div><a href="https://discord.gg/z7DwqvGeB5" target="_blank" rel="noopener noreferrer" class="gh-creator-discord">디스코드 커뮤니티 ↗</a></div>
+        </div>
+    </dialog>
     <div id="independentWindowMenu" class="nexus-independent-menu" role="menu" aria-label="독립창 선택" hidden>
         <button type="button" role="menuitem" data-action="openIndependentWindow" data-window-view="nexus">넥서스 · 필요 재료</button>
         <button type="button" role="menuitem" data-action="openIndependentWindow" data-window-view="board">빌더 · 분석 보드</button>
@@ -570,7 +580,7 @@
 </div>
 <!-- 목표설정: 난이도·진행 목표 -->
 <div class="sg xp-sp-card goal-settings-card">
-<div class="basic-goal-section-heading"><span class="basic-goal-section-copy"><strong>목표 설정</strong></span></div>
+<div class="basic-goal-section-heading"><span class="basic-goal-section-copy"><strong>목표 설정</strong></span><button class="additional-settings-button battle-mode-guide-trigger" id="battleModeGuideOpen" type="button" aria-label="전투 모드 및 특성 최적화 안내" aria-haspopup="dialog" aria-controls="battleModeGuideDialog">최적화 안내</button></div>
 <div class="xp-sp-split basic-info-grid">
 <div class="xp-sp-panel basic-info-panel">
 <section class="basic-info-lane is-primary" aria-label="개인전 및 협동전 설정">
@@ -578,7 +588,7 @@
 <div class="basic-info-row" data-basic-row="battle-mode"><label>게임 모드</label><div class="mode-choice-group" role="group" aria-label="개인전 또는 협동전"><button type="button" data-mode-choice="battle" data-value="solo" aria-pressed="true">개인전</button><button type="button" data-mode-choice="battle" data-value="coop" aria-pressed="false">협동전</button></div></div>
 <div hidden><select id="soloMode" aria-hidden="true"><option selected="" value="ON">ON</option><option value="OFF">OFF</option></select><select id="coopMode" aria-hidden="true"><option selected="" value="OFF">OFF</option><option value="ON">ON</option></select></div>
 <div class="basic-info-row" data-basic-row="speed-mode"><label>스피드 모드</label><div class="spec-dps-speed-switch-wrap goal-mode-switch-wrap" aria-label="스피드 모드 전환"><button class="artifact-dps-switch goal-mode-switch" id="specDpsSpeedModeToggle" type="button" role="switch" aria-checked="false" data-spec-dps-speed-toggle><span class="artifact-dps-switch-text">OFF</span><span class="artifact-dps-switch-text">ON</span><i aria-hidden="true"></i></button></div></div>
-<div class="basic-info-row" data-basic-row="game-mode"><div class="battle-mode-label"><span>전투 모드</span><button class="battle-mode-guide-trigger" id="battleModeGuideOpen" type="button" aria-label="전투 모드와 특성 최적화 제한 안내" aria-haspopup="dialog" aria-controls="battleModeGuideDialog">?</button></div><div class="artifact-dps-switch-wrap goal-mode-switch-wrap" aria-label="일반 또는 유물 DPS 표시"><button class="artifact-dps-switch goal-mode-switch" id="artifactDpsViewToggle" type="button" role="switch" aria-checked="false"><span class="artifact-dps-switch-text">일반</span><span class="artifact-dps-switch-text">유물</span><i aria-hidden="true"></i></button></div></div>
+<div class="basic-info-row" data-basic-row="game-mode"><label>전투 모드</label><div class="artifact-dps-switch-wrap goal-mode-switch-wrap" aria-label="일반 또는 유물 DPS 표시"><button class="artifact-dps-switch goal-mode-switch" id="artifactDpsViewToggle" type="button" role="switch" aria-checked="false"><span class="artifact-dps-switch-text">일반</span><span class="artifact-dps-switch-text">유물</span><i aria-hidden="true"></i></button></div></div>
 <div class="basic-info-row" data-basic-row="team"><label id="teamCountLabel">출발 지원 인원수</label><select id="team" hidden aria-hidden="true"><option selected="" value="1">1</option><option value="2">2</option><option value="3">3</option></select><div class="team-count-switch" role="group" aria-labelledby="teamCountLabel"><button type="button" data-team-count="1" aria-pressed="true">1</button><button type="button" data-team-count="2" aria-pressed="false">2</button><button type="button" data-team-count="3" aria-pressed="false">3</button></div></div>
 </div>
 <div class="basic-info-lane-group is-match" aria-label="난이도와 고행 단계">
@@ -656,7 +666,7 @@
 </div>
 </div>
 <div class="rune-basic-card">
-<div class="rune-panel-title rune-card-heading">룬 스텟</div>
+<div class="rune-panel-title rune-card-heading rune-stat-title"><span>룬 스텟</span><strong id="runeGradeName" class="rune-grade-name" data-rune-grade="none">미설정</strong></div>
 <div class="rune-stat-row rune-stat-head">
 <div></div><div>기본 스텟</div><div>개조 스텟</div>
 </div>
@@ -667,12 +677,13 @@
 </div>
 <div class="rune-stat-row">
 <select id="runeChoiceType">
-<option selected="" value="ap">룬 마법공격력</option>
+<option selected="" value="none">선택 안함</option>
+<option value="ap">룬 마법공격력</option>
 <option value="ua">룬 유닛 가속</option>
 <option value="td">룬 총 데미지</option>
 <option value="harmony">룬 총 데미지 &amp; 유닛 가속</option>
 </select>
-<input id="runeChoiceValue" type="text" value="0" inputmode="decimal"/>
+<span class="rune-special-value"><input id="runeChoiceValue" type="text" value="0" inputmode="decimal" disabled/></span>
 <div class="rune-mod-empty" aria-hidden="true"></div>
 </div>
 <div class="rune-stat-row">
@@ -722,15 +733,16 @@
 <input id="enchantCode" type="hidden" value="000000"/>
 </div>
 <div class="additional-editor">
-<div class="rune-panel-title rune-card-heading additional-title-row"><span class="rune-card-heading-name">에디셔널</span><span class="additional-help">최하옵션 / 평균옵션 선택입력</span></div>
+<div class="rune-panel-title rune-card-heading additional-title-row"><span class="rune-card-heading-name">에디셔널</span><span class="additional-controls"><button type="button" id="additionalRuneOpen" class="additional-settings-button">에디설정</button></span></div>
+<input id="additionalRuneSlots" type="hidden" value="[]"/>
 <div class="additional-list">
-<div class="additional-row"><label>에디셔널 공격력</label><input id="addAD" type="text" value="0" inputmode="decimal"/></div>
-<div class="additional-row"><label>에디셔널 공격속도</label><input id="addAS" type="text" value="0" inputmode="decimal"/></div>
-<div class="additional-row"><label>에디셔널 크리 데미지</label><input id="addCD" type="text" value="0" inputmode="decimal"/></div>
-<div class="additional-row"><label>에디셔널 크리 확률</label><input id="addCRI" type="text" value="0" inputmode="decimal"/></div>
-<div class="additional-row"><label>에디셔널 마법공격력</label><input id="addAP" type="text" value="0" inputmode="decimal"/></div>
-<div class="additional-row"><label>에디셔널 총 데미지</label><input id="addTD" type="text" value="0" inputmode="decimal"/></div>
-<div class="additional-row"><label>에디셔널 유닛 가속</label><input id="addUA" type="text" value="0" inputmode="decimal"/></div>
+<div class="additional-row"><label>에디셔널 공격력</label><input id="addAD" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 공격속도</label><input id="addAS" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 크리 데미지</label><input id="addCD" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 크리 확률</label><input id="addCRI" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 마법공격력</label><input id="addAP" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 총 데미지</label><input id="addTD" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 유닛 가속</label><input id="addUA" type="text" value="0" readonly aria-readonly="true"/></div>
 </div>
 </div>
 </div>
@@ -1130,10 +1142,18 @@
 <div class="trait-limit-fields">
 <label class="trait-limit-field" for="traitLimitAS"><span>공격속도 제한</span><input id="traitLimitAS" type="text" inputmode="decimal" value="0" aria-label="공격속도 제한"></label>
 <label class="trait-limit-field" for="traitLimitCRI"><span>크리 확률 제한</span><input id="traitLimitCRI" type="text" inputmode="decimal" value="0" aria-label="크리 확률 제한"></label>
+<div class="trait-limit-field trait-limit-special"><span id="traitLimitLifeBonusTitle">목숨 보너스</span>
+<select id="traitLimitLifeBonus" class="trait-limit-source" aria-label="목숨 보너스 자동 투자" tabindex="-1" aria-hidden="true"><option value="ON" selected>투자 가능</option><option value="OFF">투자 제한</option></select>
+<div class="trait-limit-segments" role="group" aria-labelledby="traitLimitLifeBonusTitle"><button type="button" class="trait-limit-segment" data-limit-select="traitLimitLifeBonus" data-limit-value="ON" aria-pressed="true">투자 가능</button><button type="button" class="trait-limit-segment" data-limit-select="traitLimitLifeBonus" data-limit-value="OFF" aria-pressed="false">투자 제한</button></div>
+</div>
 </div>
 </section>
 <section class="trait-limit-group" aria-label="특수 계열 제한">
 <div class="trait-limit-fields">
+<div class="trait-limit-field trait-limit-special"><span id="traitLimitMagicAPTitle">마법공격력</span>
+<select id="traitLimitMagicAP" class="trait-limit-source" aria-label="마법공격력 1·2·3 자동 투자" tabindex="-1" aria-hidden="true"><option value="ON" selected>투자 가능</option><option value="OFF">투자 제한</option></select>
+<div class="trait-limit-segments" role="group" aria-labelledby="traitLimitMagicAPTitle"><button type="button" class="trait-limit-segment" data-limit-select="traitLimitMagicAP" data-limit-value="ON" aria-pressed="true">투자 가능</button><button type="button" class="trait-limit-segment" data-limit-select="traitLimitMagicAP" data-limit-value="OFF" aria-pressed="false">투자 제한</button></div>
+</div>
 <div class="trait-limit-field trait-limit-special"><span id="traitLimitMultiTargetTitle">멀티 타겟</span>
 <select id="traitLimitMultiTarget" class="trait-limit-source" aria-label="멀티 타겟 투자" tabindex="-1" aria-hidden="true"><option value="ON">투자 가능</option><option value="OFF" selected>투자 제한</option></select>
 <div class="trait-limit-segments" role="group" aria-labelledby="traitLimitMultiTargetTitle"><button type="button" class="trait-limit-segment" data-limit-select="traitLimitMultiTarget" data-limit-value="ON" aria-pressed="false">투자 가능</button><button type="button" class="trait-limit-segment" data-limit-select="traitLimitMultiTarget" data-limit-value="OFF" aria-pressed="true">투자 제한</button></div>
@@ -1249,7 +1269,7 @@
 <section id="unitSanctuaryPanel" class="unit-sanctuary-panel" aria-label="성소 정보">
   <header class="unit-sanctuary-heading">
     <h3>성소 정보 <span id="unitSanctuaryCount">0 / 10</span></h3>
-    <button type="button" class="unit-sanctuary-guide-trigger" id="unitSanctuaryGuideOpen" aria-label="성소 정보 사용 방법" aria-expanded="false" aria-haspopup="dialog" aria-controls="unitSanctuaryGuideDetails">사용 방법</button>
+    <button type="button" class="unit-sanctuary-guide-trigger additional-settings-button" id="unitSanctuaryGuideOpen" aria-label="성소 정보 사용 방법" aria-expanded="false" aria-haspopup="dialog" aria-controls="unitSanctuaryGuideDetails">사용 방법</button>
     <button type="button" class="unit-sanctuary-reset" id="unitSanctuaryReset" aria-label="전체 초기화"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7"/></svg></button>
   </header>
   <div id="unitSanctuarySummary" class="unit-basic-summary unit-sanctuary-summary" aria-label="설정된 성소 정보 요약"></div>
@@ -1276,6 +1296,15 @@
 
 
 
+<div id="additionalRuneModal" class="additional-rune-modal" hidden>
+  <div class="additional-rune-backdrop" data-additional-close aria-hidden="true"></div>
+  <section class="additional-rune-dialog" role="dialog" aria-modal="true" aria-labelledby="additionalRuneTitle" tabindex="-1">
+    <header class="additional-rune-dialog-head"><div><h2 id="additionalRuneTitle">에디셔널 룬 설정</h2><p>룬 10칸 · 스탯 평균 자동 계산</p></div><div class="additional-rune-header-actions"><button type="button" class="additional-rune-done" data-additional-close>설정완료</button><button type="button" class="additional-rune-close" data-additional-close aria-label="닫기">×</button></div></header>
+    <div class="additional-rune-modal-content">
+      <div class="additional-rune-grid-scroll"><div id="additionalRuneGrid" class="additional-rune-grid" aria-label="룬 1번부터 10번까지"></div></div>
+    </div>
+  </section>
+</div>
 <div id="dpsCompareModalOverlay" class="dps-compare-overlay" hidden>
       <section
         id="dpsCompareModal"

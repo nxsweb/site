@@ -207,17 +207,202 @@ function specBoardPierceValue(){
 }
 
 /* ── 03 · 입력·화면 동기화 ── */
+const ADDITIONAL_STAT_FIELDS=Object.freeze([['addAD','ad'],['addAS','as'],['addCD','cd'],['addCRI','cri'],['addAP','ap'],['addTD','td'],['addUA','ua']]);
+const ADDITIONAL_RUNE_NUMERIC_FIELDS=Object.freeze(['ad','as','cd','cri','modAD','modAS','modCD','modCRI','specialValue']);
+const ADDITIONAL_RUNE_AWAKEN_BONUS=Object.freeze({'없음':0,a:2,b:5,c:9,d:14,e:20,f:30,g:40});
+function emptyAdditionalRune(){
+  return {registered:false,ad:'',as:'',cd:'',cri:'',modAD:'0',modAS:'0',modCD:'0',modCRI:'0',specialType:'none',specialValue:'',reinf:'0',asc:'없음'};
+}
+function normalizeAdditionalRuneNumber(value,allowNegative=false){
+  const raw=String(value ?? '').replace(/,/g,'').trim();
+  const prefix=allowNegative ? (raw.startsWith('-') ? '-' : raw.startsWith('+') ? '+' : '') : '';
+  const digits=raw.replace(/\D/g,'');
+  if(!digits) return allowNegative ? '0' : '';
+  const numeric=Number(prefix+digits);
+  const clamped=allowNegative ? Math.max(-10,Math.min(10,numeric)) : numeric;
+  return String(clamped);
+}
+function normalizeAdditionalRune(value){
+  const source=value && typeof value==='object' && !Array.isArray(value) ? value : {};
+  const rune=emptyAdditionalRune();
+  rune.registered=source.registered===true;
+  ADDITIONAL_RUNE_NUMERIC_FIELDS.forEach(key=>{
+    if(key.startsWith('mod') && (source[key]===undefined || source[key]==='')) return;
+    rune[key]=normalizeAdditionalRuneNumber(source[key],key.startsWith('mod'));
+  });
+  rune.specialType=normalizeRuneChoiceType(source.specialType ?? 'none');
+  rune.reinf=String(Math.min(15,Math.max(0,Number(normalizeAdditionalRuneNumber(source.reinf))||0)));
+  rune.asc=Object.hasOwn(ADDITIONAL_RUNE_AWAKEN_BONUS,source.asc) ? source.asc : '없음';
+  return rune;
+}
+function parseAdditionalRuneSlots(value){
+  let parsed=value;
+  if(typeof value==='string'){
+    try{parsed=JSON.parse(value);}catch{parsed=[];}
+  }
+  const source=Array.isArray(parsed) ? parsed : [];
+  return Array.from({length:10},(_,index)=>normalizeAdditionalRune(source[index]));
+}
+function normalizeAdditionalRuneSlotsValue(value){
+  return JSON.stringify(parseAdditionalRuneSlots(value));
+}
+function mainAdditionalRune(){
+  const rune=emptyAdditionalRune();
+  rune.registered=true;
+  for(const [field,id] of Object.entries({ad:'rAD',as:'rAS',cd:'rCD',cri:'rCRI',modAD:'rModAD',modAS:'rModAS',modCD:'rModCD',modCRI:'rModCRI'}))
+    rune[field]=String(v(id));
+  rune.specialType=normalizeRuneChoiceType(vs('runeChoiceType'));
+  rune.specialValue=String(v('runeChoiceValue'));
+  rune.reinf=String(Math.max(0,Math.min(15,v('rReinf'))));
+  rune.asc=Object.hasOwn(ADDITIONAL_RUNE_AWAKEN_BONUS,vs('rAsc'))?vs('rAsc'):'없음';
+  return rune;
+}
+function additionalRuneSlotsWithMain(){
+  const slots=parseAdditionalRuneSlots($('additionalRuneSlots')?.value);
+  slots[0]=mainAdditionalRune();
+  return slots;
+}
+function additionalRuneAverage(){
+  const slots=additionalRuneSlotsWithMain();
+  const totals={ad:0,as:0,cd:0,cri:0,ap:0,td:0,ua:0};
+  const round=value=>value<0 ? -Math.floor(-value+0.5) : Math.floor(value+0.5);
+  slots.forEach(rune=>{
+    if(!rune.registered) return;
+    const n=key=>Number(rune[key])||0;
+    const bonus=Number(rune.reinf)||0;
+    const mod=key=>n('mod'+key);
+    totals.ad+=round((n('ad')+bonus+mod('AD'))/3)+(ADDITIONAL_RUNE_AWAKEN_BONUS[rune.asc]||0);
+    totals.as+=round((n('as')+bonus+mod('AS'))/3);
+    totals.cd+=round((n('cd')+Math.max(0,bonus-10)+mod('CD'))/3);
+    totals.cri+=round((n('cri')+bonus+mod('CRI'))/3);
+    const special=round(n('specialValue')/3);
+    if(rune.specialType==='ap') totals.ap+=special;
+    if(rune.specialType==='td' || rune.specialType==='harmony') totals.td+=special;
+    if(rune.specialType==='ua' || rune.specialType==='harmony') totals.ua+=special;
+  });
+  return Object.fromEntries(Object.entries(totals).map(([key,total])=>[key,key==='cri'?round(total/10):Number((total/10).toFixed(1))]));
+}
+function syncAdditionalAverage(){
+  const average=additionalRuneAverage();
+  ADDITIONAL_STAT_FIELDS.forEach(([id,key])=>{
+    const input=$(id);
+    if(input) input.value=String(id==='addAD' ? Math.round(average[key]) : average[key]);
+  });
+}
+function syncMainRuneGrade(){
+  const type=normalizeRuneChoiceType(vs('runeChoiceType'));
+  const value=$('runeChoiceValue');
+  if(value) value.disabled=type==='none';
+  const grade=runeGradeKey(type,v('rCD'));
+  const name=$('runeGradeName');
+  if(name){name.dataset.runeGrade=grade;name.textContent=RUNE_GRADE_NAMES[grade];}
+}
+function additionalRuneCardHtml(rune,index){
+  const grade=runeGradeKey(rune.specialType,rune.cd);
+  const fieldNames={ad:'공격력',as:'공격속도',cd:'크리 데미지',cri:'크리 확률',modAD:'공격력 개조',modAS:'공격속도 개조',modCD:'크리 데미지 개조',modCRI:'크리 확률 개조',specialValue:'특수 스탯 수치'};
+  const readonly=index===0;
+  const input=(key,mod=false)=>`<input data-additional-rune-index="${index}" data-additional-rune-field="${key}" type="text" inputmode="${mod?'decimal':'numeric'}" aria-label="룬 ${index+1} ${fieldNames[key]}" value="${escapeHtml(mod && Number(rune[key])===0 ? '' : rune[key])}" ${readonly?'disabled':''}>`;
+  const statLine=(label,base,mod)=>`<div class="additional-rune-stat-line"><label>${label}</label>${input(base)}${input(mod,true)}</div>`;
+  const option=(value,label,selected)=>`<option value="${escapeHtml(value)}" ${value===selected?'selected':''}>${escapeHtml(label)}</option>`;
+  const kinds=[['none','선택 안함'],['ap','마법공격력'],['ua','유닛 가속'],['td','총 데미지'],['harmony','총 데미지 + 유닛 가속']];
+  const awakening=['없음','a','b','c','d','e','f','g'];
+  return `<article class="additional-rune-card" data-additional-rune-card="${index}" data-rune-grade="${grade}">
+    <header class="additional-rune-card-title"><strong>룬 ${index+1}</strong><span data-additional-rune-grade>${RUNE_GRADE_NAMES[grade]}</span><button type="button" class="additional-rune-reset" data-additional-rune-reset="${index}" ${(readonly || !rune.registered)?'disabled':''}>초기화</button></header>
+    <div class="additional-rune-stat-heading"><span aria-hidden="true"></span><span>기본 스텟</span><span>개조 스텟</span></div>
+    ${statLine('공격력','ad','modAD')}
+    <div class="additional-rune-stat-line"><select data-additional-rune-index="${index}" data-additional-rune-field="specialType" aria-label="룬 ${index+1} 특수 스탯" ${readonly?'disabled':''}>${kinds.map(([key,label])=>option(key,label,rune.specialType)).join('')}</select><span class="additional-rune-special-value">${input('specialValue')}</span><i aria-hidden="true"></i></div>
+    ${statLine('공격속도','as','modAS')}
+    ${statLine('크리 데미지','cd','modCD')}
+    ${statLine('크리 확률','cri','modCRI')}
+    <div class="additional-rune-stat-line additional-rune-bottom-row"><label>룬 강화수</label><select data-additional-rune-index="${index}" data-additional-rune-field="reinf" aria-label="룬 ${index+1} 강화수" ${readonly?'disabled':''}>${(readonly ? [Number(rune.reinf)] : Array.from({length:16},(_,n)=>n)).map(n=>option(String(n),n===0?'선택 안함':String(n),rune.reinf)).join('')}</select><span class="additional-rune-empty" aria-hidden="true"></span></div>
+    <div class="additional-rune-stat-line additional-rune-bottom-row"><label>룬 각성</label><select data-additional-rune-index="${index}" data-additional-rune-field="asc" aria-label="룬 ${index+1} 각성" ${readonly?'disabled':''}>${awakening.map(key=>option(key,key==='없음'?'선택 안함':key,rune.asc)).join('')}</select><span class="additional-rune-empty" aria-hidden="true"></span></div>
+  </article>`;
+}
+function renderAdditionalRuneGrid(){
+  const grid=$('additionalRuneGrid');
+  if(!grid) return;
+  const slots=additionalRuneSlotsWithMain();
+  grid.innerHTML=slots.map(additionalRuneCardHtml).join('');
+  slots.forEach((rune,index)=>syncAdditionalRuneCard(index,rune));
+}
+function syncAdditionalRuneCard(index,rune){
+  const card=qs(`[data-additional-rune-card="${index}"]`);
+  if(!card) return;
+  const grade=runeGradeKey(rune.specialType,rune.cd);
+  card.dataset.runeGrade=grade;
+  const label=card.querySelector('[data-additional-rune-grade]');
+  if(label) label.textContent=RUNE_GRADE_NAMES[grade];
+  const special=card.querySelector('[data-additional-rune-field="specialValue"]');
+  if(special) special.disabled=index===0 || rune.specialType==='none';
+  card.querySelectorAll('[data-additional-rune-field="specialType"], [data-additional-rune-field="reinf"], [data-additional-rune-field="asc"]').forEach(el=>{el.disabled=index===0;});
+  const reset=card.querySelector('[data-additional-rune-reset]');
+  if(reset) reset.disabled=index===0 || !rune.registered;
+}
+function closeAdditionalRuneModal(){
+  const modal=$('additionalRuneModal');
+  if(modal) modal.hidden=true;
+  document.body.classList.remove('additional-rune-open');
+  $('additionalRuneOpen')?.focus();
+}
+function openAdditionalRuneModal(){
+  renderAdditionalRuneGrid();
+  const modal=$('additionalRuneModal');
+  if(modal) modal.hidden=false;
+  document.body.classList.add('additional-rune-open');
+  modal?.querySelector('[data-additional-close]')?.focus();
+}
+function bindAdditionalRuneEvents(){
+  document.addEventListener('click',event=>{
+    if(event.target.closest?.('#additionalRuneOpen')){openAdditionalRuneModal();return;}
+    if(event.target.closest?.('[data-additional-close]')){closeAdditionalRuneModal();return;}
+    const reset=event.target.closest?.('[data-additional-rune-reset]');
+    if(reset){
+      const index=Number(reset.dataset.additionalRuneReset);
+      if(index===0) return;
+      const slots=parseAdditionalRuneSlots($('additionalRuneSlots')?.value);
+      slots[index]=emptyAdditionalRune();
+      $('additionalRuneSlots').value=JSON.stringify(slots);
+      renderAdditionalRuneGrid();
+      commitAppUpdate();
+    }
+  });
+  const handleRuneChange=event=>{
+    const field=event.target?.dataset?.additionalRuneField;
+    const index=Number(event.target?.dataset?.additionalRuneIndex);
+    if(!field || !Number.isInteger(index) || index<1 || index>=10 || event.target.disabled || isStorageLocked()) return;
+    if(event.type==='input' && event.isComposing) return;
+    const slots=parseAdditionalRuneSlots($('additionalRuneSlots')?.value);
+    const rune=slots[index];
+    const numeric=ADDITIONAL_RUNE_NUMERIC_FIELDS.includes(field);
+    const isMod=field.startsWith('mod');
+    const raw=event.target.value;
+    const value=numeric ? normalizeAdditionalRuneNumber(raw,isMod) : raw;
+    const typingSign=isMod && event.type==='input' && (raw==='-' || raw==='+');
+    const visible=isMod && value==='0' ? '' : value;
+    if(numeric && !typingSign && raw!==visible) event.target.value=visible;
+    if(isMod && value==='0' && !rune.registered) return;
+    if(rune[field]===value && rune.registered) return;
+    rune[field]=value;
+    rune.registered=true;
+    $('additionalRuneSlots').value=JSON.stringify(slots);
+    syncAdditionalRuneCard(index,rune);
+    commitAppUpdate();
+  };
+  $('additionalRuneGrid')?.addEventListener('input',handleRuneChange);
+  $('additionalRuneGrid')?.addEventListener('change',handleRuneChange);
+}
 function syncRuneChoice(){
-  const type=vs('runeChoiceType') || 'harmony';
+  const type=normalizeRuneChoiceType(vs('runeChoiceType'));
   const value=v('runeChoiceValue');
   RUNE_CHOICE_TARGETS.forEach(([kind,id])=>setValue(id, kind===type ? value : 0));
+  syncMainRuneGrade();
 }
 function hydrateRuneChoiceFromHidden(){
   const typeEl=$('runeChoiceType');
   const valueEl=$('runeChoiceValue');
   if(!typeEl || !valueEl) return;
   const selected=RUNE_CHOICE_TARGETS.find(([,id])=>v(id)!==0);
-  typeEl.value=selected ? selected[0] : 'harmony';
+  typeEl.value=selected ? selected[0] : 'none';
   valueEl.value=String(selected ? v(selected[1]) : 0);
   syncRuneChoice();
 }
@@ -442,13 +627,8 @@ function formatMoneyInput(el){
   const digits=(neg?raw.slice(1):raw).replace(/^0+(?=\d)/,'');
   el.value=(neg?'-':'') + (digits?digits.replace(/\B(?=(\d{3})+(?!\d))/g,','):'0');
 }
-const DECIMAL_DISPLAY_INPUT_IDS=new Set(['addAD','addAS','addCD','addCRI','addAP','addTD','addUA']);
 function formatAllMoneyInputs(){
   qsa('.money-input').forEach(formatMoneyInput);
-  DECIMAL_DISPLAY_INPUT_IDS.forEach(id=>{
-    const el=$(id);
-    if(el) el.value=normalizeDecimalDisplayValue(el.value);
-  });
 }
 
 function currentArtifactDpsResult(){
@@ -556,6 +736,23 @@ function syncPreCalculationViews(){
   normalizeRoundInputs();
   syncExclusiveRuneOptions();
   syncRuneChoice();
+  syncAdditionalAverage();
+  if(!$('additionalRuneModal')?.hidden){
+    const rune=mainAdditionalRune();
+    const card=qs('[data-additional-rune-card="0"]');
+    if(card){
+      for(const key of ADDITIONAL_RUNE_NUMERIC_FIELDS){
+        const input=card.querySelector(`[data-additional-rune-field="${key}"]`);
+        const visible=key.startsWith('mod') && Number(rune[key])===0 ? '' : rune[key];
+        if(input && input.value!==visible) input.value=visible;
+      }
+      for(const key of ['specialType','reinf','asc']){
+        const select=card.querySelector(`[data-additional-rune-field="${key}"]`);
+        if(select && select.value!==rune[key]) select.value=rune[key];
+      }
+      syncAdditionalRuneCard(0,rune);
+    }
+  }
   syncDonationBuffControl();
   syncEnchantInputs();
   syncControlDisplays();
@@ -575,9 +772,9 @@ function renderCalculatedViews(s){
   updateTraits();
 }
 /* 특성 투자 제한: 원본 ON/OFF 셀렉트와 좌우 선택 버튼 동기화 */
-const TRAIT_LIMIT_STATUS_FIELDS=['traitLimitAS','traitLimitCRI','traitLimitMultiTarget','traitLimitInfinite'];
+const TRAIT_LIMIT_STATUS_FIELDS=['traitLimitAS','traitLimitCRI','traitLimitLifeBonus','traitLimitMagicAP','traitLimitMultiTarget','traitLimitInfinite'];
 function syncTraitLimitControlPresentation(){
-  for(const id of ['traitLimitMultiTarget','traitLimitInfinite']){
+  for(const id of ['traitLimitLifeBonus','traitLimitMagicAP','traitLimitMultiTarget','traitLimitInfinite']){
     const field=$(id);
     if(!field) continue;
     document.querySelectorAll(`[data-limit-select="${id}"]`).forEach(button=>{
@@ -1029,13 +1226,14 @@ const FIELD_REGISTRY={
   opt10:{kind:'룬정보',name:'10강 옵션',save:true},
   opt15:{kind:'룬정보',name:'15강 옵션',save:true},
   transOpt:{kind:'룬정보',name:'초월 옵션',save:true},
-  addAD:{kind:'에디셔널',name:'공격력',save:true},
-  addAS:{kind:'에디셔널',name:'공격속도',save:true},
-  addCD:{kind:'에디셔널',name:'크리 데미지',save:true},
-  addCRI:{kind:'에디셔널',name:'크리 확률',save:true},
-  addAP:{kind:'에디셔널',name:'마법공격력',save:true},
-  addTD:{kind:'에디셔널',name:'총 데미지',save:true},
-  addUA:{kind:'에디셔널',name:'유닛 가속',save:true},
+  additionalRuneSlots:{kind:'에디셔널',name:'룬 10칸 설정',save:true},
+  addAD:{kind:'에디셔널',name:'공격력',save:false},
+  addAS:{kind:'에디셔널',name:'공격속도',save:false},
+  addCD:{kind:'에디셔널',name:'크리 데미지',save:false},
+  addCRI:{kind:'에디셔널',name:'크리 확률',save:false},
+  addAP:{kind:'에디셔널',name:'마법공격력',save:false},
+  addTD:{kind:'에디셔널',name:'총 데미지',save:false},
+  addUA:{kind:'에디셔널',name:'유닛 가속',save:false},
   enchAD:{kind:'인첸트 레벨 / 결과',name:'공격력',save:true},
   enchCRI:{kind:'인첸트 레벨 / 결과',name:'크리 확률',save:true},
   enchUA:{kind:'인첸트 레벨 / 결과',name:'유닛 가속',save:true},
@@ -1049,6 +1247,8 @@ const FIELD_REGISTRY={
   traitLimitAS:{kind:'특성 투자 제한',name:'공격속도',save:true},
   traitLimitCRI:{kind:'특성 투자 제한',name:'크리 확률',save:true},
   traitLimitCD:{kind:'특성 투자 제한',name:'크리 데미지',save:true},
+  traitLimitLifeBonus:{kind:'특성 투자 제한',name:'목숨 보너스',save:true},
+  traitLimitMagicAP:{kind:'특성 투자 제한',name:'마법공격력 1·2·3',save:true},
   traitLimitMultiTarget:{kind:'특성 투자 제한',name:'멀티 타겟',save:true},
   traitLimitInfinite:{kind:'특성 투자 제한',name:'무한특성',save:true},
   skillDouble:{kind:'성소 보드',name:'더블스페',save:true},
@@ -1294,6 +1494,10 @@ function setTraitTierExpanded(tier,expanded,exclusive=true){
   if(toggle) toggle.setAttribute('aria-expanded',String(expanded));
   setAccordionContentExpanded(list,expanded);
 }
+function traitNextInvestmentLabel(row,isMax,cost){
+  if(row===45 && !isCoopMode()) return '협동전 전용';
+  return isMax ? '✓ 마스터 완료' : `다음 투자 · ${fullNumber(cost)}`;
+}
 function buildTraitBoard(){
   const body=$('traitBody');
   if(!body) return;
@@ -1318,7 +1522,7 @@ function buildTraitBoard(){
         <div class="trait-invest-main">
           <span class="trait-invest-index" aria-hidden="true">${String(index+1).padStart(2,'0')}</span>
           <div class="trait-row-detail">
-            <div class="trait-invest-topline"><div class="tr-name">${escapeHtml(name)}</div><div class="tr-type"><span class="trait-effect-text">${escapeHtml(rStr)}</span><span class="trait-cost-chip ${isMax?'is-complete':''}">${isMax?'✓ 마스터 완료':`다음 투자 · ${fullNumber(cost)}`}</span></div></div>
+            <div class="trait-invest-topline"><div class="tr-name">${escapeHtml(name)}</div><div class="tr-type"><span class="trait-effect-text">${escapeHtml(rStr)}</span><span class="trait-cost-chip ${isMax?'is-complete':''}">${traitNextInvestmentLabel(row,isMax,cost)}</span></div></div>
           </div>
         </div>
         <div class="tr-ctrl" aria-label="${escapeHtml(name)} 투자 조절">
@@ -1370,7 +1574,7 @@ function updateTraits(){
       if(input.value!==String(n)) input.value=String(n);
       const currentRate=abyss?({133:15,134:7.5,135:1.5,136:3}[row]??rate):rate;
       text(effect,row===58?'강화수 +1':row===96?'2단 강화 +0.5':traitEffectText(row,type,currentRate));
-      text(cost,isMax?'✓ 마스터 완료':`다음 투자 · ${fullNumber(nextCost(row))}`);
+      text(cost,traitNextInvestmentLabel(row,isMax,nextCost(row)));
       cost.classList.toggle('is-complete',isMax);
       for(const button of buttons){
         const disabled=button.dataset.action==='traitQuickAdjust' ? mx-n<Number(button.dataset.step) : button.dataset.delta==='-1' ? n<=0 : isMax;
@@ -1565,6 +1769,9 @@ function isUtilityOptimizationTrait(t, maxTierIndex=null){
   if(!Array.isArray(t)) return false;
   const row=t[0], tier=t[2], type=t[3];
   if(row===116 || row===112) return false;
+  if(row===45 && !isCoopMode()) return false;
+  if(row===51 && !traitLimitSwitchOn('traitLimitLifeBonus')) return false;
+  if(type==='AP' && !traitLimitSwitchOn('traitLimitMagicAP')) return false;
   const tierIdx=UTILITY_OPT_TIERS.indexOf(tier);
   if(tierIdx<0) return false;
   if(maxTierIndex!==null && tierIdx>maxTierIndex) return false;
@@ -2117,7 +2324,7 @@ function bindReactiveInputs(){
     }
   });
   let raf=0;
-  const schedule=(target)=>{
+  const schedule=(target,finalize=false)=>{
     if(!shouldHandleReactiveInput(target)) return;
     if(target.matches('.money-input')) formatMoneyInput(target);
     if(target.id==='spBankApply') syncSpBankApplyControl();
@@ -2131,7 +2338,7 @@ function bindReactiveInputs(){
       syncPlanetExplorationRestrictedControls();
       renderDpsSanctuaryInfo();
     }
-    if(RUNE_CHOICE_SYNC_IDS.has(target.id)) syncRuneChoice();
+    if(RUNE_CHOICE_SYNC_IDS.has(target.id) || target.id==='rCD') syncRuneChoice();
     if(ENCHANT_INPUT_ID_SET.has(target.id)) syncEnchantInputs();
     if(RUNE_OPTION_SELECT_ID_SET.has(target.id)) syncExclusiveRuneOptions();
     if(target.id==='soloMode' || target.id==='coopMode'){
@@ -2157,8 +2364,8 @@ function bindReactiveInputs(){
       commitAppUpdate();
     });
   };
-  document.addEventListener('input', e=>schedule(e.target), true);
-  document.addEventListener('change', e=>schedule(e.target), true);
+  document.addEventListener('input', e=>{ if(!e.isComposing) schedule(e.target); }, true);
+  document.addEventListener('change', e=>schedule(e.target,true), true);
 }
 function bindButtonPressFeedback(){
   const selector='button,.btn';
@@ -2195,7 +2402,7 @@ function bindAppEvents(){
   [
     bindActionEvents, bindTraitHoldEvents, bindTraitInputEvents,
     bindIntegratedTabEvents, ()=>window.DpsPreset.bindEvents(), bindJewelImageEvents,
-    bindZeroScoreCalculator, bindTraitLimitDisplayEvents, bindTraitLimitChoiceEvents, bindDpsBaseUnitControlEvents, bindDpsSanctuaryEvents, bindReactiveInputs,
+    bindZeroScoreCalculator, bindTraitLimitDisplayEvents, bindTraitLimitChoiceEvents, bindAdditionalRuneEvents, bindDpsBaseUnitControlEvents, bindDpsSanctuaryEvents, bindReactiveInputs,
     bindButtonPressFeedback, bindDamageBoardTabEvents, bindDpsCompareEvents, bindDamageBoardSwitchEvents, bindPlanetExplorationCalendar
   ].forEach(fn=>fn());
 }
@@ -2401,9 +2608,18 @@ function initAppSelectDropdowns(){
     if(activeSelect && !menu.contains(event.target)) closeMenu();
     requestSync();
   });
-  // 유닛 상세 모달의 Escape 단축키보다 먼저 열린 목록만 닫습니다.
+  // 에디설정 모달이 열린 상태에서는 메뉴와 모달을 Escape 한 번에 닫습니다.
+  // 다른 화면에서는 기존 커스텀 Select의 Escape 동작을 유지합니다.
   window.addEventListener('keydown',event=>{
-    if(event.key==='Escape' && activeSelect){
+    if(event.key!=='Escape') return;
+    if(!$('additionalRuneModal')?.hidden){
+      event.preventDefault();
+      event.stopPropagation();
+      closeMenu();
+      closeAdditionalRuneModal();
+      return;
+    }
+    if(activeSelect){
       event.preventDefault();
       event.stopPropagation();
       closeMenu(true);

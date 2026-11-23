@@ -452,14 +452,76 @@ body:not(.is-tabbed) .col-left,body:not(.is-tabbed) .col-mid,body:not(.is-tabbed
 .col-left .ir label,.rune-stat-row label,.rune-option-grid label,.additional-row label,.mini-ir:not(.unit-enhance-option-row) label{min-height:31px;height:31px;display:flex;align-items:center;justify-content:center;text-align:center;text-align-last:center;padding:0 9px;font-size:var(--ui-item-label-font);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;}
 .clean-rune-card .rune-card-heading.additional-title-row{display:flex;align-items:center;justify-content:space-between;gap:9px;height:auto;font-size:var(--v0030-feature-font);margin:0 0 12px;padding:0;min-height:28px;}
 .clean-rune-card .rune-card-heading-name{display:inline-flex;align-items:center;gap:8px;min-width:0;color:#eef7ff;white-space:nowrap;}
-.clean-rune-card .rune-card-heading .additional-help{min-width:0;color:#a9cce8;font-size:calc(9.75px * var(--app-font-scale));line-height:1.25;white-space:normal;text-align:right;}
 @media(max-width:540px){
   .clean-rune-card .rune-card-heading.additional-title-row{flex-wrap:wrap;margin:0 0 12px;padding:0;min-height:28px;}
-  .clean-rune-card .rune-card-heading .additional-help{flex-basis:100%;text-align:left;padding-left:32px;}
 }
 .clean-rune-card .rune-panel-title.additional-title-row{display:flex;align-items:center;gap:9px;height:auto;font-size:var(--v0030-feature-font);line-height:1.25;margin:0 0 12px;padding:0;min-height:28px;}
 .additional-title-row > span:first-child{min-width:0;color:#eef7ff;white-space:nowrap;}
-.additional-title-row .additional-help{min-width:0;margin:0;padding:0;border:0;background:transparent;color:var(--color-slate-500);font-size:calc(10.75px * var(--app-font-scale));line-height:1.2;letter-spacing:-.03em;text-align:right;white-space:nowrap;}
+/* 에디셔널 · 자동 계산 결과 및 룬 등급 안내 */
+.clean-rune-card .rune-stat-title{justify-content:space-between;}
+.clean-rune-card .rune-grade-name{font-weight:700;font-size:calc(11px * var(--app-font-scale));letter-spacing:0;}
+.rune-grade-name[data-rune-grade="none"]{color:#98a6b8;}
+.rune-grade-name[data-rune-grade="final"]{color:#9eabbc;}
+.rune-grade-name[data-rune-grade="winner"]{color:#d49b67;}
+.rune-grade-name[data-rune-grade="cosmos"],.rune-grade-name[data-rune-grade="chaos"]{color:#cbd5e1;}
+.rune-grade-name[data-rune-grade="harmony"]{color:#edc559;}
+.rune-special-value{position:relative;min-width:0;display:block;}
+.rune-stat-row .rune-special-value input{width:100%;box-sizing:border-box;}
+.rune-special-value input:disabled,.additional-rune-special-value input:disabled{cursor:not-allowed;opacity:.75;}
+.additional-title-row .additional-controls{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;}
+.additional-settings-button{padding:5px 9px;min-height:28px;border:1px solid #bd9250;border-radius:7px;background:#141922;color:#f0c779;font-size:calc(10px * var(--app-font-scale));line-height:1.2;cursor:pointer;white-space:nowrap;}
+.clean-rune-card .additional-row input[readonly]{background:var(--role-readonly-bg,#191c21);color:#e6eef9;border-color:var(--role-readonly-bd,#434b59);cursor:default;}
+@media(max-width:540px){
+  .clean-rune-card .rune-card-heading.additional-title-row{flex-wrap:wrap;}
+  .clean-rune-card .additional-title-row .additional-controls{flex-shrink:0;}
+  .additional-settings-button{padding:5px 7px;font-size:calc(9.5px * var(--app-font-scale));}
+}
+/* 에디설정 모달 · 기존 룬 스탯의 기본/개조 정렬을 10칸에 반복 */
+body.additional-rune-open{overflow:hidden;}
+.additional-rune-modal[hidden]{display:none!important;}
+.additional-rune-modal{position:fixed;inset:0;z-index:2600;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;}
+.additional-rune-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.82);}
+.additional-rune-dialog{position:relative;display:flex;flex-direction:column;width:min(1430px,100%);max-height:min(900px,calc(100dvh - 24px));min-height:0;background:var(--ui-panel-body-bg);color:var(--ui-text);border:1px solid var(--ui-modal-border);border-radius:var(--ui-modal-radius);box-shadow:var(--ui-modal-shadow);overflow:hidden;}
+.additional-rune-dialog-head{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;min-height:var(--ui-integrated-head-height);background:var(--ui-integrated-head-bg);border-bottom:1px solid var(--ui-integrated-head-line);gap:12px;}
+.additional-rune-dialog-head h2{margin:0;color:var(--ui-integrated-head-text);font-size:var(--ui-main-title-font);font-weight:var(--ui-main-title-weight);}
+.additional-rune-dialog-head p{margin:4px 0 0;color:var(--ui-sub);font-size:calc(11px * var(--app-font-scale));}
+.additional-rune-header-actions{display:flex;align-items:center;justify-content:flex-end;flex:0 0 auto;gap:6px;}
+.additional-rune-done{border:1px solid var(--ui-button-active-border);border-radius:var(--ui-control-radius);background:var(--ui-button-active-bg);color:var(--ui-button-active-text);font-size:12px;font-weight:650;min-height:32px;padding:0 12px;cursor:pointer;white-space:nowrap;}
+.additional-rune-close{font-size:22px;line-height:1;min-width:32px;width:32px;height:32px;padding:0;color:var(--ui-button-text);background:var(--ui-button-bg);border:1px solid var(--ui-button-border);border-radius:var(--ui-control-radius);cursor:pointer;}
+.additional-rune-modal-content{overflow-y:auto;overscroll-behavior:contain;padding:13px 16px 10px;min-height:0;}
+.additional-rune-grid-scroll{overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:8px;}
+.additional-rune-grid{display:grid;grid-template-columns:repeat(5,minmax(215px,1fr));gap:10px;min-width:1100px;}
+.additional-rune-card{--rune-outline:var(--ui-modal-border);background:var(--ui-panel-body-bg);border:2px solid var(--rune-outline);border-radius:var(--ui-control-radius);padding:9px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;}
+.additional-rune-card[data-rune-grade="final"]{--rune-outline:#8696aa;}
+.additional-rune-card[data-rune-grade="winner"]{--rune-outline:#bf7e49;}
+.additional-rune-card[data-rune-grade="cosmos"],.additional-rune-card[data-rune-grade="chaos"]{--rune-outline:#cbd5e1;}
+.additional-rune-card[data-rune-grade="harmony"]{--rune-outline:#e4b943;}
+.additional-rune-card-title{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:3px;padding-bottom:6px;border-bottom:1px solid var(--ui-integrated-head-line);color:var(--ui-text);font-size:calc(12px * var(--app-font-scale));}
+.additional-rune-card-title [data-additional-rune-grade]{color:var(--rune-outline);font-weight:750;justify-self:center;text-align:center;white-space:nowrap;}
+.additional-rune-stat-heading,.additional-rune-stat-line{display:grid;grid-template-columns:minmax(66px,1.1fr) minmax(0,.85fr) minmax(0,.85fr);gap:4px;align-items:center;}
+.additional-rune-stat-heading{color:var(--ui-sub);font-size:10px;text-align:center;}
+.additional-rune-stat-line>label{color:var(--ui-text);font-size:10.5px;white-space:nowrap;text-align:center;}
+.additional-rune-stat-line>select,.additional-rune-stat-line>.app-select-trigger{font-size:10px;padding:1px 0;}
+.additional-rune-stat-line>input,.additional-rune-stat-line>select,.additional-rune-special-value input{min-width:0;width:100%;height:29px;min-height:29px;box-sizing:border-box;background:var(--role-manual-input-bg,var(--ui-input));border:1px solid var(--ui-field-border);border-radius:var(--ui-control-radius);color:var(--ui-text);text-align:center;font-size:11px;}
+.additional-rune-special-value{position:relative;display:block;min-width:0;}
+.additional-rune-stat-line>.app-select-trigger{min-width:0;width:100%;height:29px;min-height:29px;font-size:10px;padding:0 14px 0 3px;}
+.additional-rune-stat-line>.app-select-trigger .app-select-button-chevron{right:5px;width:5px;height:5px;}
+.additional-rune-card[data-additional-rune-card="0"]{background:var(--role-readonly-bg,var(--ui-panel-body-bg));}
+.additional-rune-card input:disabled{caret-color:transparent;}
+.additional-rune-special-value input:disabled,.additional-rune-stat-line>input:disabled{background:var(--role-readonly-bg);border-color:var(--role-readonly-bd);color:var(--ui-sub);cursor:not-allowed;}
+.additional-rune-bottom-row{margin-top:2px;}
+.additional-rune-bottom-row>select{height:29px;background:var(--role-manual-select-bg,var(--ui-input));color:var(--ui-text);border:1px solid var(--ui-field-border);border-radius:var(--ui-control-radius);text-align:center;}
+.additional-rune-empty{display:block;min-width:0;}
+.additional-rune-reset{justify-self:end;padding:5px 7px;border:1px solid var(--ui-button-border);border-radius:var(--ui-control-radius);background:var(--ui-button-bg);color:var(--ui-button-text);font-size:10px;cursor:pointer;white-space:nowrap;}
+.additional-rune-reset:disabled{opacity:.35;cursor:default;}
+@media(max-width:700px){
+ .additional-rune-modal{padding:6px;}
+ .additional-rune-dialog{max-height:calc(100dvh - 12px);border-radius:10px;}
+ .additional-rune-dialog-head{padding:10px 12px;}
+ .additional-rune-dialog-head h2{font-size:15px;}
+ .additional-rune-modal-content{padding:10px 8px;}
+ .additional-rune-grid{gap:7px;}
+}
 .clean-rune-card .enchant-combined-grid,.clean-rune-card .enchant-combined-row{background:transparent;border:0;border-radius:0;box-shadow:none;}
 .clean-rune-card .enchant-combined-grid{display:grid;grid-template-columns:1fr;padding:0;gap:7px;}
 .col-mid,.col-right{min-width:520px;padding:10px 8px;}
@@ -706,6 +768,7 @@ input[readonly],input:disabled,select:disabled,body:not(.is-mobile) .enchant-res
 .col-left > .basic-goal-cards > .integrated-content > .sg.goal-settings-card::before,.col-left > .basic-goal-cards .basic-settings-info-content > .sg.goal-settings-card::before{content:"";position:absolute;pointer-events:none;top:12px;bottom:12px;left:0;width:1px;background:var(--ui-integrated-head-line);}
 .basic-goal-section-heading{display:flex;align-items:center;min-width:0;min-height:28px;height:auto;max-height:none;gap:8px;margin:0 12px 12px;padding:0 0 8px;border:0;border-bottom:1px solid var(--settings-hairline,rgba(135,149,172,.16));border-radius:0;background:transparent;box-shadow:none;color:var(--subhead-text);font-size:var(--studio-subheader-font);font-weight:600;line-height:1.4;letter-spacing:0;}
 .basic-goal-section-copy{display:grid;min-width:0;gap:0;}
+.basic-goal-section-heading .battle-mode-guide-trigger{margin-left:auto;flex-shrink:0;}
 .basic-goal-section-copy strong{margin:0;color:inherit;font-family:var(--font-main);font-size:var(--ui-sub-title-font);font-weight:500;line-height:1.25;letter-spacing:0;}
 @media(max-width:700px){
   .col-left > .basic-goal-cards > .integrated-content > .sg.goal-settings-card::before,.col-left > .basic-goal-cards .basic-settings-info-content > .sg.goal-settings-card::before{top:-9px;bottom:auto;left:12px;right:12px;width:auto;height:1px;}
@@ -1047,12 +1110,7 @@ body .basic-goal-cards .goal-mode-switch.is-active i{left:calc(50% + 2px);}
 body .basic-goal-cards .goal-mode-switch .artifact-dps-switch-text{color:#a9c9e1;font-size:calc(11.25px * var(--app-font-scale));}
 body .basic-goal-cards .goal-mode-switch:not(.is-active) .artifact-dps-switch-text:first-child,body .basic-goal-cards .goal-mode-switch.is-active .artifact-dps-switch-text:nth-child(2){color:#fff;}
 body .basic-goal-cards .goal-mode-switch:disabled{opacity:.5;cursor:not-allowed;}
-/* 전투 모드 설명: 기본 설정 행과 독립 대화상자에서만 사용 */
-body .xp-sp-card .basic-info-row .battle-mode-label{display:grid;grid-template-columns:minmax(0,1fr) max-content minmax(0,1fr);align-items:center;gap:0;min-width:0;min-height:30px;padding:5px 3px;box-sizing:border-box;color:var(--field-label-text);font-size:var(--ui-item-label-font);line-height:1.18;white-space:nowrap;}
-body .xp-sp-card .basic-info-row .battle-mode-label>span{grid-column:2;text-align:center;}
-body .xp-sp-card .basic-info-row .battle-mode-guide-trigger{position:relative;grid-column:3;justify-self:start;display:inline-grid;place-items:center;width:16px;min-width:16px;height:16px;min-height:16px;margin-left:5px;padding:0;border:1px solid #566170;border-radius:50%;background:#111317;color:#d0d8e4;font-size:11px;font-weight:700;line-height:1;cursor:pointer;}
-body .xp-sp-card .basic-info-row .battle-mode-guide-trigger::before{content:"";position:absolute;inset:-5px;}
-body .xp-sp-card .basic-info-row .battle-mode-guide-trigger:hover,body .xp-sp-card .basic-info-row .battle-mode-guide-trigger:focus-visible{border-color:var(--ui-button-hover-border);background:#22272e;color:#fff;outline:2px solid var(--ui-button-active-border);outline-offset:1px;}
+/* 전투 모드 최적화 안내: 진입 버튼은 목표 설정 헤더의 공통 보조 버튼 사용 */
 .battle-mode-guide-dialog{position:fixed;inset:0;box-sizing:border-box;display:flex;flex-direction:column;width:min(440px,calc(100vw - 24px));max-width:none;max-height:min(440px,calc(100vh - 28px));max-height:min(440px,calc(100dvh - 28px));margin:auto;padding:0;overflow:hidden;border:1px solid var(--ui-modal-border);border-radius:12px;background:var(--ui-panel-body-bg);color:var(--ui-text);box-shadow:0 22px 65px rgba(0,0,0,.75);font-family:var(--font-main);font-size:calc(13px * var(--app-font-scale));line-height:1.55;}
 .battle-mode-guide-dialog:not([open]){display:none;}
 .battle-mode-guide-dialog::backdrop{background:rgba(0,0,0,.68);}
@@ -1060,11 +1118,6 @@ body .xp-sp-card .basic-info-row .battle-mode-guide-trigger:hover,body .xp-sp-ca
 .battle-mode-guide-panel{min-height:0;padding:14px 16px 16px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;background:var(--ui-panel-body-bg);}
 .battle-mode-guide-panel>strong{display:block;margin:0 0 8px;color:#f0f4fa;font-size:calc(13px * var(--app-font-scale));font-weight:650;}
 .battle-mode-guide-panel .battle-mode-guide-muted{margin:0 0 7px;color:#a7b2c1;font-size:calc(11.5px * var(--app-font-scale));line-height:1.5;word-break:keep-all;}
-.battle-mode-guide-extra{margin-top:11px;border:1px solid #4c6078;border-radius:9px;background:#121a25;}
-.battle-mode-guide-extra summary{padding:10px 12px;color:#d6e8f9;font-weight:600;cursor:pointer;list-style-position:inside;}
-.battle-mode-guide-extra summary:focus-visible{outline:2px solid #97c5ff;outline-offset:2px;}
-.battle-mode-guide-extra[open] summary{border-bottom:1px solid #35465a;}
-.battle-mode-guide-extra .battle-mode-guide-muted{padding:0 11px 9px;}
 .battle-mode-guide-trait-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 8px;margin:9px 0 10px;padding:0 11px;list-style:none;}
 .battle-mode-guide-trait-list li{min-width:0;padding:6px 8px;border:1px solid #303e4f;border-radius:7px;background:#151f2b;font-size:calc(11.5px * var(--app-font-scale));line-height:1.4;word-break:keep-all;overflow-wrap:anywhere;}
 .battle-mode-guide-trait-list small{display:block;margin-top:2px;color:#9ba8b8;font-size:calc(10.5px * var(--app-font-scale));}

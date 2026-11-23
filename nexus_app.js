@@ -2352,6 +2352,8 @@
 
     document.addEventListener('click', e => {
         if (!e.target.closest('.gh-fontsize-ctrl')) closeFontSizePopup();
+        const creatorDialog = getEl('creatorInfoDialog');
+        if (e.target === creatorDialog && creatorDialog.open) creatorDialog.close();
         if (!e.target.closest('#independentWindowMenu,#btnBuildStandalone')) setIndependentMenuOpen(false);
         const presetDisclosure = document.querySelector('.preset-disclosure[open]');
         if (presetDisclosure && !presetDisclosure.contains(e.target)) presetDisclosure.open = false;
@@ -2368,6 +2370,8 @@
 
         const action = actionEl.dataset.action, uid = actionEl.dataset.uid;
         switch (action) {
+            case 'openCreatorInfo': getEl('creatorInfoDialog')?.showModal(); break;
+            case 'closeCreatorInfo': getEl('creatorInfoDialog')?.close(); break;
             case 'switchMainView': switchLayout(actionEl.dataset.view); break;
             case 'toggleBuildMaterialMode': e.preventDefault(); e.stopPropagation(); toggleBuildMaterialMode(); break;
             case 'runPreset':

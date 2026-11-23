@@ -284,9 +284,6 @@ body .unit-slot-number{display:grid;place-items:center;flex:0 0 29px;width:29px;
 body .unit-sanctuary-panel{display:grid;min-width:0;gap:12px;margin:26px 0 0;padding:0;border:0;border-radius:0;background:transparent;}
 body .unit-sanctuary-heading{display:flex;position:relative;align-items:center;justify-content:flex-start;gap:8px;margin:0;}
 body .unit-sanctuary-heading h3{display:flex;align-items:center;gap:9px;margin:0;color:var(--ui-text);font-size:calc(15px * var(--app-font-scale));line-height:1.4;}
-body .unit-sanctuary-guide{position:absolute;left:0;top:calc(100% + 6px);z-index:25;display:grid;gap:6px;width:min(320px,100%);box-sizing:border-box;padding:12px;border:1px solid #4c6078;border-radius:9px;background:#121a25;box-shadow:0 10px 28px rgba(0,0,0,.5);color:#c5d0de;font-size:calc(13px * var(--app-font-scale));line-height:1.5;word-break:keep-all;overflow-wrap:break-word;}
-body .unit-sanctuary-guide strong{font-size:calc(13px * var(--app-font-scale));font-weight:600;color:var(--ui-text);}
-body .unit-sanctuary-guide ul{display:grid;gap:6px;margin:0;padding-left:17px;}
 body .unit-sanctuary-reset{display:grid;place-items:center;margin-left:auto;width:30px;height:30px;padding:5px;border:1px solid transparent;border-radius:6px;background:transparent;color:#9daec5;cursor:pointer;}
 body .unit-sanctuary-reset svg{width:17px;height:17px;}
 body .unit-sanctuary-reset:hover,body .unit-sanctuary-reset:focus-visible{border-color:#9b6571;background:#211b23;color:#ffccd4;outline-offset:2px;}
@@ -666,18 +663,13 @@ body #battleModeGuideDialog :is(td,thead th:not(:first-child)) { text-align:cent
 body #battleModeGuideDialog .battle-guide-difference td strong { color:var(--ui-integrated-head-text); font-weight:650; }
 body #battleModeGuideDialog .battle-guide-common { margin-top:12px; }
 body #battleModeGuideDialog .battle-guide-common strong { color:var(--ui-text); font-weight:500; }
-body #battleModeGuideDialog .battle-mode-guide-extra { margin-top:24px; border:0; border-top:1px solid var(--ui-line-strong); border-bottom:1px solid var(--ui-line-strong); border-radius:0; background:transparent; }
-body #battleModeGuideDialog .battle-mode-guide-extra summary { padding:16px 4px; font-size:calc(13px * var(--app-font-scale)); }
-body #battleModeGuideDialog .battle-mode-guide-extra[open] summary { border-bottom:0; }
-body #battleModeGuideDialog .battle-guide-excluded-intro { margin:0 4px 12px; }
-body #battleModeGuideDialog .battle-mode-guide-trait-list { padding:0 4px; margin:0 0 12px; gap:0 20px; }
 body #battleModeGuideDialog .battle-mode-guide-trait-list li {
   display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 8px;
-  min-height:38px; padding:8px 0; border:0; border-bottom:1px solid var(--ui-line);
+  border:0; border-bottom:1px solid var(--ui-line);
   border-radius:0; background:transparent; font-size:calc(12px * var(--app-font-scale));
 }
 body #battleModeGuideDialog .battle-mode-guide-trait-list small { display:inline; margin:0; font-size:calc(11px * var(--app-font-scale)); color:var(--ui-sub); }
-body #battleModeGuideDialog .battle-mode-guide-extra .battle-mode-guide-muted { padding:0 4px 16px; font-size:calc(12px * var(--app-font-scale)); }
+body #battleModeGuideDialog .battle-mode-guide-extra .battle-mode-guide-muted { font-size:calc(12px * var(--app-font-scale)); }
 body #battleModeGuideDialog .battle-guide-unavailable { padding-top:20px; font-size:calc(12px * var(--app-font-scale)); }
 body #battleModeGuideDialog .battle-guide-unavailable strong { font-weight:500; color:var(--ui-text); }
 body #battleModeGuideDialog .battle-guide-unavailable p { color:var(--ui-sub); }
@@ -743,9 +735,10 @@ body .trait-board-panel .trait-tier-name { font-size:var(--studio-subheader-font
 /* The two guide destinations stay above the scrollable content. */
 body #battleModeGuideDialog .battle-guide-tabs {
   flex:none; display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:0; padding:0 20px; border-bottom:1px solid var(--ui-line-strong);
+  gap:0; padding:0; border-bottom:1px solid var(--ui-line-strong);
 }
 body #battleModeGuideDialog .battle-guide-tabs button {
+  box-sizing:border-box; width:100%; min-width:0; margin:0;
   min-height:48px; padding:12px 8px; border:0; border-bottom:2px solid transparent;
   border-radius:0; background:transparent; color:var(--ui-sub);
   font:500 calc(13px * var(--app-font-scale))/1.4 var(--font-main); cursor:pointer;
@@ -756,12 +749,11 @@ body #battleModeGuideDialog [data-battle-guide-panel][hidden] { display:none !im
 body #battleModeGuideDialog .battle-mode-guide-extra { margin:0; border:0; border-radius:0; background:var(--ui-panel-body-bg); }
 body #battleModeGuideDialog .battle-guide-traits-title { margin:0 0 8px; font-size:calc(14px * var(--app-font-scale)); font-weight:600; line-height:1.5; }
 body #battleModeGuideDialog .battle-guide-excluded-intro { margin:0 0 16px; }
-body #battleModeGuideDialog .battle-mode-guide-trait-list { margin:0 0 16px; padding:0; }
+body #battleModeGuideDialog .battle-mode-guide-trait-list { margin:0 0 16px; padding:0; gap:0 20px; }
 body #battleModeGuideDialog .battle-mode-guide-trait-list li { min-height:44px; padding:12px 0; }
 body #battleModeGuideDialog .battle-mode-guide-extra .battle-mode-guide-muted { margin:0; padding:0; }
 @media (max-width:700px) {
   :root { --studio-header-height:40px; --studio-header-pad:12px; --studio-header-font:calc(14px * var(--app-font-scale)); --studio-subheader-font:calc(12px * var(--app-font-scale)); }
-  body #battleModeGuideDialog .battle-guide-tabs { padding-inline:12px; }
   body #battleModeGuideDialog .battle-guide-tabs button { font-size:calc(12px * var(--app-font-scale)); }
 }
 
@@ -820,13 +812,6 @@ body #dpsCompareModal > .dps-compare-header {
 }
 body #dpsCompareModalTitle { gap:0; font-size:var(--studio-header-font) !important; font-weight:600 !important; line-height:1.4 !important; }
 body #dpsCompareModal .dps-compare-close { width:28px; min-width:28px; height:28px; min-height:28px; }
-body .unit-sanctuary-guide-trigger {
-  flex:none; min-height:28px; padding:4px 8px; border:1px solid var(--ui-line-strong);
-  border-radius:6px; background:var(--ui-panel-body-bg); color:var(--ui-sub);
-  font:500 calc(11px * var(--app-font-scale))/1.4 var(--font-main); cursor:pointer;
-}
-body .unit-sanctuary-guide-trigger:hover { color:var(--ui-text); border-color:var(--ui-button-hover-border); }
-body .unit-sanctuary-guide-trigger:active { transform:translateY(1px); }
 body #unitSanctuaryGuideDetails {
   position:fixed; inset:0; display:flex; flex-direction:column;
   width:min(560px,calc(100% - 24px)); max-height:calc(100dvh - 32px); margin:auto; padding:0;
@@ -1134,15 +1119,13 @@ body #battleModeGuideDialog .battle-guide-tabs button:hover:not([aria-selected=t
 /* 제목 안의 보조 기능은 같은 무광 버튼 문법을 사용한다. */
 body :is(.hdr.app-header,.right-workspace-head,.trait-preset-modal-head,.unit-slot-modal-header,
   .dps-compare-header,.unit-sanctuary-heading,.ub-collection-head,.unit-slot-card-head,.unit-sanctuary-card-head)
-  :is(button,a.ui-action-btn),
-body .unit-sanctuary-guide-trigger {
+  :is(button:not(.additional-settings-button),a.ui-action-btn) {
   border-color:#3b4655; border-radius:6px; background:var(--studio-control-bg);
   color:#b9c9dc; box-shadow:none; text-shadow:none;
 }
 body :is(.hdr.app-header,.right-workspace-head,.trait-preset-modal-head,.unit-slot-modal-header,
   .dps-compare-header,.unit-sanctuary-heading,.ub-collection-head,.unit-slot-card-head,.unit-sanctuary-card-head)
-  :is(button,a.ui-action-btn):hover:not(:disabled),
-body .unit-sanctuary-guide-trigger:hover {
+  :is(button:not(.additional-settings-button),a.ui-action-btn):hover:not(:disabled) {
   background:var(--studio-control-hover); border-color:#6a87ac; color:#e3ebf6;
 }
 body :is(.trait-preset-modal-close,.unit-slot-modal-close,.dps-compare-close) {
@@ -1240,7 +1223,7 @@ body #basicSettingsPanel2 .basic-settings-box-header {
 }
 body #basicSettingsPanel2 .basic-settings-inline-title {
   display:block; width:auto; min-height:0; margin:0; padding:0;
-  border:0; border-radius:0; background:transparent; box-shadow:none;
+  border:0; box-shadow:none;
   color:var(--ui-integrated-head-text); font-size:calc(15px * var(--app-font-scale));
   font-weight:500; line-height:1.4;
 }

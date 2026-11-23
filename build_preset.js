@@ -114,6 +114,7 @@ function normalizeStoredElementValue(id, value){
   if(id==='dpsBaseUnitSlotExpansions') return serializeDpsBaseUnitSlotExpansions(value);
   if(id==='specDpsSpeedMode' || id==='dpsBaseUnitSpeedMode') return normalizeOnOffValue(value,'OFF');
   if(id==='specBoardPierce') return normalizeSpecBoardPierceValue(value);
+  if(id==='additionalRuneSlots') return normalizeAdditionalRuneSlotsValue(value);
   if(id==='donationBuffType') return normalizeDonationBuffType(value);
   if(DPS_BASE_UNIT_QUANTITY_IDS.has(id)) return normalizeDpsBaseUnitQuantityStorageValue(value);
   if(DPS_BASE_UNIT_ENHANCE_IDS.has(id)) return normalizeDpsBaseUnitEnhanceValue(value);
@@ -158,7 +159,6 @@ function writeElementValue(el, value){
     el.dataset.planetExplorationFloorValue=stored;
     value=stored;
   }
-  if(DECIMAL_DISPLAY_INPUT_IDS.has(el.id)) value=normalizeDecimalDisplayValue(value);
   if(EROSION_CONTROL_IDS.has(el.id)){
     const stored=normalizeErosionControlValue(el.id, value);
     el.dataset.erosionValue=stored;
@@ -247,6 +247,8 @@ function makeStateObject(){
   values.optTier=vs('optTier') || values.optTier || '루키';
   values.utilOptTier=vs('utilOptTier') || values.utilOptTier || '루키';
   values[PRESET_BATTLE_MODE_VALUE_ID]=isArtifactDpsViewEnabled() ? 'artifact' : 'normal';
+  // 에디셔널은 룬 10칸만 저장한다. 표시되는 7개 평균값은 매번 계산한다.
+  values.additionalRuneSlots=normalizeAdditionalRuneSlotsValue(vs('additionalRuneSlots'));
   Object.entries(TRAIT_LIMIT_DEFAULTS).forEach(([id,value])=>{ values[id]=vs(id) || values[id] || value; });
   if(hasOwn(values,'spBankApply')) values.spBankApply=normalizeSpBankApplyValue(values.spBankApply);
   TRAIT_LIMIT_INPUT_IDS.forEach(id=>{ values[id]=normalizeTraitLimitStorageValue(values[id] ?? TRAIT_LIMIT_DEFAULTS[id] ?? '0'); });
@@ -289,11 +291,9 @@ function sanitizeSavedValues(values){
   if(hasOwn(out,'challengeTowerFloor')) out.challengeTowerFloor=normalizedTowerFloorString(out.challengeTowerFloor);
   if(hasOwn(out,'planetExplorationFloor')) out.planetExplorationFloor=normalizedPlanetExplorationFloorString(out.planetExplorationFloor);
   if(hasOwn(out,'pbless')) out.pbless=normalizePowerBlessRawValue(out.pbless);
-  DECIMAL_DISPLAY_INPUT_IDS.forEach(id=>{
-    if(hasOwn(out,id)) out[id]=normalizeDecimalDisplayValue(out[id]);
-  });
   if(hasOwn(out,'spBankApply')) out.spBankApply=normalizeSpBankApplyValue(out.spBankApply);
   if(hasOwn(out,'specBoardPierce')) out.specBoardPierce=normalizeSpecBoardPierceValue(out.specBoardPierce);
+  if(hasOwn(out,'additionalRuneSlots')) out.additionalRuneSlots=normalizeAdditionalRuneSlotsValue(out.additionalRuneSlots);
   out.dpsBaseUnits=normalizeDpsBaseUnitsValue(out.dpsBaseUnits ?? '');
   if(hasOwn(out,'dpsBaseUnitSlots')) out.dpsBaseUnitSlots=serializeDpsBaseUnitSlots(out.dpsBaseUnitSlots);
   if(hasOwn(out,'dpsJewelSettings')) out.dpsJewelSettings=serializeDpsJewelSettings(out.dpsJewelSettings);
@@ -577,6 +577,8 @@ function mergeTraitPresetWithLocalState(presetState, localState, options={}){
     ? {...preset.values, ...local.values}
     : {...local.values, ...preset.values};
   values=resetTraitPresetUnitBoardValues(values);
+  // 룬 데이터가 없는 프리셋에 이전 편집 세션의 룬 입력을 상속하지 않는다.
+  values.additionalRuneSlots=preset.values.additionalRuneSlots ?? '[]';
   // 전투 모드는 공통 설정 유지 여부와 무관하게 해당 프리셋의 값으로 복원한다.
   values[PRESET_BATTLE_MODE_VALUE_ID]=normalizePresetBattleMode(preset.values[PRESET_BATTLE_MODE_VALUE_ID]);
   return makeStorageEnvelope({
@@ -616,11 +618,14 @@ function applyStateObject(data, options={}){
       const masterEl=$('enhanceMaster');
       if(masterEl) writeElementValue(masterEl, sanitizedValues.enhanceMaster);
     }
+    // 프리셋을 바꿀 때 이전 룬 입력이 남지 않게 초기화한다.
+    if(!hasOwn(sanitizedValues,'additionalRuneSlots')) $('additionalRuneSlots').value='[]';
     Object.entries(sanitizedValues).forEach(([id,val])=>{
       if(id==='team') return;
       const el=$(id);
       if(el) writeElementValue(el,val);
     });
+    syncAdditionalAverage();
     syncBattleMode();
     if(teamSelect && hasOwn(sanitizedValues,'team')) writeElementValue(teamSelect,sanitizedValues.team);
     syncTeamSelect({preserveCurrent:true});
@@ -1630,11 +1635,19 @@ function traitPresetImportPresetPath(item,index){
 function traitPresetDonationDisplay(type){
   return ({none:'미적용',sp:'일반 나눔',paid:'특별 나눔'})[type] || '나눔 설정';
 }
+const TRAIT_PRESET_INVESTMENT_SWITCH_IDS=new Set(['traitLimitLifeBonus','traitLimitMagicAP','traitLimitMultiTarget','traitLimitInfinite']);
 function traitPresetChangeValueText(key,value,state=null){
   if(value===undefined) return '저장값 없음';
   if(key==='inv:116') return traitPresetDonationDisplay(state?.values?.donationBuffType ?? donationTypeFromInvestment(value));
   if(key==='value:donationBuffType') return traitPresetDonationDisplay(value);
   if(key==='value:gameMode') return state?.values?.coopMode==='ON' ? '협동전' : '개인전';
+  if(key==='value:additionalRuneSlots'){
+    const slots=parseAdditionalRuneSlots(value).slice(1);
+    const changed=slots.filter(rune=>rune.registered);
+    return changed.length ? `룬 ${changed.length}칸 설정 (${slots.map((rune,i)=>rune.registered?i+2:null).filter(Boolean).join(', ')}번)` : '추가 룬 없음';
+  }
+  if(key.startsWith('value:') && TRAIT_PRESET_INVESTMENT_SWITCH_IDS.has(key.slice(6)))
+    return String(value).toUpperCase()==='ON' ? '투자 가능' : '투자 제한';
   if(key===`value:${PRESET_BATTLE_MODE_VALUE_ID}`) return normalizePresetBattleMode(value)==='artifact' ? '유물' : '일반';
   if(value===true) return '사용';
   if(value===false) return '미사용';
@@ -1858,9 +1871,6 @@ function traitPresetChangeVariation(before,after,key=''){
   const rounded=Number(delta.toFixed(8));
   return traitPresetChangeNumberText(rounded>0 ? `+${rounded}` : String(rounded));
 }
-function comparableTraitPresetValue(values,id){
-  return hasOwn(values,id) ? values[id] : undefined;
-}
 function stableTraitPresetZeroScore(value){
   return stableTraitPresetValue(normalizeZeroScoreState(value || {rows:[]}));
 }
@@ -1879,7 +1889,7 @@ function traitPresetStateChangeSummary(previousState,currentState){
   valueIds.forEach(id=>{
     // 슬롯 수는 유닛 보드에서 별도로 비교하므로 기존 프리셋의 누락된 UI 필드를 변경으로 세지 않는다.
     if(id==='dpsBaseUnitVisibleSlotCount') return;
-    if(stableTraitPresetValue(comparableTraitPresetValue(previous.values || {},id))===stableTraitPresetValue(comparableTraitPresetValue(current.values || {},id))) return;
+    if(stableTraitPresetValue(previous.values?.[id])===stableTraitPresetValue(current.values?.[id])) return;
     changedValueIds.add(id);
     // 개인전 OFF·협동전 ON은 독립적인 변경 2건이 아니라 '게임 모드' 변경 1건이다.
     if(id==='soloMode' || id==='coopMode') singleKeys.add('value:gameMode');
@@ -2236,6 +2246,39 @@ function makeTraitPresetFileName(customName=''){
   const date=String(now.getFullYear()).slice(2)+padTraitPresetDatePart(now.getMonth()+1)+padTraitPresetDatePart(now.getDate());
   return `특성프리셋-${date}.txt`;
 }
+// 백업·최신화 화면의 이름만 한글로 표시한다. 파일 저장 키/스키마는 변경하지 않는다.
+const TRAIT_PRESET_RETIRED_VALUE_NAMES=Object.freeze({
+  additionalInputMode:'에디셔널 · 입력 방식',
+  additionalManualValues:'에디셔널 · 수동 입력 보관',
+  additionalRuneModEnabled:'에디셔널 · 개조 적용 선택',
+  addAD:'에디셔널 · 수동 공격력',
+  addAS:'에디셔널 · 수동 공격속도',
+  addCD:'에디셔널 · 수동 크리 데미지',
+  addCRI:'에디셔널 · 수동 크리 확률',
+  addAP:'에디셔널 · 수동 마법공격력',
+  addTD:'에디셔널 · 수동 총 데미지',
+  addUA:'에디셔널 · 수동 유닛 가속'
+});
+const TRAIT_PRESET_RETIRED_STRUCTURE_NAMES=Object.freeze({
+  type:'파일 종류',webDpsVersion:'웹 버전',presetManagement:'관리 버전',exportedAt:'내보낸 날짜',
+  presets:'프리셋 목록',jewelSettings:'쥬얼 설정',unitBoard:'유닛 보드',
+  id:'프리셋 식별 정보',name:'프리셋 이름',createdAt:'생성 날짜',updatedAt:'수정 날짜',
+  meta:'프리셋 분류 정보',state:'저장 상태',savedAt:'저장 날짜',
+  values:'설정값',inv:'특성 투자',zeroScore:'승단 계산',
+  visibleSlotCount:'표시 슬롯 수',units:'유닛 구성',slotExpansions:'슬롯 확장',
+  additionalUnitSettings:'추가 유닛 설정',sanctuaryInfo:'성소 정보',
+  legendaryMythicJewels:'전설·신화 쥬얼'
+});
+function traitPresetRetiredValueName(id){
+  if(hasOwn(REMOVED_PRESET_VALUE_LABELS,id)) return `이달의 룬 효과 · ${REMOVED_PRESET_VALUE_LABELS[id]}`;
+  if(hasOwn(TRAIT_PRESET_RETIRED_VALUE_NAMES,id)) return TRAIT_PRESET_RETIRED_VALUE_NAMES[id];
+  const field=FIELD_REGISTRY[id];
+  if(field) return `${field.kind} · ${field.name}`;
+  return '기타 이전 설정';
+}
+function traitPresetBackupStructureName(id){
+  return TRAIT_PRESET_RETIRED_STRUCTURE_NAMES[String(id || '')] || '기타 이전 저장 정보';
+}
 const TRAIT_PRESET_CHANGE_LABEL_OVERRIDES=Object.freeze({
   gameMode:'게임 모드',
   [PRESET_BATTLE_MODE_VALUE_ID]:'전투 모드',
@@ -2261,12 +2304,31 @@ function traitPresetChangeKeyLabel(key){
     const id=normalized.slice(6);
     if(id==='gameMode') return '게임 모드';
     const field=FIELD_REGISTRY[id];
-    if(field?.kind==='에디셔널') return '에디셔널 버프';
+    if(hasOwn(TRAIT_PRESET_RETIRED_VALUE_NAMES,id)) return TRAIT_PRESET_RETIRED_VALUE_NAMES[id];
+    if(field?.kind==='에디셔널') return `에디셔널 · ${field.name}`;
     if(field?.kind==='인첸트 레벨 / 결과') return '룬 인첸트 레벨';
     if(field?.kind==='룬정보' && /^(rAD|rAS|rCRI|rCD)$/.test(id)) return `룬 ${field.name}`;
+    if(field?.kind==='룬정보') return `룬 · ${field.name}`;
     if(field?.kind==='특성 투자 제한') return `특성 투자 제한 ${field.name}`;
     return TRAIT_PRESET_CHANGE_LABEL_OVERRIDES[id] || field?.name || '기타 설정';
   }
+  if(normalized.startsWith('obsolete:')){
+    const [,scope,...rest]=normalized.split(':');
+    const id=rest.join(':');
+    if(scope==='value') return `폐지된 설정 · ${traitPresetRetiredValueName(id)}`;
+    if(scope==='root') return `폐지된 공통 항목 · ${traitPresetBackupStructureName(id)}`;
+    if(scope==='preset') return `폐지된 프리셋 항목 · ${traitPresetBackupStructureName(id)}`;
+    if(scope==='state') return `폐지된 상태 항목 · ${traitPresetBackupStructureName(id)}`;
+    if(scope==='inv') return '특성 투자 · 폐지된 투자 항목';
+    if(scope==='unitBoard' || scope==='board') return `유닛 보드 · 폐지된 ${traitPresetBackupStructureName(id.split(/[.\[]/)[0])}`;
+    if(scope==='jewel') return `쥬얼 설정 · 폐지된 ${traitPresetBackupStructureName(id)}`;
+    if(scope==='board-link') return '유닛 보드 · 사용하지 않는 프리셋 연결';
+    return '폐지된 저장 항목';
+  }
+  if(normalized.startsWith('schema:value:')) return traitPresetImportReadableName(normalized.slice('schema:value:'.length));
+  if(normalized==='schema:visibleSlotCount') return '유닛 보드 · 표시 슬롯 수';
+  if(normalized==='schema:sanctuaryInfo') return '유닛 보드 · 성소 정보 형식';
+  if(normalized.startsWith('schema:board:')) return `유닛 보드 · ${traitPresetBackupStructureName(normalized.slice('schema:board:'.length).split(/[.\[]/)[0])} 형식`;
   if(normalized.startsWith('import:')) return traitPresetImportIssueChange(normalized.slice(7)).label;
   if(normalized.startsWith('inv:')){
     const row=normalized.slice(4);
@@ -2288,7 +2350,36 @@ function traitPresetChangeKeyLabel(key){
     donationMigration:'나눔 저장 방식',
     'state:shared':'전체 프리셋 대상',
     'state:single':'현재 프리셋 대상'
-  })[normalized] || normalized;
+  })[normalized] || (normalized.startsWith('unitBoard:') ? '유닛 보드 · 설정 변경' :
+    normalized.startsWith('jewelSettings:') ? '쥬얼 설정 · 항목 변경' :
+    normalized.startsWith('zeroScore:') ? '승단 계산 · 항목 변경' : '기타 설정 변경');
+}
+function traitPresetBackupDisplayLabel(key,existingLabel=''){
+  const normalized=String(key || '');
+  // 과거 변경 기록에 영문 항목명이 저장되어 있어도 현재 표기 규칙을 우선한다.
+  if(normalized.startsWith('obsolete:') || normalized.startsWith('schema:') ||
+    normalized.startsWith('import:') || normalized.startsWith('value:') || normalized.startsWith('inv:'))
+    return traitPresetChangeKeyLabel(normalized);
+  return existingLabel || traitPresetChangeKeyLabel(normalized);
+}
+function traitPresetBackupDisplayValue(key,value){
+  const text=String(value ?? '');
+  if(text==='sld_dps_total_preset') return '통합 프리셋 파일';
+  if(text==='ON/OFF') return '개인전';
+  if(text==='OFF/ON') return '협동전';
+  const fixed={ON:'사용',OFF:'미사용','ON+':'강화 적용',none:'선택 안함',normal:'일반',
+    artifact:'유물',tower:'도전의 탑',planet:'행성탐사',harmony:'하모니룬',
+    cosmos:'코스모스룬',chaos:'카오스룬',final:'파이널룬',winners:'위너스룬'};
+  if(hasOwn(fixed,text)) return fixed[text];
+  if(key.startsWith('value:')){
+    const el=$(key.slice(6));
+    if(el?.tagName==='SELECT'){
+      const option=[...el.options].find(item=>item.value===text);
+      if(option && option.textContent.trim()!==text) return option.textContent.trim();
+    }
+  }
+  if((text.startsWith('{') || text.startsWith('[')) && safeJsonParse(text)!==null) return '세부 설정 데이터';
+  return text;
 }
 function traitPresetBackupPresetRows(store,commonScopeIds,singleScopeIds){
   const presets=Array.isArray(store?.presets) ? store.presets : [];
@@ -2428,6 +2519,11 @@ function traitPresetBackupChangePlan(store=loadTraitPresetStore(),currentSnapsho
     hasPending:hasCurrentPending || hasStoredPending || hasDraftPending
   };
 }
+function traitPresetReadableStoredChange(key,value){
+  const text=String(value ?? '');
+  if(key==='value:additionalRuneSlots' && text.trim().startsWith('[')) return traitPresetChangeValueText(key,text);
+  return text;
+}
 function traitPresetBackupChangeListHtml(keys,details=[],presetId=''){
   if(!keys.length) return '<p class="trait-preset-backup-no-change">업데이트 없음</p>';
   const scopedDetails=details.filter(row=>!row.scope || (presetId ? row.scope==='single' && row.presetId===presetId : row.scope==='common'));
@@ -2435,10 +2531,11 @@ function traitPresetBackupChangeListHtml(keys,details=[],presetId=''){
     key===group && scopedDetails.some(row=>row.key.startsWith(group+':'))));
   const rows=filteredKeys.map(key=>{
     const item=scopedDetails.find(row=>row.key===key);
-    const label=item?.label || traitPresetChangeKeyLabel(key);
+    const label=traitPresetBackupDisplayLabel(key,item?.label);
     if(!item || (key==='unitBoard' && item.before==='이전 보드' && item.after==='변경된 보드'))
       return `<li><strong>${escapeHtml(label)}</strong><span class="trait-preset-backup-values">과거 변경 기록에 세부 값이 저장되지 않았습니다.</span></li>`;
-    const before=item.before,after=item.after;
+    const before=traitPresetBackupDisplayValue(key,traitPresetReadableStoredChange(key,item.before));
+    const after=traitPresetBackupDisplayValue(key,traitPresetReadableStoredChange(key,item.after));
     const variation=traitPresetChangeVariation(before,after,key);
     return `<li><strong>${escapeHtml(label)}</strong><span class="trait-preset-backup-values"><span>${escapeHtml(traitPresetChangeNumberText(before,key))}</span><b aria-label="변경 후">→</b><span>${escapeHtml(traitPresetChangeNumberText(after,key))}</span><em>${escapeHtml(variation)}</em></span></li>`;
   });
@@ -2451,10 +2548,12 @@ function traitPresetBackupTargetsHtml(plan){
     const commonHtml=common.length ? `<section class="trait-preset-backup-common"><h4>공통 설정 · 수정 ${common.length}건</h4>${traitPresetBackupChangeListHtml(common.map(change=>change.key),common)}</section>` : '';
     const rows=recovery.rows.map(row=>{
       const changes=row.individualChanges || [];
+      // 개별 수정이 없는 프리셋은 백업에는 포함하되 변경사항 카드에서는 제외한다.
+      if(!row.error && !changes.length) return '';
       const content=row.error ? `<p class="trait-preset-backup-invalid">${escapeHtml(row.error)}</p>` :
         traitPresetBackupChangeListHtml(changes.map(change=>change.key),changes,row.raw?.id);
       return `<article class="trait-preset-backup-card"><header class="trait-preset-backup-card-head"><div class="trait-preset-backup-card-identity"><span>${row.index+1}번째</span><h3>${escapeHtml(row.name)}</h3></div></header><div class="trait-preset-backup-card-changes"><section class="trait-preset-backup-scope is-individual"><h4>${row.error?'오류':`수정 ${changes.length}건`}</h4>${content}</section></div></article>`;
-    }).join('');
+    }).filter(Boolean).join('');
     const candidates=recovery.rows.filter(row=>row.candidate);
     const conflicting=candidates.length>1 && new Set(candidates.map(row=>traitPresetSharedStateSignature(row.candidate.presets[0].state))).size>1;
     const choice=conflicting ? `<label class="trait-preset-backup-source"><span>공통 설정 기준 프리셋 선택</span><select id="traitPresetImportSharedSource"><option value="">기준 프리셋 선택</option>${candidates.map(row=>`<option value="${row.index}">${escapeHtml(row.name)} (${row.index+1}번째)</option>`).join('')}</select></label>` : '';
@@ -2598,7 +2697,14 @@ function createTraitPresetBackupFile(customName=''){
   if(!store.presets.length) throw new Error('백업할 프리셋이 없습니다.');
   const backupStore=finalizeTraitPresetStoreForExport(store);
   saveTraitPresetStore(backupStore,{source:'backup'});
-  const payload=JSON.stringify({type:TRAIT_PRESET_FILE_TYPE,webDpsVersion:currentWebDpsVersion(),presetManagement:TRAIT_PRESET_MANAGEMENT_VERSION,exportedAt:formatTraitPresetExportedAt(),presets:backupStore.presets,jewelSettings:backupStore.jewelSettings,unitBoard:backupStore.unitBoard}, null, 2);
+  // 내려받는 파일에서만 룬 슬롯을 배열로 펼쳐서 1~10번을 읽기 쉽게 표시한다.
+  // 앱 내부 저장값은 문자열 그대로 유지하며 가져오기는 동일 값을 다시 직렬화한다.
+  const readablePresets=backupStore.presets.map(preset=>{
+    const values={...preset.state.values};
+    if(typeof values.additionalRuneSlots==='string') values.additionalRuneSlots=JSON.parse(values.additionalRuneSlots);
+    return {...preset,state:{...preset.state,values}};
+  });
+  const payload=JSON.stringify({type:TRAIT_PRESET_FILE_TYPE,webDpsVersion:currentWebDpsVersion(),presetManagement:TRAIT_PRESET_MANAGEMENT_VERSION,exportedAt:formatTraitPresetExportedAt(),presets:readablePresets,jewelSettings:backupStore.jewelSettings,unitBoard:backupStore.unitBoard}, null, 2);
   const fileName=makeTraitPresetFileName(customName);
   // Android 앱에서는 blob: 다운로드 대신 시스템 문서 저장 화면을 사용한다.
   // 웹에서는 기존 다운로드 흐름과 백업 데이터 구조를 그대로 유지한다.
@@ -2828,13 +2934,13 @@ function traitPresetImportIssueChange(issue,source={}){
   const missing='저장 항목 없음';
   const info={
     '프리셋 관리 버전':['프리셋 관리 버전',source.presetManagement ?? missing,TRAIT_PRESET_MANAGEMENT_VERSION],
-    '파일 종류':['프리셋 파일 종류',source.type ?? missing,TRAIT_PRESET_FILE_TYPE],
+    '파일 종류':['프리셋 파일 종류',source.type ?? missing,'통합 프리셋 파일'],
     '웹 버전 정보':['백업 생성 웹 버전',source.webDpsVersion ?? missing,currentWebDpsVersion()],
     '쥬얼 설정':['쥬얼 설정 저장 항목',missing,'기본 쥬얼 설정 추가'],
     '유닛 보드':['유닛 보드 저장 항목',missing,'기본 유닛 보드 추가'],
     '유닛 보드.presets':['유닛 보드별 프리셋 목록',missing,'프리셋별 보드 목록 추가'],
     '유닛 보드 목록':['유닛 보드별 프리셋 목록',missing,'프리셋별 보드 목록 추가']
-  }[path] || [path,missing,'현재 저장 형식으로 보완'];
+  }[path] || ['기타 저장 형식',missing,'현재 저장 형식으로 보완'];
   const key=path==='유닛 보드 목록' ? '유닛 보드.presets' : path;
   return {key:`import:${key}`,label:info[0],before:String(info[1]),after:String(info[2])};
 }
@@ -2849,29 +2955,27 @@ function traitPresetMigrationChanges(raw){
   const add=(target,change)=>{ if(!target.some(item=>item.key===change.key)) target.push(change); };
   const boards=raw.unitBoard?.presets || {};
   Object.keys(raw).filter(key=>!TRAIT_PRESET_SCHEMA_ROOT_KEYS.has(key)).forEach(key=>
-    add(common,traitPresetObsoleteChange(`obsolete:root:${key}`,`폐지된 공통 저장 항목 · ${key}`)));
+    add(common,traitPresetObsoleteChange(`obsolete:root:${key}`,traitPresetChangeKeyLabel(`obsolete:root:${key}`))));
   Object.keys(raw.unitBoard || {}).filter(key=>key!=='presets').forEach(key=>
-    add(common,traitPresetObsoleteChange(`obsolete:unitBoard:${key}`,`유닛 보드 · 폐지된 공통 항목 (${key})`)));
+    add(common,traitPresetObsoleteChange(`obsolete:unitBoard:${key}`,traitPresetChangeKeyLabel(`obsolete:unitBoard:${key}`))));
   (raw.presets || []).forEach((preset,index)=>{
     const changes=[];
     const rawValues=preset.state?.values || {};
     const prefix=traitPresetImportPresetPath(preset,index)+'.';
     Object.keys(preset).filter(key=>!TRAIT_PRESET_SCHEMA_ITEM_KEYS.has(key)).forEach(key=>
-      add(changes,traitPresetObsoleteChange(`obsolete:preset:${key}`,`폐지된 프리셋 저장 항목 · ${key}`)));
+      add(changes,traitPresetObsoleteChange(`obsolete:preset:${key}`,traitPresetChangeKeyLabel(`obsolete:preset:${key}`))));
     Object.keys(preset.state || {}).filter(key=>!TRAIT_PRESET_SCHEMA_STATE_KEYS.has(key)).forEach(key=>
-      add(changes,traitPresetObsoleteChange(`obsolete:state:${key}`,`폐지된 프리셋 상태 항목 · ${key}`)));
+      add(changes,traitPresetObsoleteChange(`obsolete:state:${key}`,traitPresetChangeKeyLabel(`obsolete:state:${key}`))));
     Object.keys(rawValues).filter(id=>!hasOwn(defaults.values,id)).forEach(id=>{
       const removedLabel=REMOVED_PRESET_VALUE_LABELS[id];
-      const label=removedLabel ? `이달의 룬 효과 · ${removedLabel}` :
-        id==='dpsSanctuaryInfo' ? '유닛 보드 · 과거 성소 정보' :
-        id==='dpsJewelSettings' ? '쥬얼 설정 · 과거 저장 항목' : `폐지된 저장 항목 · ${id}`;
+      const label=traitPresetChangeKeyLabel(`obsolete:value:${id}`);
       const previous=removedLabel
         ? (id==='janRuneScope' ? (rawValues[id]==='J2' ? '전체 투자 @J2' : '공격 오펜 @J1') : String(rawValues[id]))
         : '과거 데이터 보존 중';
       add(changes,traitPresetObsoleteChange(`obsolete:value:${id}`,label,previous));
     });
     Object.keys(preset.state?.inv || {}).filter(id=>!hasOwn(defaults.inv,id)).forEach(id=>
-      add(changes,traitPresetObsoleteChange(`obsolete:inv:${id}`,`특성 투자 · 폐지된 항목 ${id}`)));
+      add(changes,traitPresetObsoleteChange(`obsolete:inv:${id}`,traitPresetChangeKeyLabel(`obsolete:inv:${id}`))));
     const board=boards[preset.id];
     if(board && typeof board==='object'){
       const canonical=normalizeTraitPresetUnitBoardState(board);
@@ -2882,7 +2986,7 @@ function traitPresetMigrationChanges(raw){
         const suffix=path.slice(`${preset.name}.유닛 보드.`.length);
         const top=suffix.split(/[.\[]/)[0];
         if(hasOwn(board,top) && !hasOwn(canonical,top)){
-          add(changes,traitPresetObsoleteChange(`obsolete:board:${suffix}`,`유닛 보드 · 폐지된 항목 (${suffix})`));
+          add(changes,traitPresetObsoleteChange(`obsolete:board:${suffix}`,traitPresetChangeKeyLabel(`obsolete:board:${suffix}`)));
         }else if(top==='visibleSlotCount' && board.visibleSlotCount!==canonical.visibleSlotCount){
           add(changes,{key:'schema:visibleSlotCount',label:'유닛 보드 · 표시 슬롯 수',before:String(board.visibleSlotCount),after:String(canonical.visibleSlotCount)});
         }else if(top==='sanctuaryInfo' && hasOwn(board,'sanctuaryInfo')){
@@ -2891,24 +2995,28 @@ function traitPresetMigrationChanges(raw){
           if(stableTraitPresetValue(before)!==stableTraitPresetValue(after))
             add(changes,{key:'schema:sanctuaryInfo',label:'유닛 보드 · 성소 정보 형식',before:'과거 저장 방식',after:'현재 형식'});
         }else if(top!=='sanctuaryInfo' && top!=='visibleSlotCount'){
-          add(changes,{key:`schema:board:${suffix}`,label:`유닛 보드 · ${suffix}`,before:'이전 저장 방식',after:'현재 형식'});
+          add(changes,{key:`schema:board:${suffix}`,label:traitPresetChangeKeyLabel(`schema:board:${suffix}`),before:'이전 저장 방식',after:'현재 형식'});
         }
       });
     }
     inspected.issues.filter(path=>path.startsWith(prefix)).forEach(path=>{
       const id=path.slice(prefix.length).split(/[.\[]/)[0];
       if(id==='inv' || id==='zeroScore' || hasOwn(rawValues,id)) return;
-      if(hasOwn(defaults.values,id)) add(changes,{key:`schema:value:${id}`,label:traitPresetImportReadableName(id),before:'저장값 없음',after:'기본값 추가'});
+      if(hasOwn(defaults.values,id)){
+        const isInvestmentSwitch=TRAIT_PRESET_INVESTMENT_SWITCH_IDS.has(id);
+        const after=isInvestmentSwitch ? `${traitPresetChangeValueText(`value:${id}`,defaults.values[id])} (기본값 적용)` : '기본값 추가';
+        add(changes,{key:`schema:value:${id}`,label:traitPresetImportReadableName(id),before:'저장값 없음',after});
+      }
     });
     if(changes.length) byPreset.set(preset.id,changes);
   });
   if(raw.jewelSettings && typeof raw.jewelSettings==='object'){
     const canonical=normalizeTraitPresetJewelSettings({legendaryMythicJewels:{},...raw.jewelSettings});
     Object.keys(raw.jewelSettings).filter(key=>!hasOwn(canonical || {},key)).forEach(key=>
-      add(common,traitPresetObsoleteChange(`obsolete:jewel:${key}`,`쥬얼 설정 · 과거 저장 항목 (${key})`)));
+      add(common,traitPresetObsoleteChange(`obsolete:jewel:${key}`,traitPresetChangeKeyLabel(`obsolete:jewel:${key}`))));
   }
   Object.keys(boards).filter(id=>!(raw.presets || []).some(preset=>preset.id===id)).forEach(id=>
-    add(common,traitPresetObsoleteChange(`obsolete:board-link:${id}`,`폐지된 보드 연결 · ${id}`)));
+    add(common,traitPresetObsoleteChange(`obsolete:board-link:${id}`,traitPresetChangeKeyLabel(`obsolete:board-link:${id}`))));
   const rootIssues=inspected.issues.filter(path=>!path.startsWith('프리셋 ') && !(raw.presets || []).some(preset=>path.startsWith(`${preset.name}.유닛 보드.`)));
   rootIssues.forEach(path=>{
     if(path.startsWith('쥬얼 설정.') || path.startsWith('유닛 보드.') && !['유닛 보드.presets'].includes(path)) return;
@@ -2923,6 +3031,12 @@ function prepareTraitPresetImportRecovery(parsed,fileName=''){
   inspectTraitPresetImportCompatibility({...parsed,presets:[]});
   if(!parsed.presets?.length) throw new Error('가져올 수 있는 프리셋이 없습니다.');
   const source=JSON.parse(JSON.stringify(parsed));
+  // 읽기 좋게 배열로 내보낸 룬 10칸을 기존 저장용 문자열로 되돌린다.
+  // 기존 문자열 백업도 그대로 받아들여 프리셋 저장 형식은 바꾸지 않는다.
+  source.presets.forEach(preset=>{
+    const values=preset?.state?.values;
+    if(Array.isArray(values?.additionalRuneSlots)) values.additionalRuneSlots=JSON.stringify(values.additionalRuneSlots);
+  });
   const defaults=traitPresetSchemaDefaults();
   let sharedError='',sharedIssues=[];
   try{
@@ -2934,8 +3048,8 @@ function prepareTraitPresetImportRecovery(parsed,fileName=''){
   const sharedChanges=[...new Map([
     ...sharedIssues.map(issue=>{const change=traitPresetImportIssueChange(issue,source);return [change.key,change];}),
     ...traitPresetMigrationChanges({...source,presets:[],unitBoard:{presets:{}}}).common.map(change=>[change.key,change]),
-    ...Object.keys(source.unitBoard || {}).filter(key=>key!=='presets').map(key=>{const change=traitPresetObsoleteChange(`obsolete:unitBoard:${key}`,`유닛 보드 · 폐지된 공통 항목 (${key})`);return [change.key,change];}),
-    ...Object.keys(source.unitBoard?.presets || {}).filter(id=>!source.presets.some(item=>item?.id===id)).map(id=>{const change=traitPresetObsoleteChange(`obsolete:board-link:${id}`,`폐지된 보드 연결 · ${id}`);return [change.key,change];})
+    ...Object.keys(source.unitBoard || {}).filter(key=>key!=='presets').map(key=>{const change=traitPresetObsoleteChange(`obsolete:unitBoard:${key}`,traitPresetChangeKeyLabel(`obsolete:unitBoard:${key}`));return [change.key,change];}),
+    ...Object.keys(source.unitBoard?.presets || {}).filter(id=>!source.presets.some(item=>item?.id===id)).map(id=>{const change=traitPresetObsoleteChange(`obsolete:board-link:${id}`,traitPresetChangeKeyLabel(`obsolete:board-link:${id}`));return [change.key,change];})
   ]).values()];
   const idCounts=new Map(),nameCounts=new Map();
   source.presets.forEach(item=>{
@@ -2965,7 +3079,11 @@ function prepareTraitPresetImportRecovery(parsed,fileName=''){
       const next=completed.presets[0];
       Object.entries(next.state.values).forEach(([id,value])=>{
         if(id==='dpsBaseUnitVisibleSlotCount') return;
-        if(!hasOwn(raw.state.values,id)) row.changes.push({key:`value:${id}`,label:traitPresetImportReadableName(id),before:'저장값 없음',after:traitPresetChangeValueText(`value:${id}`,value,next.state)});
+        if(!hasOwn(raw.state.values,id)){
+          const text=traitPresetChangeValueText(`value:${id}`,value,next.state);
+          const isInvestmentSwitch=TRAIT_PRESET_INVESTMENT_SWITCH_IDS.has(id);
+          row.changes.push({key:`value:${id}`,label:traitPresetImportReadableName(id),before:'저장값 없음',after:isInvestmentSwitch ? `${text} (기본값 적용)` : text});
+        }
       });
       if(hasOwn(raw.state.values,'donationBuffType')) row.changes.push({key:'donationMigration',label:'나눔 저장 방식',before:'기존 중복 저장',after:'통합 저장'});
       const missingInvestments=Object.keys(defaults.inv).filter(key=>!hasOwn(raw.state.inv || {},key));

@@ -74,18 +74,19 @@ function shardValue(id){
   return normalizedShardNumber(el ? el.value : 0);
 }
 const RUNE_CHOICE_TYPE_LABELS={
+  none:'없음',
   ap:'마법공격력',
   ua:'유닛 가속',
   td:'총 데미지',
   harmony:'총 데미지 & 유닛 가속'
 };
 const RUNE_CHOICE_TYPE_ALIASES={
-  ap:'ap', ua:'ua', td:'td', harmony:'harmony',
+  none:'none', '없음':'none', ap:'ap', ua:'ua', td:'td', harmony:'harmony',
   'td&ua':'harmony','td＆ua':'harmony','총뎀가속':'harmony','총데미지&유닛가속':'harmony','총데미지＆유닛가속':'harmony'
 };
 function normalizeRuneChoiceType(value){
   const key=String(value??'').trim().replace(/\s+/g,'').toLowerCase();
-  return RUNE_CHOICE_TYPE_ALIASES[key] || (RUNE_CHOICE_TYPE_LABELS[key] ? key : 'harmony');
+  return RUNE_CHOICE_TYPE_ALIASES[key] || (RUNE_CHOICE_TYPE_LABELS[key] ? key : 'none');
 }
 function normalizeRuneChoiceValue(value){
   const n=Number(String(value??'0').replace(/,/g,'').trim());
@@ -93,11 +94,20 @@ function normalizeRuneChoiceValue(value){
 }
 function normalizeRuneChoiceValues(values={}){
   const out={...values};
-  out.runeChoiceType=normalizeRuneChoiceType(out.runeChoiceType || 'harmony');
+  out.runeChoiceType=normalizeRuneChoiceType(out.runeChoiceType ?? 'none');
   out.runeChoiceValue=String(normalizeRuneChoiceValue(out.runeChoiceValue));
   return out;
 }
 
+const RUNE_GRADE_NAMES=Object.freeze({none:'미설정',final:'파이널룬',winner:'위너스룬',cosmos:'코스모스룬',chaos:'카오스룬',harmony:'하모니룬'});
+function runeGradeKey(type,criticalDamage){
+  const choice=normalizeRuneChoiceType(type);
+  if(choice==='harmony') return 'harmony';
+  if(choice==='td') return 'chaos';
+  if(choice==='ua') return 'cosmos';
+  if(choice==='ap') return 'final';
+  return Number(criticalDamage)>0 ? 'winner' : 'none';
+}
 const POWER_BLESS_ALL_OPTIONS=[0,20,30,40,60,90];
 const COOP_PASSENGER_DEFENSE_REDUCE_OPTIONS=[0,15,25,50,60];
 const EROSION_CONTROL_DEFAULTS={erosionStack:'500',jewelErosionRes:'30'};
@@ -137,15 +147,6 @@ function normalizeErosionControlValue(id, value){
   if(id==='jewelErosionRes') return String(Math.min(100, rounded));
   return String(rounded);
 }
-function normalizeDecimalDisplayValue(value, digits=6){
-  const text=String(value ?? '').replace(/,/g,'').trim();
-  if(text==='') return '';
-  const n=Number(text);
-  if(!Number.isFinite(n)) return String(value ?? '');
-  const fixed=n.toFixed(digits);
-  return String(parseFloat(fixed));
-}
-
 /* ── 02 · 입력·상태 ── */
 /* 입력 상태 */
 function normalizedStoredControlValue(id,dataKey,fallback,normalize){
@@ -882,7 +883,8 @@ function syncAutoEP(){
   return ep;
 }
 function effectiveAdditionalStats(){
-  return { ad:v('addAD'), as:v('addAS'), cd:v('addCD'), cri:v('addCRI'), ap:v('addAP'), td:v('addTD'), ua:v('addUA'), dr:0, sr:0, hr:0 };
+  // 엑셀 R36의 공격력 표시만 정수로 처리하고 계산에는 실수 평균을 사용한다.
+  return {...additionalRuneAverage(), dr:0, sr:0, hr:0};
 }
 function growthGraduationAttackBonus(){
   return effectiveXpValue()>=2000000 ? 20 : 0;
@@ -2352,7 +2354,7 @@ const TRAIT_LIMIT_CONFIG=[
   {id:'traitLimitCRI',key:'CRI',name:'크리 확률',value:s=>s.M8}
 ];
 const TRAIT_LIMIT_DEFAULTS={
-  traitLimitAD:'0', traitLimitAS:'0', traitLimitCRI:'0', traitLimitCD:'0', traitLimitMultiTarget:'OFF', traitLimitInfinite:'OFF'
+  traitLimitAD:'0', traitLimitAS:'0', traitLimitCRI:'0', traitLimitCD:'0', traitLimitLifeBonus:'ON', traitLimitMagicAP:'ON', traitLimitMultiTarget:'OFF', traitLimitInfinite:'OFF'
 };
 const TRAIT_LIMIT_INPUT_IDS=new Set(TRAIT_LIMIT_CONFIG.map(item=>item.id));
 const TRAIT_LIMIT_MULTI_TYPES=new Set(['MD','MP','MCP']);
@@ -2403,6 +2405,8 @@ function traitLimitAllowsTrait(t){
   if(!Array.isArray(t)) return true;
   const tier=String(t[2] ?? '');
   const type=String(t[3] ?? '');
+  if(t[0]===51 && !traitLimitSwitchOn('traitLimitLifeBonus')) return false;
+  if(type==='AP' && !traitLimitSwitchOn('traitLimitMagicAP')) return false;
   if(TRAIT_LIMIT_MULTI_TYPES.has(type) && !traitLimitSwitchOn('traitLimitMultiTarget')) return false;
   if(tier==='무한∞' && !traitLimitSwitchOn('traitLimitInfinite')) return false;
   return true;
