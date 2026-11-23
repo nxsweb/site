@@ -2219,16 +2219,23 @@ function initAppSelectDropdowns(){
   const buttons=new Map();
   const isSupported=select=>select?.matches?.(nativeSelector) && !select.closest('[data-trait-preset-custom-select]');
   const label=select=>select.getAttribute('aria-label') || (select.id ? document.querySelector(`label[for="${CSS.escape(select.id)}"]`)?.textContent.trim() : '') || select.closest('label')?.querySelector('span')?.textContent.trim() || '항목 선택';
-  function optionsFor(select){
-    return [...select.options].filter(option=>!option.hidden && !option.parentElement?.hidden);
-  }
   function syncButton(select,button){
     if(!select.isConnected || !button.isConnected) return;
     const option=select.selectedOptions?.[0];
     const value=option?.textContent.trim() || '선택 안함';
     const valueNode=button.querySelector('.app-select-button-value');
     if(valueNode.textContent!==value) valueNode.textContent=value;
-    const disabled=select.disabled || !optionsFor(select).some(item=>!item.disabled && !item.parentElement?.disabled);
+    // 옵션 배열 전체를 만들지 않고 실제 선택 가능 항목을 찾는 즉시 중단한다.
+    let hasSelectableOption=false;
+    if(!select.disabled){
+      for(const item of select.options){
+        if(!item.hidden && !item.parentElement?.hidden && !item.disabled && !item.parentElement?.disabled){
+          hasSelectableOption=true;
+          break;
+        }
+      }
+    }
+    const disabled=!hasSelectableOption;
     if(button.disabled!==disabled) button.disabled=disabled;
     const accessibleName=`${label(select)}: ${value}`;
     if(button.getAttribute('aria-label')!==accessibleName) button.setAttribute('aria-label',accessibleName);
@@ -2257,7 +2264,7 @@ function initAppSelectDropdowns(){
     select.setAttribute('aria-hidden','true');
     select.tabIndex=-1;
     buttons.set(select,button);
-    syncButton(select,button);
+    // 현재 refresh()에서 등록된 항목을 한 번만 동기화한다.
   }
   function closeMenu(restoreFocus=false){
     if(!activeSelect) return;
@@ -2353,11 +2360,9 @@ function initAppSelectDropdowns(){
   }
   function refresh(){
     scheduled=false;
+    // 기존 버튼은 아래 등록 목록에서 동기화하므로 중복 검사하지 않는다.
     document.querySelectorAll(nativeSelector).forEach(select=>{
-      if(select.classList.contains('app-select-native-source')){
-        const button=buttons.get(select);
-        if(button?.isConnected) syncButton(select,button);
-      }else enhance(select);
+      if(!select.classList.contains('app-select-native-source')) enhance(select);
     });
     for(const [select,button] of buttons){
       if(select.isConnected && button.isConnected) syncButton(select,button);
@@ -2457,19 +2462,13 @@ function initAppSelectDropdowns(){
 /* ── 14 · 앱 초기화 및 준비 상태 ── */
 function initApp(){
   loadFontScale();
+  // 기본 상태 수집에 필요한 입력 행과 이벤트만 먼저 준비한다.
+  // loadState()의 상태 적용·recalc()에서 컨트롤/계산 화면을 한 번에 동기화한다.
   renderZeroScoreCalculatorRows();
   bindAppEvents();
-  syncEnchantCodeFromInputs(true);
-  syncSelectButtons();
-  syncDonationBuffControl();
-  syncBuffChoiceButtons();
-  syncDpsBaseUnitControl();
-  renderDpsSanctuaryInfo();
-  syncExclusiveRuneOptions();
-  updateZeroScoreCalculator();
-  formatAllMoneyInputs();
-  syncTraitLimitInputs();
   loadState();
+  // 저장값이 적용된 상태에서 성소 입력 UI를 최초 생성한다.
+  renderDpsSanctuaryInfo();
   window.DpsPreset.init();
   initAppSelectDropdowns();
 }

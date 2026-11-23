@@ -1854,6 +1854,13 @@
         _buildStandaloneWindow.focus();
     }
 
+    function openAllIndependentWindows() {
+        // 사용자의 한 번 클릭 안에서 두 창을 곧바로 열어 팝업 허용 가능성을 높인다.
+        // 둘째 창이 차단되면 기존 메뉴의 개별 실행 항목으로 재시도할 수 있다.
+        openBuildIndependentWindow();
+        openBuilderIndependentWindow('both');
+    }
+
     function setIndependentMenuOpen(open) {
         const menu = getEl('independentWindowMenu');
         const button = getEl('btnBuildStandalone');
@@ -1866,8 +1873,13 @@
         menu.style.top = Math.min(window.innerHeight - menu.offsetHeight - 8, rect.bottom + 6) + 'px';
     }
 
+    let _builderBothStandaloneWindow = null;
     function openBuilderIndependentWindow(view) {
         if (!['board', 'utility', 'both'].includes(view)) return;
+        if (view === 'both' && _builderBothStandaloneWindow && !_builderBothStandaloneWindow.closed) {
+            _builderBothStandaloneWindow.focus();
+            return;
+        }
         window.NEXUS_PREPARE_BUILDER_WINDOW?.();
         const url = new URL(window.location.href);
         url.searchParams.delete('nexusStandalone');
@@ -1875,9 +1887,13 @@
         url.searchParams.delete('fresh');
         url.searchParams.delete('__nexus_check');
         const sizes = view === 'utility' ? [480,690] : view === 'both' ? [820,740] : [620,690];
-        const win = window.open(url.href, '_blank', `popup=yes,width=${sizes[0]},height=${sizes[1]},resizable=yes,scrollbars=yes`);
-        if (!win) window.alert('독립 창이 차단되었습니다. 브라우저의 팝업 허용 설정을 확인해 주세요.');
-        else win.focus();
+        const win = window.open(url.href, view === 'both' ? 'nexusBuilderBothStandalone' : '_blank',
+            `popup=yes,width=${sizes[0]},height=${sizes[1]},resizable=yes,scrollbars=yes`);
+        if (!win) window.alert('독립 창이 차단되었습니다. 브라우저의 팝업 허용 설정을 확인해 주세요. 메뉴에서 차단된 창을 다시 실행할 수 있습니다.');
+        else {
+            if (view === 'both') _builderBothStandaloneWindow = win;
+            win.focus();
+        }
     }
 
     function setupBuildStandaloneWindow() {
@@ -2354,6 +2370,7 @@
                 e.preventDefault();
                 setIndependentMenuOpen(false);
                 if (actionEl.dataset.windowView === 'nexus') openBuildIndependentWindow();
+                else if (actionEl.dataset.windowView === 'all') openAllIndependentWindows();
                 else openBuilderIndependentWindow(actionEl.dataset.windowView);
                 break;
             case 'closeBuildStandaloneWindow': window.close(); break;
