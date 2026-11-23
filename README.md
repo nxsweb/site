@@ -6,10 +6,6 @@
 <p align="center"><strong>개복디 넥서스 · 유닛도감 / 체크리스트 / 빌더</strong></p>
 <p align="center"><sub>by VAERON · 첫 공개 버전 NXSBuild-V1</sub></p>
 
-<p align="center">
-  <a href="https://nxsweb.github.io/site/">웹사이트 바로가기</a>
-</p>
-
 ---
 
 ## 프로젝트 소개
@@ -89,9 +85,7 @@
 1. GitHub의 공개 리포지토리 최상위에 **이 폴더의 내부 파일 전체**를 업로드합니다. (ZIP 안의 버전 폴더 자체를 추가로 중첩하지 않습니다.)
 2. **Settings → Pages**에서 소스를 **Deploy from a branch**, 브랜치는 `main`, 폴더는 `/(root)`로 지정합니다.
 3. GitHub Pages에서 제공한 주소로 접속합니다.
-4. 실제 배포 주소가 다른 경우 `index.html`의 Open Graph URL·이미지 URL 및 이 README의 웹사이트 링크를 변경합니다.
-
-> **참고:** 위 `https://nxsweb.github.io/site/` 주소는 현재 소스의 메타데이터에 입력된 경로이며, 실제 접속 가능 여부는 배포 후 확인해야 합니다.
+4. 배포 시 `index.html`의 Open Graph URL과 공유 이미지 URL이 실제 배포 환경에 맞는지 확인합니다.
 
 ## 버전 및 캐시
 
@@ -117,8 +111,6 @@ window.APP_VERSION = "NXSBuild-V1";
 </p>
 
 **VAERON** · NEXUS / SLD PROJECT
-
-[VAERON SLD PROJECT HOME](https://nxsweb.github.io/home/)
 
 ---
 
