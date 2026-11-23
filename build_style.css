@@ -1375,7 +1375,6 @@ html[data-dps-standalone-view] .wrap{display:block!important;width:100%;max-widt
 html[data-dps-standalone-view] .col-work{display:flex!important;flex-direction:column;gap:10px;width:100%;min-width:0;max-width:none;height:auto!important;max-height:none!important;overflow:visible!important;padding:8px;}
 html[data-dps-standalone-view] .col-left{display:none!important;}
 html[data-dps-standalone-view] .col-mid,html[data-dps-standalone-view] .col-right{display:block!important;flex:none;width:100%!important;max-width:none;min-width:0;height:auto!important;max-height:none;overflow:visible!important;margin:0;padding:0;}
-html[data-dps-standalone-view] .col-mid > .trait-board-panel > :not(.trait-utility-panel){display:none!important;}
 html[data-dps-standalone-view] .col-mid > .trait-board-panel{display:block;width:100%;min-width:0;height:auto;max-height:none;overflow:visible;margin:0;padding:0;}
 html[data-dps-standalone-view] .right-analytics-workspace,html[data-dps-standalone-view] .trait-utility-panel{width:100%;max-width:none;min-width:0;}
 html[data-dps-standalone-view="board"] .col-mid,html[data-dps-standalone-view="utility"] .col-right{display:none!important;}
