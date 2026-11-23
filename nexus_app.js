@@ -238,7 +238,7 @@
     
     let _presetTab = '일반 프리셋';
     let _fontScale = 1.0;
-    const IS_STANDALONE_BUILD = new URLSearchParams(window.location.search).get('nexusStandalone') === 'build';
+    const IS_STANDALONE_BUILD = window.NEXUS_WINDOW_MODE === 'nexus';
     let _buildStandaloneWindow = null;
 
     /* 선택 상태·수량 관리 */
@@ -1841,6 +1841,7 @@
         }
         const url = new URL(window.location.href);
         url.searchParams.set('nexusStandalone', 'build');
+        url.searchParams.delete('dpsWindow');
         url.searchParams.delete('fresh');
         url.searchParams.delete('__nexus_check');
         _buildStandaloneWindow = window.open(url.href, 'nexusBuildStandalone',
@@ -2155,6 +2156,10 @@
     /* 화면 전환 */
     const MAIN_VIEW_STORAGE_KEY = 'nexusLastMainView';
     function setupInitialView() {
+        if (IS_STANDALONE_BUILD) {
+            switchLayout('unitboard');
+            return;
+        }
         let restoredView = 'unitboard';
         try {
             if (localStorage.getItem(MAIN_VIEW_STORAGE_KEY) === 'builder') restoredView = 'builder';
@@ -2166,10 +2171,14 @@
         hideRecipeTooltip();
         const layout = getEl('mainLayout');
         if (!layout) return;
-        const nextMode = ['unitboard', 'checklist', 'builder'].includes(mode) ? mode : 'unitboard';
-        // 체크리스트도 유닛도감 소속: 저장 대상 메인 탭은 유닛도감/빌더 두 가지뿐이다.
-        const rememberedMainView = nextMode === 'builder' ? 'builder' : 'unitboard';
-        try { localStorage.setItem(MAIN_VIEW_STORAGE_KEY, rememberedMainView); } catch (error) { /* 저장소 사용 불가 시 현재 화면 전환만 유지 */ }
+        // 넥서스 독립창은 항상 조합·재료 화면으로 표시하며 메인 탭 저장값을 건드리지 않는다.
+        const nextMode = IS_STANDALONE_BUILD ? 'unitboard'
+            : (['unitboard', 'checklist', 'builder'].includes(mode) ? mode : 'unitboard');
+        if (!IS_STANDALONE_BUILD) {
+            // 체크리스트도 유닛도감 소속: 저장 대상 메인 탭은 유닛도감/빌더 두 가지뿐이다.
+            const rememberedMainView = nextMode === 'builder' ? 'builder' : 'unitboard';
+            try { localStorage.setItem(MAIN_VIEW_STORAGE_KEY, rememberedMainView); } catch (error) { /* 저장소 사용 불가 시 현재 화면 전환만 유지 */ }
+        }
         // 선택 배경·aria-current를 한 곳에서 처리해 3개 탭의 스타일을 동일하게 적용한다.
         const buttons = {
             unitboard: getEl('btnViewUnitboard'),
