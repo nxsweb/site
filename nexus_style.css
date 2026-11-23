@@ -132,6 +132,20 @@ html.nexus-standalone-build,html.nexus-standalone-build body { height:auto; min-
 .nexus-standalone-build .inspector-window-controls { display:block; }
 .nexus-standalone-build .inspector-standalone-btn svg { display:none; }
 .nexus-standalone-build .inspector-standalone-btn::after { content:"×"; font-size:21px; line-height:1; }
+/* 전체 통합 독립창: 넥서스 필요 재료와 빌더 iframe을 하나의 세로 스크롤 문서로 배치. */
+html.nexus-combined-standalone,html.nexus-combined-standalone body{height:auto;min-height:100%;overflow-y:auto;overflow-x:hidden;}
+.nexus-combined-standalone .global-header,.nexus-combined-standalone .panel-left,.nexus-combined-standalone .panel-cart,.nexus-combined-standalone .panel-right,.nexus-combined-standalone .recipe-tooltip{display:none!important;}
+.nexus-combined-standalone .main-layout{display:block;width:100%;min-width:0;height:auto;min-height:0;margin:0;padding:10px 10px 0;overflow:visible;}
+.nexus-combined-standalone .build-inspector{display:block;width:100%;min-height:0;max-height:none;overflow:visible;background:transparent;border:0;border-radius:0;}
+.nexus-combined-standalone .build-overview{background:#111216;border:1px solid #b59a67;border-radius:13px;}
+.nexus-combined-standalone .inspector-window-controls{display:block;}
+.nexus-combined-standalone .inspector-standalone-btn svg{display:none;}
+.nexus-combined-standalone .inspector-standalone-btn::after{content:"×";font-size:21px;line-height:1;}
+.nexus-combined-standalone .inspector-heading h2{font-size:0;}
+.nexus-combined-standalone .inspector-heading h2::after{content:'필요 재료';font-size:14px;}
+.nexus-combined-standalone .builder-frame-shell{position:relative;inset:auto!important;top:auto!important;z-index:auto;width:calc(100% - 20px);height:auto;margin:0 10px 10px;overflow:visible;background:transparent;}
+.nexus-combined-standalone .builder-frame-shell iframe{display:block;width:100%;min-height:740px;height:740px;overflow:hidden;}
+@media(max-width:767px){.nexus-combined-standalone .main-layout{padding:8px 8px 0;}.nexus-combined-standalone .builder-frame-shell{width:calc(100% - 16px);margin:0 8px 8px;}}
 .build-materials { padding:0 16px 16px; }
 .build-materials summary { display:flex; align-items:center; justify-content:space-between; gap:8px; list-style:none; padding:3px 0 12px; color:#e4d5bd; font-size:11px; cursor:pointer; }
 .build-materials summary::-webkit-details-marker { display:none; }

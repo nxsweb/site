@@ -697,7 +697,7 @@ function normalizeTraitPresetStatusData(data){
   const pendingChangeDetails=Array.isArray(data.pendingChangeDetails) ? data.pendingChangeDetails.filter(row=>
     row && typeof row==='object' && typeof row.key==='string' && typeof row.presetId==='string' &&
     (row.scope==='common' || row.scope==='single') && row.key!==TRAIT_PRESET_OBSOLETE_SANCTUARY_CHANGE_KEY && typeof row.before==='string' && typeof row.after==='string'
-  ).slice(0,800).map(row=>({presetId:row.presetId,key:row.key,scope:row.scope,before:row.before,after:row.after})) : [];
+  ).slice(0,800).map(row=>({presetId:row.presetId,key:row.key,scope:row.scope,before:row.before,after:row.after,...(typeof row.label==='string' ? {label:row.label.slice(0,160)} : {})})) : [];
   // V48에서 성소 정보만 공통 변경으로 기록된 과거 상태는 공통 변경 표시를 제거한다.
   // 다른 공통 변경 또는 개별 변경이 있으면 그 증거와 해당 프리셋의 백업 상태를 보존한다.
   const obsoleteOnly=uniqueStrings(data.pendingCommonChangeKeys).length===1 &&
@@ -1642,8 +1642,8 @@ function traitPresetChangeValueText(key,value,state=null){
   if(typeof value==='object') return '구성 데이터';
   return String(value);
 }
-function traitPresetChangeDetail(key,before,after,scope,presetId=''){
-  return {key,scope,presetId,before:String(before),after:String(after)};
+function traitPresetChangeDetail(key,before,after,scope,presetId='',label=''){
+  return {key,scope,presetId,before:String(before),after:String(after),...(label ? {label} : {})};
 }
 function mergeTraitPresetChangeDetails(previous=[],incoming=[]){
   const rows=new Map();
@@ -1674,6 +1674,79 @@ function traitPresetUnitBoardChangeKeys(beforeBoard,afterBoard){
     }
   }
   return keys;
+}
+// 백업 모달의 세부 비교는 정규화된 프리셋 데이터만 읽으며 저장 상태를 수정하지 않는다.
+function traitPresetUnitBoardDetailedChanges(beforeBoard,afterBoard,presetId){
+  const oldBoard=normalizeTraitPresetUnitBoardState(beforeBoard);
+  const newBoard=normalizeTraitPresetUnitBoardState(afterBoard);
+  const rows=[];
+  const add=(key,before,after,label)=>{
+    if(stableTraitPresetValue(before)===stableTraitPresetValue(after))return;
+    rows.push(traitPresetChangeDetail(key,before??'없음',after??'없음','single',presetId,label));
+  };
+  const unitName=id=>dpsBaseUnitById(id)?.label || String(id || '없음');
+  const beforeUnits=new Map(oldBoard.units.map(unit=>[unit.slot,unit]));
+  const afterUnits=new Map(newBoard.units.map(unit=>[unit.slot,unit]));
+  const fields={quantity:'수량',enhanceExpected:'강화 기대값',limitBreak:'한계 돌파',voidPower:'공허의 힘',legendaryMythicJewel:'전설/신화 쥬얼'};
+  [...new Set([...beforeUnits.keys(),...afterUnits.keys()])].sort((a,b)=>a-b).forEach(slot=>{
+    const previous=beforeUnits.get(slot),current=afterUnits.get(slot);
+    const prefix=`유닛 보드 · ${slot+1}번 슬롯`;
+    add(`unitBoard:slot:${slot}:unitId`,previous ? unitName(previous.unitId) : '없음',current ? unitName(current.unitId) : '없음',`${prefix} · 유닛`);
+    Object.entries(fields).forEach(([field,name])=>{
+      const before=previous?.[field],after=current?.[field];
+      if(before===undefined && after===undefined)return;
+      // 슬롯이 교체되는 경우에도 옵션 변경을 누락하지 않고 기록한다.
+      add(`unitBoard:slot:${slot}:${field}`,before===undefined?'없음':before,after===undefined?'없음':after,`${prefix} · ${name}`);
+    });
+  });
+  add('unitBoard:visibleSlotCount',oldBoard.visibleSlotCount,newBoard.visibleSlotCount,'유닛 보드 · 표시 슬롯 수');
+  const oldExpanded=new Set(oldBoard.slotExpansions),newExpanded=new Set(newBoard.slotExpansions);
+  [...new Set([...oldExpanded,...newExpanded])].sort().forEach(id=>
+    add(`unitBoard:expansion:${id}`,oldExpanded.has(id)?'사용':'미사용',newExpanded.has(id)?'사용':'미사용',`유닛 보드 · ${unitName(id)} · 슬롯 확장`));
+  const beforeExtras=oldBoard.additionalUnitSettings,afterExtras=newBoard.additionalUnitSettings;
+  const walk=(before,after,path,key,label)=>{
+    if(stableTraitPresetValue(before)===stableTraitPresetValue(after))return;
+    if((before && typeof before==='object') || (after && typeof after==='object')){
+      const a=before && typeof before==='object' ? before : {};
+      const b=after && typeof after==='object' ? after : {};
+      const names=[...new Set([...Object.keys(a),...Object.keys(b)])].sort((x,y)=>Number(x)-Number(y) || x.localeCompare(y));
+      names.forEach(name=>walk(a[name],b[name],[...path,name],`${key}:${name}`,`${label} · ${/^\d+$/.test(name)?`${Number(name)+1}번`:name}`));
+    }else add(key,before,after,label);
+  };
+  [...new Set([...Object.keys(beforeExtras),...Object.keys(afterExtras)])].sort().forEach(id=>
+    walk(beforeExtras[id],afterExtras[id],[],`unitBoard:extra:${id}`,`유닛 보드 · ${unitName(id)} · 추가 설정`));
+  return rows;
+}
+function traitPresetJewelDetailedChanges(beforeSettings,afterSettings){
+  const old=normalizeTraitPresetJewelSettings(beforeSettings)?.legendaryMythicJewels || {};
+  const next=normalizeTraitPresetJewelSettings(afterSettings)?.legendaryMythicJewels || {};
+  const rows=[];
+  const labels={ad:'공격력',as:'공격 속도',td:'추가 피해',ua:'유닛 공격력',enhance:'강화',mythic:'신화 여부'};
+  [...new Set([...Object.keys(old),...Object.keys(next)])].sort().forEach(name=>{
+    const a=old[name] || {},b=next[name] || {};
+    [...new Set([...Object.keys(a),...Object.keys(b)])].sort().forEach(field=>{
+      const before=a[field]??'없음',after=b[field]??'없음';
+      if(stableTraitPresetValue(before)!==stableTraitPresetValue(after))
+        rows.push(traitPresetChangeDetail(`jewelSettings:${name}:${field}`,before,after,'common','',`쥬얼 설정 · ${name} · ${labels[field] || field}`));
+    });
+  });
+  return rows;
+}
+function traitPresetZeroScoreDetailedChanges(beforeValue,afterValue,presetId){
+  const before=normalizeZeroScoreState(beforeValue || {rows:[]}).rows || [];
+  const after=normalizeZeroScoreState(afterValue || {rows:[]}).rows || [];
+  const rows=[];
+  if(before.length!==after.length)rows.push(traitPresetChangeDetail('zeroScore:rowCount',before.length,after.length,'common',presetId,'승단 계산 · 항목 수'));
+  const names={type:'항목',current:'현재 수치',target:'목표 수치',star:'별 표시',currentHonor:'현재 명예',targetHonor:'목표 명예',honorCurrent:'명예 현재값',honorTarget:'명예 목표값'};
+  for(let index=0;index<Math.max(before.length,after.length);index++){
+    const a=before[index] || {},b=after[index] || {};
+    [...new Set([...Object.keys(a),...Object.keys(b)])].forEach(field=>{
+      const old=a[field]??'없음',next=b[field]??'없음';
+      if(stableTraitPresetValue(old)!==stableTraitPresetValue(next))
+        rows.push(traitPresetChangeDetail(`zeroScore:${index}:${field}`,old,next,'common',presetId,`승단 계산 · ${index+1}번 · ${names[field] || field}`));
+    });
+  }
+  return rows;
 }
 function traitPresetSanctuaryValueText(field,value){
   if(field==='skill1' || field==='skill2') return value || '선택 안함';
@@ -1715,7 +1788,7 @@ function traitPresetChangeDetailsForStores(beforeStore,afterStore){
       add(`inv:${id}`,before,newInv[id],id==='116'?'common':'single',next.id,oldState,newState);
     });
     if(stableTraitPresetZeroScore(oldState.zeroScore)!==stableTraitPresetZeroScore(newState.zeroScore))
-      details.push(traitPresetChangeDetail('zeroScore','이전 구성','변경된 구성','common',next.id));
+      details.push(...traitPresetZeroScoreDetailedChanges(oldState.zeroScore,newState.zeroScore,next.id));
     const oldBoard=beforeStore?.unitBoard?.presets?.[next.id];
     const newBoard=afterStore?.unitBoard?.presets?.[next.id];
     const boardKeys=traitPresetUnitBoardChangeKeys(oldBoard,newBoard);
@@ -1723,7 +1796,8 @@ function traitPresetChangeDetailsForStores(beforeStore,afterStore){
     const afterSlots=normalizeDpsSanctuaryInfo(newBoard?.sanctuaryInfo).slots;
     boardKeys.forEach(key=>{
       if(key==='unitBoard'){
-        details.push(traitPresetChangeDetail(key,oldBoard?'이전 보드':'보드 없음',newBoard?'변경된 보드':'보드 없음','single',next.id));
+        const changed=traitPresetUnitBoardDetailedChanges(oldBoard,newBoard,next.id);
+        details.push(...(changed.length ? changed : [traitPresetChangeDetail(key,'이전 보드','변경된 보드','single',next.id)]));
       }else if(key==='sanctuaryInfo:init'){
         details.push(traitPresetChangeDetail(key,'저장 항목 없음',`기본 ${afterSlots.length}슬롯 추가`,'single',next.id));
       }else if(key==='sanctuaryInfo:slotCount'){
@@ -1740,7 +1814,7 @@ function traitPresetChangeDetailsForStores(beforeStore,afterStore){
     });
   });
   if(stableTraitPresetValue(beforeStore?.jewelSettings)!==stableTraitPresetValue(afterStore?.jewelSettings))
-    details.push(traitPresetChangeDetail('jewelSettings','이전 구성','변경된 구성','common'));
+    details.push(...traitPresetJewelDetailedChanges(beforeStore?.jewelSettings,afterStore?.jewelSettings));
   // 공통 값은 하나만 보여주되 기존 값이 서로 다르면 그 사실을 명시한다.
   const common=new Map(),individual=[];
   details.forEach(row=>{
@@ -2356,15 +2430,19 @@ function traitPresetBackupChangePlan(store=loadTraitPresetStore(),currentSnapsho
 }
 function traitPresetBackupChangeListHtml(keys,details=[],presetId=''){
   if(!keys.length) return '<p class="trait-preset-backup-no-change">업데이트 없음</p>';
-  const rows=keys.map(key=>{
-    const item=details.find(row=>row.key===key && (!row.scope || (presetId ? row.scope==='single' && row.presetId===presetId : row.scope==='common')));
+  const scopedDetails=details.filter(row=>!row.scope || (presetId ? row.scope==='single' && row.presetId===presetId : row.scope==='common'));
+  const filteredKeys=keys.filter(key=>!['unitBoard','jewelSettings','zeroScore'].some(group=>
+    key===group && scopedDetails.some(row=>row.key.startsWith(group+':'))));
+  const rows=filteredKeys.map(key=>{
+    const item=scopedDetails.find(row=>row.key===key);
     const label=item?.label || traitPresetChangeKeyLabel(key);
-    if(!item) return `<li><strong>${escapeHtml(label)}</strong><span class="trait-preset-backup-values">과거 변경 기록에 세부 값이 저장되지 않았습니다.</span></li>`;
+    if(!item || (key==='unitBoard' && item.before==='이전 보드' && item.after==='변경된 보드'))
+      return `<li><strong>${escapeHtml(label)}</strong><span class="trait-preset-backup-values">과거 변경 기록에 세부 값이 저장되지 않았습니다.</span></li>`;
     const before=item.before,after=item.after;
     const variation=traitPresetChangeVariation(before,after,key);
     return `<li><strong>${escapeHtml(label)}</strong><span class="trait-preset-backup-values"><span>${escapeHtml(traitPresetChangeNumberText(before,key))}</span><b aria-label="변경 후">→</b><span>${escapeHtml(traitPresetChangeNumberText(after,key))}</span><em>${escapeHtml(variation)}</em></span></li>`;
   });
-  return `<ul class="trait-preset-backup-change-list">${rows.join('')}</ul>`;
+  return rows.length ? `<ul class="trait-preset-backup-change-list">${rows.join('')}</ul>` : '<p class="trait-preset-backup-no-change">업데이트 없음</p>';
 }
 function traitPresetBackupTargetsHtml(plan){
   if(plan.mode==='import'){
@@ -2393,12 +2471,14 @@ function traitPresetBackupTargetsHtml(plan){
   const migrationCommon=migration?.common || [];
   const commonKeys=[...new Set([...(plan.commonChangeKeys || []),...migrationCommon.map(change=>change.key)])];
   const allDetails=[...details,...migrationCommon.map(change=>({...traitPresetChangeDetail(change.key,change.before,change.after,'common'),label:change.label}))];
-  const commonSummary=commonKeys.length ? `<section class="trait-preset-backup-common"><h4>공통 설정 · 수정 ${commonKeys.length}건</h4>
-    ${traitPresetBackupChangeListHtml(commonKeys,allDetails)}</section>` : '';
+  const visibleCommonKeys=commonKeys.filter(key=>!['jewelSettings','zeroScore'].some(group=>key===group && allDetails.some(row=>row.scope==='common' && row.key.startsWith(group+':'))));
+  const commonSummary=visibleCommonKeys.length ? `<section class="trait-preset-backup-common"><h4>공통 설정 · 수정 ${visibleCommonKeys.length}건</h4>
+    ${traitPresetBackupChangeListHtml(visibleCommonKeys,allDetails)}</section>` : '';
   const cards=rows.map((row,index)=>{
     const migrationChanges=migration?.byPreset?.get(row.id) || [];
     const pendingKeys=singleChanges.get(row.id) || [];
-    const keys=[...new Set([...pendingKeys,...migrationChanges.map(change=>change.key)])];
+    const keys=[...new Set([...pendingKeys,...migrationChanges.map(change=>change.key)])].filter(key=>
+      key!=='unitBoard' || !allDetails.some(item=>item.scope==='single' && item.presetId===row.id && item.key.startsWith('unitBoard:')));
     if(!keys.length) return '';
     const preset=plan.store.presets.find(item=>item.id===row.id);
     const group=TRAIT_PRESET_SELECT_GROUPS.find(item=>item.key===traitPresetCategoryKey(preset));
@@ -2520,6 +2600,12 @@ function createTraitPresetBackupFile(customName=''){
   saveTraitPresetStore(backupStore,{source:'backup'});
   const payload=JSON.stringify({type:TRAIT_PRESET_FILE_TYPE,webDpsVersion:currentWebDpsVersion(),presetManagement:TRAIT_PRESET_MANAGEMENT_VERSION,exportedAt:formatTraitPresetExportedAt(),presets:backupStore.presets,jewelSettings:backupStore.jewelSettings,unitBoard:backupStore.unitBoard}, null, 2);
   const fileName=makeTraitPresetFileName(customName);
+  // Android 앱에서는 blob: 다운로드 대신 시스템 문서 저장 화면을 사용한다.
+  // 웹에서는 기존 다운로드 흐름과 백업 데이터 구조를 그대로 유지한다.
+  if(window.NativeAndroid && typeof window.NativeAndroid.saveBackup==='function'){
+    if(!window.NativeAndroid.saveBackup(fileName,payload)) throw new Error('안드로이드 파일 저장 요청에 실패했습니다.');
+    return fileName;
+  }
   const blob=new Blob([payload], {type:'text/plain;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');

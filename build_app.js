@@ -2466,6 +2466,9 @@ function initApp(){
   // loadState()의 상태 적용·recalc()에서 컨트롤/계산 화면을 한 번에 동기화한다.
   renderZeroScoreCalculatorRows();
   bindAppEvents();
+  // 유닛별 저장 필드는 복원 전에 준비해야 강화·한계 돌파·쥬얼 값이 유지된다.
+  // 화면 전체 재동기화 없이 필수 저장 입력만 생성하여 초기 최적화를 보존한다.
+  ensureDpsBaseUnitStore();
   loadState();
   // 저장값이 적용된 상태에서 성소 입력 UI를 최초 생성한다.
   renderDpsSanctuaryInfo();

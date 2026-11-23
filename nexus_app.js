@@ -238,7 +238,7 @@
     
     let _presetTab = '일반 프리셋';
     let _fontScale = 1.0;
-    const IS_STANDALONE_BUILD = window.NEXUS_WINDOW_MODE === 'nexus';
+    const IS_STANDALONE_BUILD = ['nexus','combined'].includes(window.NEXUS_WINDOW_MODE);
     let _buildStandaloneWindow = null;
 
     /* 선택 상태·수량 관리 */
@@ -1854,11 +1854,27 @@
         _buildStandaloneWindow.focus();
     }
 
+    let _combinedStandaloneWindow = null;
     function openAllIndependentWindows() {
-        // 사용자의 한 번 클릭 안에서 두 창을 곧바로 열어 팝업 허용 가능성을 높인다.
-        // 둘째 창이 차단되면 기존 메뉴의 개별 실행 항목으로 재시도할 수 있다.
-        openBuildIndependentWindow();
-        openBuilderIndependentWindow('both');
+        // 넥서스 재료와 빌더의 두 보드를 한 창에서 구성한다. 팝업은 한 번만 요청한다.
+        if (_combinedStandaloneWindow && !_combinedStandaloneWindow.closed) {
+            _combinedStandaloneWindow.focus();
+            return;
+        }
+        window.NEXUS_PREPARE_BUILDER_WINDOW?.();
+        const url = new URL(window.location.href);
+        url.searchParams.set('nexusStandalone', 'all');
+        url.searchParams.set('dpsWindow', 'both');
+        url.searchParams.delete('fresh');
+        url.searchParams.delete('__nexus_check');
+        const win = window.open(url.href, 'nexusCombinedStandalone',
+            'popup=yes,width=820,height=740,resizable=yes,scrollbars=yes');
+        if (!win) {
+            window.alert('통합 독립 창이 차단되었습니다. 브라우저의 팝업 허용 설정을 확인해 주세요.');
+            return;
+        }
+        _combinedStandaloneWindow = win;
+        win.focus();
     }
 
     function setIndependentMenuOpen(open) {
@@ -1898,7 +1914,8 @@
 
     function setupBuildStandaloneWindow() {
         if (!IS_STANDALONE_BUILD) return;
-        document.title = '나의 조합 · 필요 재료 | 개복디 넥서스';
+        document.title = window.NEXUS_WINDOW_MODE === 'combined'
+            ? '넥서스 + 빌더 통합 | 개복디 넥서스' : '나의 조합 · 필요 재료 | 개복디 넥서스';
         const button = getEl('btnBuildStandalone');
         if (button) {
             const closeHost = document.querySelector('.inspector-window-controls');
