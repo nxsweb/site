@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./src/asset/logo-horizontal-1600.png" alt="NEXUS 공식 로고" width="680">
+  <img src="./asset/logo-horizontal-1600.png" alt="NEXUS 공식 로고" width="680">
 </p>
 
 <h1 align="center">NEXUS</h1>
@@ -10,7 +10,7 @@
 
 ## 프로젝트 소개
 
-![VAERON SLD PROJECT 공식 프로젝트 소개 이미지](./src/asset/og-image.jpg)
+![VAERON SLD PROJECT 공식 프로젝트 소개 이미지](./asset/og-image.jpg)
 
 <sub>출처: VAERON SLD PROJECT 공식 에셋</sub>
 
@@ -55,40 +55,40 @@
 
 ```text
 /
-├── src/
-│   ├── index.html                  # 통합 진입점 · APP_VERSION
-│   ├── nexus_app.js                # 넥서스 화면·이벤트·상태
-│   ├── nexus_data.js               # 넥서스 유닛 및 조합 데이터
-│   ├── nexus_checklist.js          # 체크리스트 기능
-│   ├── nexus_responsive.js         # 넥서스 반응형 처리
+├── src/                        # 전체 웹 실행 원본 (GitHub 배포 시 내부 파일만 업로드)
+│   ├── index.html              # 통합 진입점 · APP_VERSION
+│   ├── nexus_app.js
+│   ├── nexus_data.js
+│   ├── nexus_checklist.js
+│   ├── nexus_responsive.js
 │   ├── nexus_style.css
 │   ├── nexus_checklist.css
-│   ├── build_app.js                # 빌더 앱
-│   ├── build_calc.js               # 계산 로직
-│   ├── build_data.js               # 빌더 데이터
-│   ├── build_unit.js               # 유닛/쥬얼 처리
-│   ├── build_preset.js             # 프리셋 관리
-│   ├── build_responsive.js         # 빌더 반응형 처리
+│   ├── build_app.js
+│   ├── build_calc.js
+│   ├── build_data.js
+│   ├── build_unit.js
+│   ├── build_preset.js
+│   ├── build_responsive.js
 │   ├── build_style.css
 │   ├── build_unit.css
 │   ├── build_preset.css
-│   ├── asset/                      # 아이콘·로고·파비콘·공유 이미지
-│   │   ├── jw/                     # 쥬얼 이미지 25개
-│   │   ├── og-image.jpg            # VAERON SLD PROJECT 소개 이미지
-│   │   └── vaeron.png              # VAERON 제작자 심볼
+│   ├── asset/                  # 아이콘·로고·파비콘·공유 이미지
+│   │   ├── jw/                 # 영문 쥬얼 이미지 25개
+│   │   ├── og-image.jpg
+│   │   └── vaeron.png
 │   └── googlec03dd31e5a5edd69.html
-├── deploy/                     # 현재 버전 누적 변경 파일
+├── deploy/                     # 현재 버전 누적 변경 파일 (src/ 기준 상대 경로)
 ├── README.md
 └── RELEASE_NOTES.md
 ```
 
-로컬 실행 진입점은 `src/index.html`입니다. 배포 시 deploy/의 코드 파일은 src/ 기준 상대 경로로 기존 사이트에 반영합니다. README.md와 RELEASE_NOTES.md는 관리 문서입니다.
+로컬 실행 진입점은 `src/index.html`입니다. deploy/의 웹 변경 파일은 src/ 기준 상대 경로로 GitHub 리포지토리 최상위에 반영합니다. README.md와 RELEASE_NOTES.md는 프로젝트 최상위에서 관리하며 GitHub에도 최상위에 배포합니다. README 이미지 경로는 GitHub 배포 기준(`./asset/`)을 유지하므로 로컬 ZIP의 최상위 README 미리보기에서는 이미지가 표시되지 않을 수 있습니다.
 
 빌더는 `index.html` 내부 템플릿을 독립된 프레임에 구성해 실행합니다. 파일명은 `nexus_`/`build_` 접두어로 구분합니다. 쥬얼 이미지는 `asset/jw/`에 있으며 빌더에서 `./asset/jw/영문파일명.png` 경로로 불러옵니다. `asset/`에는 VAERON SLD PROJECT의 공식 이미지 에셋도 포함되어 있습니다.
 
 ## GitHub Pages 배포
 
-1. GitHub의 공개 리포지토리 최상위에 **src/ 폴더의 내부 웹 실행 파일 전체**를 업로드합니다. (ZIP 안의 버전 폴더 자체를 추가로 중첩하지 않습니다.)
+1. GitHub의 공개 리포지토리 최상위에 **src/ 내부의 웹 실행 파일과 asset/ 폴더 전체, 최상위 README.md와 RELEASE_NOTES.md**를 업로드합니다. (src/ 자체를 업로드하거나 ZIP의 버전 폴더, deploy/, 개인 백업 파일을 업로드하지 않습니다.)
 2. **Settings → Pages**에서 소스를 **Deploy from a branch**, 브랜치는 `main`, 폴더는 `/(root)`로 지정합니다.
 3. GitHub Pages에서 제공한 주소로 접속합니다.
 4. 배포 시 `index.html`의 Open Graph URL과 공유 이미지 URL이 실제 배포 환경에 맞는지 확인합니다.
@@ -97,7 +97,7 @@
 
 ## 버전 및 캐시
 
-최초 공개 버전은 **`NXSBuild-V1`**, 현재 버전은 **`NXSBuild-V4`**입니다. 버전 상수는 `index.html` 상단에 있습니다.
+최초 공개 버전은 **`NXSBuild-V1`**, 현재 버전은 **`NXSBuild-V4`**입니다. 버전 상수는 원본 `src/index.html` 상단에 있습니다.
 
 ```js
 window.APP_VERSION = "NXSBuild-V4";
@@ -115,7 +115,7 @@ window.APP_VERSION = "NXSBuild-V4";
 ## 제작
 
 <p align="center">
-  <img src="./src/asset/vaeron.png" alt="VAERON 공식 제작자 심볼" width="200">
+  <img src="./asset/vaeron.png" alt="VAERON 공식 제작자 심볼" width="200">
 </p>
 
 **VAERON** · NEXUS / SLD PROJECT
