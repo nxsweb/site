@@ -4,7 +4,7 @@
 
 <h1 align="center">NEXUS</h1>
 <p align="center"><strong>개복디 넥서스 · 유닛도감 / 체크리스트 / 빌더</strong></p>
-<p align="center"><sub>by VAERON · 현재 버전 NXSBuild-V4</sub></p>
+<p align="center"><sub>by VAERON · 현재 버전 NXSBuild-V5</sub></p>
 
 ---
 
@@ -51,7 +51,7 @@
 - **프런트엔드:** HTML, CSS, JavaScript
 - **호스팅:** GitHub Pages에 배포 가능한 정적 사이트
 - **로컬 데이터:** 브라우저 `localStorage`를 통한 즐겨찾기·화면 선택·설정/프리셋 등의 저장
-- **통합 실행:** 하나의 `index.html`에 넥서스 화면과 빌더 실행 템플릿을 구성
+- **통합 실행:** 하나의 `index.html` 문서에서 유닛도감·체크리스트·빌더를 직접 실행하고 기능별 CSS·이벤트 적용 범위를 분리
 
 ```text
 /
@@ -84,7 +84,7 @@
 
 로컬 실행 진입점은 `src/index.html`입니다. deploy/의 웹 변경 파일은 src/ 기준 상대 경로로 GitHub 리포지토리 최상위에 반영합니다. README.md와 RELEASE_NOTES.md는 프로젝트 최상위에서 관리하며 GitHub에도 최상위에 배포합니다. README 이미지 경로는 GitHub 배포 기준(`./asset/`)을 유지하므로 로컬 ZIP의 최상위 README 미리보기에서는 이미지가 표시되지 않을 수 있습니다.
 
-빌더는 `index.html` 내부 템플릿을 독립된 프레임에 구성해 실행합니다. 파일명은 `nexus_`/`build_` 접두어로 구분합니다. 쥬얼 이미지는 `asset/jw/`에 있으며 빌더에서 `./asset/jw/영문파일명.png` 경로로 불러옵니다. `asset/`에는 VAERON SLD PROJECT의 공식 이미지 에셋도 포함되어 있습니다.
+빌더는 `index.html`의 같은 문서에서 직접 실행합니다. 메인 빌더 화면은 공통 헤더 아래 CSS 레이아웃으로 배치하고, 독립창과 통합 독립창도 해당 문서의 실행 모드로 구성합니다. 파일명은 `nexus_`/`build_` 접두어로 구분합니다. 쥬얼 이미지는 `asset/jw/`에 있으며 빌더에서 `./asset/jw/영문파일명.png` 경로로 불러옵니다. `asset/`에는 VAERON SLD PROJECT의 공식 이미지 에셋도 포함되어 있습니다.
 
 ## GitHub Pages 배포
 
@@ -93,14 +93,14 @@
 3. GitHub Pages에서 제공한 주소로 접속합니다.
 4. 배포 시 `index.html`의 Open Graph URL과 공유 이미지 URL이 실제 배포 환경에 맞는지 확인합니다.
 
-쥬얼 이미지 영문화 배포 시 `deploy/asset/jw/`의 영문 PNG 25개와 `build_unit.js`를 함께 반영한 뒤 기존 한글명 PNG 25개를 서버에서 삭제합니다.
+쥬얼 이미지 영문화가 아직 반영되지 않은 이전 배포본을 갱신할 때는 `src/asset/jw/`의 영문 PNG 25개와 최신 `build_unit.js`를 함께 배포한 뒤 기존 한글명 PNG를 서버에서 삭제합니다. V5의 deploy/에는 V5 변경 파일만 포함됩니다.
 
 ## 버전 및 캐시
 
-최초 공개 버전은 **`NXSBuild-V1`**, 현재 버전은 **`NXSBuild-V4`**입니다. 버전 상수는 원본 `src/index.html` 상단에 있습니다.
+최초 공개 버전은 **`NXSBuild-V1`**, 현재 버전은 **`NXSBuild-V5`**입니다. 버전 상수는 원본 `src/index.html` 상단에 있습니다.
 
 ```js
-window.APP_VERSION = "NXSBuild-V4";
+window.APP_VERSION = "NXSBuild-V5";
 ```
 
 공통 버전이 연결된 JS·CSS, 사이트 파비콘, 매니페스트 요청, 쥬얼 이미지는 URL 버전 매개변수를 통해 새 파일을 요청합니다. 매니페스트 **내부** 아이콘과 Google·메신저가 수집하는 Open Graph 이미지는 브라우저의 일반 캐시와 독립된 업데이트 정책이 적용될 수 있으므로, 실제 배포 후 별도 확인해야 합니다.
