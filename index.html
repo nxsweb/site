@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="ko" class="nexus-booting">
+<head>
+    <script>
+        window.APP_VERSION = "NXSBuild-V6";
+        window.NEXUS_ANDROID_APP = false; // GitHub Pages 웹 배포에서는 기존 버전 확인을 유지한다.
+        window.NEXUS_BUILD_VERSION = window.APP_VERSION;
+        // 독립창의 실행 모드는 메인 화면의 마지막 탭 설정과 분리한다.
+        var nexusWindowParams = new URLSearchParams(window.location.search);
+        var dpsWindowView = nexusWindowParams.get('dpsWindow');
+        window.NEXUS_WINDOW_MODE = nexusWindowParams.get('nexusStandalone') === 'all'
+            ? 'combined'
+            : nexusWindowParams.get('nexusStandalone') === 'build'
+            ? 'nexus'
+            : (['board', 'utility', 'both'].includes(dpsWindowView) ? 'builder' : 'main');
+        if (window.NEXUS_WINDOW_MODE === 'builder') {
+            document.documentElement.classList.add('nexus-builder-standalone');
+            // 빌더 창에는 넥서스 엔진을 로드하지 않으므로 넥서스 부팅 상태를 남기지 않는다.
+            document.documentElement.classList.remove('nexus-booting');
+        } else if (window.NEXUS_WINDOW_MODE === 'nexus') {
+            document.documentElement.classList.add('nexus-standalone-build');
+        } else if (window.NEXUS_WINDOW_MODE === 'combined') {
+            document.documentElement.classList.add('nexus-combined-standalone');
+        }
+        window.NEXUS_STORAGE_KEYS = {
+            saveData: "nexusSaveData",
+            favorites: "nexusFavorites",
+            fontScale: "nexusFontScaleV2"
+        };
+        window.nexusAssetUrl = function(src){
+            var separator = src.indexOf('?') === -1 ? '?' : '&';
+            return src + separator + 'v=' + encodeURIComponent(window.APP_VERSION);
+        };
+        // 부팅 리소스가 실패한 경우에만 동일 출처의 진입 문서를 확인한다.
+        // 404/5xx 또는 통신 실패는 S1001, 진입 문서가 정상이라면 기존 N/B 오류를 사용한다.
+        window.nexusDiagnoseServiceFailure = function(fallbackCode, onResolved){
+            if(!/^https?:$/.test(location.protocol) || !window.fetch || window.NEXUS_ANDROID_APP){
+                onResolved(fallbackCode);
+                return;
+            }
+            if(!window.__nexusServiceProbe){
+                var checkUrl=new URL(location.href);
+                checkUrl.searchParams.set('__nexus_service_check', String(Date.now()));
+                var controller=typeof AbortController==='function' ? new AbortController() : null;
+                var timeout=controller ? setTimeout(function(){controller.abort();},3500) : null;
+                window.__nexusServiceProbe=fetch(checkUrl.href, {
+                    cache:'no-store',
+                    signal:controller ? controller.signal : undefined
+                }).then(function(response){return !response.ok;},function(){return true;})
+                  .finally(function(){if(timeout!==null)clearTimeout(timeout);});
+            }
+            window.__nexusServiceProbe.then(function(unavailable){
+                onResolved(unavailable ? 'S1001' : fallbackCode);
+            },function(){onResolved('S1001');});
+        };
+        window.nexusCleanUpdateParams = function(){
+            if(!window.location || !window.history || !window.history.replaceState) return;
+            try{
+                var url = new URL(window.location.href);
+                var changed = false;
+                ['fresh','__nexus_check'].forEach(function(name){
+                    if(url.searchParams.has(name)){
+                        url.searchParams.delete(name);
+                        changed = true;
+                    }
+                });
+                if(changed) window.history.replaceState(null, document.title || '', url.pathname + url.search + url.hash);
+            }catch{}
+        };
+        var nexusUpdateCheckPending = false;
+        window.nexusCheckIndexUpdate = function(){
+            if(window.NEXUS_ANDROID_APP || nexusUpdateCheckPending || !window.fetch || !window.location || window.location.protocol === 'file:') return;
+            nexusUpdateCheckPending = true;
+            var current = window.APP_VERSION;
+            var url = new URL(window.location.href);
+            url.searchParams.set('__nexus_check', String(Date.now()));
+            fetch(url.href, { cache:'no-store' }).then(function(res){
+                if(!res.ok) return '';
+                return res.text();
+            }).then(function(html){
+                var match = String(html || '').match(/window\.APP_VERSION\s*=\s*["']([^"']+)["']/);
+                var latest = match && match[1];
+                if(!latest || latest === current) return;
+                var key = 'nexus-auto-refresh:' + latest;
+                try{
+                    if(sessionStorage.getItem(key) === '1') return;
+                    sessionStorage.setItem(key, '1');
+                }catch{}
+                var next = new URL(window.location.href);
+                next.searchParams.set('fresh', latest);
+                next.searchParams.delete('__nexus_check');
+                window.location.replace(next.href);
+            }).catch(function(){}).finally(function(){ nexusUpdateCheckPending = false; });
+        };
+        window.nexusCleanUpdateParams();
+        if(!window.NEXUS_ANDROID_APP){
+            setTimeout(window.nexusCheckIndexUpdate, 1200);
+            window.addEventListener('focus', window.nexusCheckIndexUpdate);
+            document.addEventListener('visibilitychange', function(){
+                if(!document.hidden) window.nexusCheckIndexUpdate();
+            });
+            setInterval(window.nexusCheckIndexUpdate, 180000);
+        }
+    </script>
+
+    <style>
+        html.nexus-booting body{margin:0;background:#000000;color:#e7c57b;overflow:hidden;}
+        html.nexus-booting .global-header,html.nexus-booting .main-layout,html.nexus-booting .recipe-tooltip{visibility:hidden;}
+        #nexusBootScreen{position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:#000000;font-family:system-ui,-apple-system,sans-serif;}
+        #nexusBootScreen .boot-card{box-sizing:border-box;width:min(360px,calc(100vw - 48px));max-height:calc(100dvh - 24px);overflow-y:auto;padding:32px;border:1px solid #51432b;border-radius:20px;background:#15161a;text-align:center;box-shadow:0 16px 60px #00000040;}
+        #nexusBootScreen .boot-title{font-size:19px;margin-bottom:10px;color:#e7c57b;}
+        #nexusBootScreen .boot-desc{font-size:13px;line-height:1.7;color:#b2ac9f;}
+        #nexusBootScreen .boot-error-code{display:inline-flex;margin:16px 0 4px;padding:8px 16px;border-radius:8px;background:#33211d;color:#e1a38d;}
+        #nexusBootScreen .boot-error-info{margin-top:12px;padding:12px;border:1px solid #51432b;border-radius:10px;background:#202125;text-align:left;}
+        #nexusBootScreen .boot-error-label{margin-bottom:5px;font-size:12px;font-weight:700;color:#e7c57b;}
+        #nexusBootScreen .boot-error-reason{font-size:13px;line-height:1.6;color:#eee7dc;white-space:pre-wrap;overflow-wrap:anywhere;}
+        #nexusBootScreen .boot-error-file{margin-top:8px;font-size:12px;color:#b2ac9f;overflow-wrap:anywhere;}
+        #nexusBootScreen .boot-duplicate-list{margin-top:12px;max-height:35vh;overflow-y:auto;text-align:left;}
+        #nexusBootScreen .boot-duplicate-item{padding:10px 0;border-top:1px solid #51432b;font-size:13px;color:#eee7dc;overflow-wrap:anywhere;}
+        #nexusBootScreen .boot-duplicate-position{margin-top:4px;font-size:12px;color:#b2ac9f;}
+        #nexusBootScreen .boot-actions{display:flex;justify-content:center;gap:8px;margin-top:16px;}
+        #nexusBootScreen .boot-action-btn{height:38px;padding:0 14px;border:1px solid #51432b;border-radius:8px;background:#15161a;color:#e7c57b;cursor:pointer;}
+        #nexusBootScreen .boot-action-btn.primary{border-color:#e7c57b;background:#e7c57b;color:#211c12;}
+        #nexusBootScreen .boot-service-contact a{color:#e7c57b;overflow-wrap:anywhere;}
+        html.nexus-boot-error #nexusBootScreen .boot-card{border-color:#855d48;}
+        html:not(.nexus-booting) #nexusBootScreen{display:none;}
+    </style>
+    <style id="builderBootStyle">
+
+section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background:#000000;color:#e6edf7;overflow:hidden}
+#buildDirectPane.dps-booting .wrap{visibility:hidden}
+#dpsBootScreen{--btn-action-bg:#141518;--btn-action-border-hover:#8795a4;--btn-action-text:#f8fbff;position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:#0b0c0f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#dpsBootScreen .boot-card{box-sizing:border-box;width:min(320px,calc(calc(var(--dps-vw,1vw) * 100) - 48px));max-height:calc(calc(var(--dps-vh,1dvh) * 100) - 24px);overflow-y:auto;padding:22px 20px;border:1px solid #272c32;border-radius:18px;background:#0c0d10;box-shadow:0 16px 44px rgba(0,0,0,.34);text-align:center}
+#dpsBootScreen .boot-title{font-size:18px;margin-bottom:8px;color:#cfe0ff}
+#dpsBootScreen .boot-desc{font-size:13px;line-height:1.5;color:#aebdd1}
+#dpsBootScreen .boot-error-code{display:inline-flex;align-items:center;justify-content:center;margin:12px 0 10px;padding:7px 12px;border:1px solid #7f1d2d;border-radius:999px;background:#0c0d10;color:#ff9aaa;letter-spacing:.4px;font-variant-numeric:tabular-nums}
+#dpsBootScreen .boot-error-info{margin-top:10px;padding:12px;border:1px solid #394558;border-radius:10px;background:#14171c;text-align:left}
+#dpsBootScreen .boot-error-label{margin-bottom:5px;font-size:12px;font-weight:700;color:#cfe0ff}
+#dpsBootScreen .boot-error-reason{font-size:13px;line-height:1.6;color:#e6edf7;white-space:pre-wrap;overflow-wrap:anywhere}
+#dpsBootScreen .boot-error-file{margin-top:8px;font-size:12px;color:#aebdd1;overflow-wrap:anywhere}
+#dpsBootScreen .boot-actions{display:flex;justify-content:center;gap:8px;margin-top:12px}
+#dpsBootScreen .boot-action-btn{height:34px;padding:0 12px;border:1px solid #394558;border-radius:10px;background:#0d0e11;color:#a9c8ff;cursor:pointer}
+#dpsBootScreen .boot-action-btn.primary{border-color:var(--btn-action-border-hover);background:var(--btn-action-bg);color:var(--btn-action-text)}
+#dpsBootScreen .boot-service-contact a{color:#a9c8ff;overflow-wrap:anywhere}
+#buildDirectPane.dps-boot-error #dpsBootScreen .boot-card{border-color:#7f1d2d;background:#0c0d10}
+#buildDirectPane.dps-boot-error #dpsBootScreen .boot-title{color:#ff9aaa}
+#buildDirectPane:not(.dps-booting) #dpsBootScreen{display:none}
+
+    </style>
+    <script>
+        (function(){
+            function copyTextFallback(text){
+                var area=document.createElement('textarea');
+                area.value=text;
+                area.setAttribute('readonly','');
+                area.style.position='fixed';
+                area.style.left='-9999px';
+                document.body.appendChild(area);
+                area.select();
+                try{document.execCommand('copy');}catch{}
+                area.remove();
+            }
+            window.nexusCopyBootErrorCode=function(code, btn){
+                var done=function(){ if(btn){ var old=btn.textContent; btn.textContent='복사됨'; setTimeout(function(){btn.textContent=old;},1200); } };
+                if(navigator.clipboard && window.isSecureContext){
+                    navigator.clipboard.writeText(code).then(done).catch(function(){ copyTextFallback(code); done(); });
+                }else{
+                    copyTextFallback(code); done();
+                }
+            };
+            window.nexusShowBootError=function(code, err){
+                if(window.__nexusBootError && window.NEXUS_LAST_BOOT_ERROR && window.NEXUS_LAST_BOOT_ERROR.code!==code) return;
+                window.__nexusBootError=true;
+                try{window.NEXUS_LAST_BOOT_ERROR={code:code,error:err||'unknown',time:Date.now()};}catch{}
+                if(document.readyState==='loading' && !document.getElementById('nexusBootScreen')){
+                    document.addEventListener('DOMContentLoaded',function(){window.nexusShowBootError(code,err);},{once:true});
+                    return;
+                }
+                try{
+                    var types={
+                        N1001:{title:'넥서스 실행 오류',guide:'초기화 중 오류가 발생했습니다. 아래 상세 원인을 확인하세요.'},
+                        N1002:{title:'스크립트 파일 로드 실패',guide:'표시된 JavaScript 파일의 경로와 배포 여부를 확인하세요.'},
+                        N1003:{title:'유닛 데이터 로드 실패',guide:'nexus/data.js와 UNIT_DATABASE 선언을 확인하세요.'},
+                        N1004:{title:'필수 리소스 로드 실패',guide:'표시된 CSS·이미지 파일이 정상적으로 제공되는지 확인하세요.'},
+                        N1005:{title:'중복 유닛명 확인 필요',guide:'nexus/data.js에서 중복 유닛명을 수정한 뒤 새로고침하세요.'},
+                        S1001:{title:'서비스가 중지됨',guide:'서비스가 중지됨, 제작자에게 문의해주세요'}
+                    };
+                    var info=types[code]||{title:'넥서스 초기화 오류',guide:'오류 정보를 확인하세요.'};
+                    var reason=err && err.message ? String(err.message) : String(err || '상세 원인 정보가 없습니다.');
+                    var matched=(reason + "\n" + (err && err.stack || "")).match(/((?:(?:build|nexus)\/)?[\w.-]+\.(?:js|css|png|jpe?g|webp|svg))(?:\?[^\s]*)?/i);
+                    var file=err && (err.file || err.fileName) || (matched && matched[1]) || (code==='N1003' || code==='N1005'?'nexus/data.js':'');
+                    var duplicates=err && Array.isArray(err.duplicates) ? err.duplicates : [];
+                    document.documentElement.classList.add('nexus-booting','nexus-boot-error');
+                    var boot=document.getElementById('nexusBootScreen');
+                    if(boot){
+                        boot.removeAttribute('aria-hidden');
+                        boot.innerHTML='<div class="boot-card"><div class="boot-title" id="nexusBootTitle"></div><div class="boot-desc" id="nexusBootDesc"></div><div class="boot-error-code" id="nexusBootCode" aria-label="오류코드"></div><div class="boot-error-info"><div class="boot-error-label">상세 원인</div><div class="boot-error-reason" id="nexusBootReason"></div><div class="boot-error-file" id="nexusBootFile" hidden></div><div class="boot-duplicate-list" id="nexusBootDuplicateList" hidden></div></div><div class="boot-actions"><button class="boot-action-btn" id="nexusBootCopyBtn" type="button">오류 정보 복사</button><button class="boot-action-btn primary" id="nexusBootReloadBtn" type="button">새로고침</button></div></div>';
+                        if(code==='S1001'){
+                            boot.querySelector('.boot-error-info').hidden=true;
+                            var contact=document.createElement('div');
+                            contact.className='boot-error-info boot-service-contact';
+                            contact.innerHTML='<div class="boot-error-label">제작자 배틀태그</div><div class="boot-error-reason">VAERON#3787</div><div class="boot-error-label" style="margin-top:12px">디스코드</div><a href="https://discord.gg/z7DwqvGeB5" target="_blank" rel="noopener noreferrer">https://discord.gg/z7DwqvGeB5</a>';
+                            boot.querySelector('.boot-actions').before(contact);
+                        }
+                        document.getElementById('nexusBootTitle').textContent=info.title;
+                        document.getElementById('nexusBootDesc').textContent=info.guide;
+                        document.getElementById('nexusBootCode').textContent=code;
+                        document.getElementById('nexusBootReason').textContent=reason;
+                        var fileElement=document.getElementById('nexusBootFile');
+                        if(file){fileElement.textContent='관련 파일: '+file;fileElement.hidden=false;}
+                        var list=document.getElementById('nexusBootDuplicateList');
+                        if(duplicates.length){
+                            list.hidden=false;
+                            duplicates.forEach(function(item){
+                                var row=document.createElement('div');
+                                row.className='boot-duplicate-item';
+                                var heading=document.createElement('div');
+                                heading.textContent='유닛명: '+item.name+' (중복 '+item.positions.length+'개)';
+                                var location=document.createElement('div');
+                                location.className='boot-duplicate-position';
+                                location.textContent='UNIT_DATABASE 데이터 순서: '+item.positions.join(', ');
+                                row.appendChild(heading);
+                                row.appendChild(location);
+                                list.appendChild(row);
+                            });
+                        }
+                        var copyBtn=document.getElementById('nexusBootCopyBtn');
+                        var reloadBtn=document.getElementById('nexusBootReloadBtn');
+                        if(copyBtn) copyBtn.onclick=function(){
+                            var report=code==='S1001'
+                                ? [code,info.title,info.guide,'제작자 배틀태그: VAERON#3787','디스코드: https://discord.gg/z7DwqvGeB5']
+                                : [code,info.title,reason,file?'관련 파일: '+file:''];
+                            duplicates.forEach(function(item){report.push('유닛명: '+item.name+' / 중복 '+item.positions.length+'개 / UNIT_DATABASE 데이터 순서: '+item.positions.join(', '));});
+                            window.nexusCopyBootErrorCode(report.filter(Boolean).join('\n'),copyBtn);
+                        };
+                        if(reloadBtn) reloadBtn.onclick=function(){window.location.reload();};
+                    }
+                }catch(e){window.NEXUS_BOOT_RENDER_ERROR=e;}
+            };
+            window.nexusReportBootResourceError=function(code,error){
+                if(window.__nexusBootErrorPending || window.__nexusBootError) return;
+                window.__nexusBootErrorPending=true;
+                window.nexusDiagnoseServiceFailure(code,function(resolved){
+                    window.__nexusBootErrorPending=false;
+                    window.nexusShowBootError(resolved,error);
+                });
+            };
+            window.addEventListener('error',function(event){
+                if(event.error && !/(?:^|\/)build\/[^/]+\.js(?:\?|$)/.test(event.filename||'') && !window.__nexusAppReady && !window.__nexusBootError && !window.__nexusBootErrorPending){
+                    window.nexusShowBootError('N1001',event.error);
+                }
+            });
+            window.addEventListener('error',function(event){
+                var link=event.target;
+                if(link && link.matches && link.matches('link[data-boot-style]')){
+                    link.dataset.loadFailed='1';
+                    window.nexusReportBootResourceError('N1004',new Error((link.getAttribute('href') || 'stylesheet') + ' load failed'));
+                }
+            },true);
+            function waitForEssentialResources(){
+                function waitForDocument(){
+                    if(document.readyState!=='loading') return Promise.resolve();
+                    return new Promise(function(resolve){document.addEventListener('DOMContentLoaded',resolve,{once:true});});
+                }
+                function waitForStyle(){
+                    var links=Array.from(document.querySelectorAll('link[data-boot-style]'));
+                    if(links.length!==2) return Promise.reject(new Error('required stylesheet missing'));
+                    return Promise.all(links.map(function(link){
+                        if(link.dataset.loadFailed==='1') return Promise.reject(new Error((link.getAttribute('href') || 'stylesheet') + ' load failed'));
+                        if(link.sheet) return Promise.resolve();
+                        return new Promise(function(resolve,reject){
+                            link.addEventListener('load',resolve,{once:true});
+                            link.addEventListener('error',function(){reject(new Error((link.getAttribute('href') || 'stylesheet') + ' load failed'));},{once:true});
+                        });
+                    }));
+                }
+                function waitForPageLoad(){
+                    if(document.readyState==='complete') return Promise.resolve();
+                    return new Promise(function(resolve){window.addEventListener('load',resolve,{once:true});});
+                }
+                function waitForImages(){
+
+                    var images=Array.from(document.images).filter(function(img){
+                        return img.src && img.loading!=='lazy' && !img.closest('[hidden],#buildDirectPane');
+                    });
+                    return Promise.all(images.map(function(img){
+                        function check(){
+                            if(img.naturalWidth>0) return;
+                            throw new Error('required image failed: '+(img.currentSrc || img.src));
+                        }
+                        if(img.complete){try{check();return Promise.resolve();}catch(error){return Promise.reject(error);}}
+                        return new Promise(function(resolve,reject){
+                            img.addEventListener('load',resolve,{once:true});
+                            img.addEventListener('error',function(){reject(new Error('required image failed: '+(img.currentSrc || img.src)));},{once:true});
+                        });
+                    }));
+                }
+                function waitForPaint(){
+                    return new Promise(function(resolve){
+                        requestAnimationFrame(function(){requestAnimationFrame(resolve);});
+                    });
+                }
+                // 서로 독립적인 파일·글꼴·이미지 대기를 병렬 처리한다.
+                return waitForDocument().then(function(){
+                    return Promise.all([
+                        waitForStyle(),waitForPageLoad(),
+                        document.fonts ? document.fonts.ready : null,
+                        waitForImages()
+                    ]);
+                }).then(waitForPaint);
+            }
+            function releaseBootScreen(){
+                if(window.__nexusBootError) return;
+                document.documentElement.classList.remove('nexus-booting','nexus-boot-error');
+                var boot=document.getElementById('nexusBootScreen');
+                if(boot) boot.setAttribute('aria-hidden','true');
+            }
+            window.nexusMarkAppReady=function(){
+                if(window.__nexusAppReady || window.__nexusBootError) return;
+                window.__nexusAppReady=true;
+                waitForEssentialResources().then(releaseBootScreen).catch(function(error){
+                    window.nexusReportBootResourceError('N1004',error);
+                });
+            };
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NEXUS | 유닛도감 · 체크리스트 · 빌더</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <meta name="theme-color" content="#090c12">
+    <meta property="og:image" content="https://nxsweb.github.io/site/asset/og-image-1200x630.png">
+    <meta property="og:image:secure_url" content="https://nxsweb.github.io/site/asset/og-image-1200x630.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="NEXUS 통합 웹 - 유닛도감, 체크리스트, 빌더">
+    <meta name="twitter:image" content="https://nxsweb.github.io/site/asset/og-image-1200x630.png">
+    <meta name="twitter:image:alt" content="NEXUS 통합 웹 - 유닛도감, 체크리스트, 빌더">
+    <meta name="description" content="NEXUS 통합 웹: 유닛도감, 체크리스트, 조합 재료 계산 및 빌더 기능">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nxsweb.github.io/site/">
+    <meta property="og:title" content="NEXUS | 유닛도감 · 체크리스트 · 빌더">
+    <meta property="og:description" content="NEXUS 통합 웹: 유닛도감, 체크리스트, 조합 재료 계산 및 빌더 기능">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NEXUS | 유닛도감 · 체크리스트 · 빌더">
+    <meta name="twitter:description" content="NEXUS 통합 웹: 유닛도감, 체크리스트, 조합 재료 계산 및 빌더 기능">
+    <script>
+        (function(){
+            // Brand icons and manifest share the same cache version as app scripts and styles.
+            [
+                ['icon', './asset/favicon.ico', 'image/x-icon', ''],
+                ['icon', './asset/favicon-48.png', 'image/png', '48x48'],
+                ['icon', './asset/favicon-32.png', 'image/png', '32x32'],
+                ['apple-touch-icon', './asset/apple-touch-icon.png', '', '180x180'],
+                ['manifest', './asset/site.webmanifest', '', '']
+            ].forEach(function(spec){
+                var link = document.createElement('link');
+                link.rel = spec[0];
+                if(spec[2]) link.type = spec[2];
+                if(spec[3]) link.setAttribute('sizes', spec[3]);
+                link.href = window.nexusAssetUrl(spec[1]);
+                document.head.appendChild(link);
+            });
+            document.addEventListener('DOMContentLoaded', function(){
+                var brandIcon = document.querySelector('.gh-brand-mark img[data-nexus-asset]');
+                if (brandIcon) brandIcon.src = window.nexusAssetUrl(brandIcon.getAttribute('data-nexus-asset'));
+            }, { once:true });
+            var stylesheet = document.createElement('link');
+            stylesheet.rel = 'stylesheet';
+            stylesheet.dataset.bootStyle = '1';
+            stylesheet.href = window.nexusAssetUrl('./nexus/style.css');
+            document.head.appendChild(stylesheet);
+            var checklistStyle = document.createElement('link');
+            checklistStyle.rel = 'stylesheet';
+            checklistStyle.dataset.bootStyle = '1';
+            checklistStyle.href = window.nexusAssetUrl('./nexus/checklist.css');
+            document.head.appendChild(checklistStyle);
+        })();
+    </script>
+    <script id="headerControlLayout">
+(function(){
+'use strict';
+    function syncHeaderControlLayout(){
+        const header = document.getElementById('globalHeader');
+        if (!header) return;
+        const rect = header.getBoundingClientRect();
+        header.dataset.nexusLayout = window.innerWidth < 768 ? 'mobile'
+            : (rect.width < 400 && rect.height > window.innerHeight * .7 ? 'rail' : 'bar');
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncHeaderControlLayout, { once:true });
+    } else syncHeaderControlLayout();
+    window.addEventListener('resize', syncHeaderControlLayout, { passive:true });
+})();
+    </script>
+</head>
+<body>
+<div id="nexusBootScreen" aria-live="polite"><div class="boot-card"><div class="boot-title">개복디 넥서스 적용 중</div><div class="boot-desc">최신 빌드와 설정을 불러오는 중입니다.</div></div></div>
+    <header id="globalHeader" class="global-header">
+        <div class="gh-left">
+            <div class="gh-logo-text" id="ghLogoText">
+                <span class="gh-brand-mark" aria-hidden="true">
+                    <img data-nexus-asset="./asset/favicon-64.png" alt="" width="30" height="30" decoding="async">
+                </span>
+                <div class="gh-title-wrap">
+                    <div class="gh-title" id="ghTitleText">
+                        <span class="gh-title-mainline">개복디 넥서스</span>
+                        <span class="gh-title-subline"><button type="button" class="gh-creator-trigger" data-action="openCreatorInfo" aria-haspopup="dialog" aria-controls="creatorInfoDialog" title="제작자 정보">by VAERON</button><span id="ghTitleVersion"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="gh-center" aria-label="주요 화면">
+            <button type="button" id="btnViewUnitboard" class="gh-nav-btn active" data-action="switchMainView" data-view="unitboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7.8C9.2 6 6.5 6 3 7v12c3.5-1 6.2-1 9 .8 2.8-1.8 5.5-1.8 9-.8V7c-3.5-1-6.2-1-9 .8Z"/><path d="M12 7.8V20"/></svg><span class="gh-nav-label">유닛도감</span></button>
+            <button type="button" id="btnViewChecklist" class="gh-nav-btn" data-action="switchMainView" data-view="checklist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 11l2 2 4-4M9 17h6"/></svg><span class="gh-nav-label">체크리스트</span></button>
+            <button type="button" id="btnViewBuilder" class="gh-nav-btn" data-action="switchMainView" data-view="builder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h8"/></svg><span class="gh-nav-label">빌더</span></button>
+        </nav>
+        <div class="gh-right">
+            <button type="button" id="btnGlobalPreset" class="gh-tool-btn gh-preset-trigger" data-action="toggleBuilderPreset" aria-label="프리셋" aria-controls="traitPresetManagerOverlay" aria-expanded="false" hidden><svg class="trait-preset-trigger-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-gear"/></svg><span>프리셋</span><i aria-hidden="true"></i></button>
+            <button type="button" id="btnBuildStandalone" class="gh-tool-btn" data-action="toggleIndependentWindowMenu" aria-label="독립창 선택" aria-haspopup="menu" aria-controls="independentWindowMenu" aria-expanded="false" data-nexus-tooltip="독립창 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="15" rx="2"/><rect x="11.5" y="11" width="7.5" height="5.5" rx="1"/></svg></button>
+            <div class="gh-fontsize-ctrl">
+                <button type="button" class="gh-tool-btn gh-fontsize-trigger" data-action="toggleFontSizePopup" id="btnFontSizePopup" aria-label="글자 크기 조절" aria-controls="fontSizePopup" aria-expanded="false" data-nexus-tooltip="글자 크기 조절">A</button>
+                <div id="fontSizePopup" class="gh-fontsize-popup" role="group" aria-label="글자 크기 조절" hidden>
+                    <button type="button" class="gh-icon-btn" data-action="decreaseFont" aria-label="글씨 축소">A−</button>
+                    <span class="gh-fontsize-val" id="fontSizeLabel" aria-live="polite">100%</span>
+                    <button type="button" class="gh-icon-btn" data-action="increaseFont" aria-label="글씨 확대">A+</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <dialog id="creatorInfoDialog" class="gh-creator-dialog" aria-labelledby="creatorInfoTitle" aria-describedby="creatorInfoDescription">
+        <div class="gh-creator-card">
+            <button type="button" class="gh-creator-close" data-action="closeCreatorInfo" aria-label="제작자 정보 닫기">×</button>
+            <div class="gh-creator-profile">
+                <img class="gh-creator-icon" data-nexus-asset="./asset/vaeron.png" src="./asset/vaeron.png" loading="lazy" width="76" height="76" alt="VAERON 로고" decoding="async">
+                <div class="gh-creator-identity"><span class="gh-creator-overline">CREATOR &amp; DEVELOPER</span><h2 id="creatorInfoTitle">VAERON</h2><p id="creatorInfoDescription">NEXUS · BUILD 제작 및 관리</p></div>
+            </div>
+            <div class="gh-creator-details"><div><span class="gh-creator-overline">BATTLE.NET · BATTLETAG</span><strong>VAERON<span class="gh-creator-hash">#3787</span></strong></div><a href="https://discord.gg/z7DwqvGeB5" target="_blank" rel="noopener noreferrer" class="gh-creator-discord">디스코드 커뮤니티 ↗</a></div>
+        </div>
+    </dialog>
+    <div id="independentWindowMenu" class="nexus-independent-menu" role="menu" aria-label="독립창 선택" hidden>
+        <button type="button" role="menuitem" data-action="openIndependentWindow" data-window-view="nexus">넥서스 · 필요 재료</button>
+        <button type="button" role="menuitem" data-action="openIndependentWindow" data-window-view="board">빌더 · 분석 보드</button>
+        <button type="button" role="menuitem" data-action="openIndependentWindow" data-window-view="utility">빌더 · 특성 유틸 관리</button>
+        <button type="button" role="menuitem" data-action="openIndependentWindow" data-window-view="both">빌더 · 분석 보드 + 특성 유틸 관리</button>
+        <button type="button" role="menuitem" data-action="openIndependentWindow" data-window-view="all">넥서스 + 빌더 전체 실행</button>
+    </div>
+    <main id="mainLayout" class="main-layout">
+        <section class="panel-left hud-panel" id="panelLeft" aria-label="유닛도감">
+            <div class="archive-toolbar">
+                <div class="left-search-wrap" role="search"><div class="search-row"><div class="search-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input type="text" id="unitSearchInput" class="search-input" placeholder="유닛명 · 땅굴*8" autocomplete="off" spellcheck="false" aria-label="유닛 검색" role="combobox" aria-autocomplete="list" aria-controls="unitSearchSuggestions" aria-expanded="false"></div><button type="button" id="btnRunUnitSearch" class="search-run-btn" title="검색 실행 (Enter)">실행</button></div><div id="unitSearchSuggestions" class="search-suggestions" role="listbox" aria-label="유닛 이름 후보" hidden></div></div>
+                <div class="left-tabs-wrap"><div id="unitboardTabs" class="unitboard-tabs" role="tablist" aria-label="유닛 분류"></div></div>
+                <details class="preset-disclosure">
+                    <summary><span>프리셋</span></summary>
+                    <div id="presetInlineWrap" class="preset-inline-wrap" role="group" aria-label="프리셋 목록"><div class="preset-panel-title" aria-hidden="true">프리셋 선택</div><div id="presetInlineTabBar" class="preset-inline-tab-bar"></div><div id="presetInlineBtnList" class="preset-inline-btn-list"></div></div>
+                </details>
+            </div>
+            <div class="archive-list-heading"><div><h2 id="archiveCategoryTitle">테바</h2><span class="archive-count" id="archiveCount"></span></div><div class="left-tab-actions"><button type="button" id="btnSelectAllTab" class="btn-tab-action" data-action="toggleSelectAllTab"><span>전체 선택</span><span class="action-icon" aria-hidden="true">+</span></button><button type="button" id="btnResetSelection" class="btn-tab-action btn-reset-action" data-action="resetUnitboard" title="현재 선택만 해제합니다. 보류·완료 내역과 재료 진행도는 유지합니다."><span>선택 초기화</span><span class="action-icon" aria-hidden="true">↺</span></button></div></div>
+            <div class="panel-unitboard-inner"><div id="tabContent" class="panel-body panel-unitboard-body"></div></div>
+        </section>
+        <aside class="build-inspector hud-panel" aria-label="나의 조합">
+            <section class="build-overview" aria-label="정수와 필요 재료">
+            <div class="inspector-heading"><div><h2>나의 조합</h2></div><div class="inspector-window-controls"></div></div>
+            <div id="cartEssenceSummary" class="cart-essence-summary" aria-live="polite"></div>
+            <section class="panel-costboard" id="panelCostboard" aria-label="필요 재료">
+                <details class="build-materials" open>
+                    <summary><span>필요 재료</span><span class="build-material-actions"><button type="button" id="buildMaterialModeBtn" class="build-material-mode-btn" data-action="toggleBuildMaterialMode" aria-pressed="false"><span class="build-material-mode-label">전체재료 전환</span><span class="build-material-mode-icon" aria-hidden="true">▦</span></button><span class="disclosure-chevron" aria-hidden="true">⌄</span></span></summary>
+                    <div class="panel-section costboard-section"><div id="costboardGrid" class="costboard-grid"></div></div>
+                </details>
+            </section>
+            </section>
+            <section class="panel-cart" id="panelCart" aria-label="선택 유닛">
+                <div class="cart-list-heading"><h3>선택 유닛</h3><div id="cartHeaderActions"></div></div>
+                <div class="panel-section cart-section" id="cartSection"><div id="cartTabBar" class="cart-tab-bar"></div><div id="cartListArea" class="cart-list-area"></div></div>
+            </section>
+        </aside>
+        <section class="panel-right hud-panel" id="colRightPanel" aria-label="체크리스트">
+            <div class="panel-header checklist-ph" id="checklistMobileHeader"><div class="checklist-ph-btns" id="checklistGlobalActions"><button type="button" id="btnHideCompleted" class="ctrl-btn" data-action="toggleHideCompleted" aria-pressed="false" title="완료된 재료를 표시하고 있습니다"><span id="btnHideCompletedLabel">완료 숨기기</span><span class="action-state" id="btnHideCompletedState" aria-hidden="true">OFF</span></button><button type="button" id="btnRestoreAll" class="ctrl-btn reset-btn" data-action="restoreAllCompleted" title="전체 선택·보류·완료 내역 초기화 · 2초 내 다시 누르면 취소"><span id="btnRestoreAllLabel" aria-live="polite">전체 초기화</span><span class="reset-action-state" id="btnRestoreAllState" aria-hidden="true">↺</span></button></div></div>
+            <div id="checklistContent" class="panel-body"></div>
+        </section>
+    </main>
+    <div id="boardActionStatus" class="action-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="recipeTooltip" class="recipe-tooltip" role="tooltip" aria-live="polite"></div>
+
+    <section id="buildDirectPane" class="builder-direct-pane" aria-label="개복디 빌더" hidden>
+    <div id="buildDirectBody" class="builder-direct-body">
+
+<svg class="ui-header-glyph-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="dpsUiSparklesGlyph" viewBox="0 0 24 24"><path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></symbol><symbol id="dpsUiResetGlyph" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 2.6 6.4M3 5v7h7"/></symbol><symbol id="dpsUiRunGlyph" viewBox="0 0 24 24"><path d="m8 5 12 7-12 7Z"/></symbol><symbol id="dpsUiInfoGlyph" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol><symbol id="dpsUiBackGlyph" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></symbol><symbol id="dpsUiWarningGlyph" viewBox="0 0 24 24"><path d="m10.29 3.86-8.18 14.1A2 2 0 0 0 3.84 21h16.32a2 2 0 0 0 1.73-3.04l-8.18-14.1a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></symbol><symbol id="traitPresetGlyph-gear" viewBox="0 0 24 24"><path d="M8.00 5.07L9.53 4.39L9.64 1.77L14.36 1.77L14.47 4.39L16.00 5.07L17.35 6.05L19.68 4.84L22.04 8.93L19.83 10.34L20.00 12.00L19.83 13.66L22.04 15.07L19.68 19.16L17.35 17.95L16.00 18.93L14.47 19.61L14.36 22.23L9.64 22.23L9.53 19.61L8.00 18.93L6.65 17.95L4.32 19.16L1.96 15.07L4.17 13.66L4.00 12.00L4.17 10.34L1.96 8.93L4.32 4.84L6.65 6.05Z"/><circle cx="12" cy="12" r="3.4"/></symbol><symbol id="traitPresetGlyph-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-3.8-.8L3 21l1.8-5.7A8.5 8.5 0 1 1 21 11.5Z"/></symbol><symbol id="traitPresetGlyph-empty" viewBox="0 0 24 24"><path d="M3 7V5h7l2 3h9v3M3 7h7l2 4h10l-2 9H3Z M9 15h6"/></symbol><symbol id="traitPresetGlyph-unloaded" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol><symbol id="traitPresetGlyph-normal" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z M8 12l3 3 5-6"/></symbol><symbol id="traitPresetGlyph-changed" viewBox="0 0 24 24"><path d="M20 4v6h-6M4 20v-6h6M4 10a8 8 0 0 1 13-4l3 4M4 14l3 4a8 8 0 0 0 13-4"/></symbol><symbol id="traitPresetGlyph-backup" viewBox="0 0 24 24"><path d="M4 16v4h16v-4M12 3v13m-5-5 5 5 5-5"/></symbol><symbol id="traitPresetGlyph-migration" viewBox="0 0 24 24"><path d="M12 3 2 21h20ZM12 9v5M12 17h.01"/></symbol><symbol id="traitPresetGlyph-error" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6ZM9 9l6 6m0-6-6 6"/></symbol></svg>
+
+<button type="button" class="trait-preset-standalone-trigger" data-trait-preset-manager-open aria-label="프리셋" aria-expanded="false" aria-controls="traitPresetManagerOverlay" hidden><svg class="trait-preset-trigger-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-gear"/></svg><span>프리셋</span><i aria-hidden="true"></i></button>
+<div id="dpsBootScreen" aria-live="polite"><div class="boot-card"><div class="boot-title">개복디 빌더 적용 중</div><div class="boot-desc">최신 빌드와 스타일을 불러오는 중입니다.</div></div></div>
+<div class="wrap">
+<div class="col-work">
+<div class="col-left">
+<div class="basic-goal-cards integrated-card settings-polish">
+<div class="sg-title basic-info-title basic-goal-title">
+<div class="basic-goal-brand"><span class="basic-goal-brand-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><span class="basic-goal-brand-copy"><strong>기본 설정</strong></span></div>
+</div>
+<div class="integrated-tabs basic-settings-tabs" role="tablist" aria-label="기본 설정" data-integrated-tabs="basicSettings"><button type="button" class="integrated-tab is-active" role="tab" id="basicSettingsTab0" aria-controls="basicSettingsPanel0" aria-selected="true" data-integrated-tab="basicSettings" data-integrated-index="0" tabindex="0">기본 정보</button><button type="button" class="integrated-tab" role="tab" id="basicSettingsTab1" aria-controls="basicSettingsPanel1" aria-selected="false" data-integrated-tab="basicSettings" data-integrated-index="1" tabindex="-1">룬과 버프</button><button type="button" class="integrated-tab" role="tab" id="basicSettingsTab3" aria-controls="basicSettingsPanel3" aria-selected="false" data-integrated-tab="basicSettings" data-integrated-index="2" tabindex="-1">더제로 전당</button></div>
+<div id="basicSettingsPanel0" class="integrated-content basic-settings-info-panel is-active" role="tabpanel" aria-labelledby="basicSettingsTab0" data-integrated-panel="basicSettings" data-integrated-index="0">
+
+<div class="basic-settings-info-content">
+
+<!-- 기본 정보: 재화 -->
+<div class="sg xp-sp-card basic-info-resource-card">
+<div class="basic-goal-section-heading"><span class="basic-goal-section-copy"><strong>재화 정보</strong></span></div>
+<div class="xp-sp-split basic-info-grid">
+<div class="xp-sp-panel basic-info-panel">
+<section class="basic-info-lane is-primary" aria-label="SP와 심연의혼">
+<div class="basic-info-lane-group is-sp" aria-label="SP">
+<div class="basic-info-row manual-resource" data-basic-row="start-sp"><label for="sp">시작 SP</label><input class="money-input" id="sp" inputmode="numeric" type="text" value="0"/></div>
+<div class="basic-info-row readonly-resource" data-basic-row="total-sp"><label>총 SP</label><b id="spTotalBasicView">0</b></div>
+<div class="basic-info-row readonly-resource" data-basic-row="used-sp-attack"><label>사용한 SP (공격)</label><b id="spAttackView">0</b></div>
+<div class="basic-info-row readonly-resource" data-basic-row="used-sp-utility"><label>사용한 SP (유틸)</label><b id="spUtilityView">0</b></div>
+<div class="basic-info-row readonly-resource" data-basic-row="remain-sp"><label>남은 SP</label><b id="spRemainBasicView">0</b></div>
+<div class="basic-info-row" data-basic-row="sp-bank"><label>SP 은행</label><div class="mode-choice-group" role="group" aria-label="SP 은행 반영"><button type="button" data-mode-choice="sp-bank" data-value="미반영" aria-pressed="true">OFF</button><button type="button" data-mode-choice="sp-bank" data-value="반영" aria-pressed="false">ON</button></div></div>
+<select id="spBankApply" hidden aria-hidden="true"><option selected="" value="미반영">OFF</option><option value="반영">ON</option></select>
+</div>
+<div class="basic-info-lane-group is-soul" aria-label="심연의혼">
+<div class="basic-info-row manual-resource" data-basic-row="owned-soul"><label for="soul">본인 심연의혼</label><input class="money-input" id="soul" inputmode="numeric" type="text" value="0"/></div>
+<div class="basic-info-row readonly-resource" data-basic-row="used-soul"><label>사용한 심연의혼</label><b id="soulUsedBasicView">0</b></div>
+<div class="basic-info-row readonly-resource" data-basic-row="remain-soul"><label>남은 심연의혼</label><b id="soulRemainBasicView">0</b></div>
+</div>
+</section>
+<section class="basic-info-lane is-secondary" aria-label="XP와 EP와 RP">
+<div class="basic-info-lane-group is-xp-ep" aria-label="XP 및 EP">
+<div class="basic-info-row manual-resource" data-basic-row="owned-xp"><label for="xp">보유 XP</label><input class="money-input" id="xp" inputmode="numeric" type="text" value="1"/></div>
+<div class="basic-info-row manual-resource" data-basic-row="owned-bxp"><label for="bxp">보유 BXP</label><input class="money-input" id="bxp" inputmode="numeric" type="text" value="0"/></div>
+<div class="basic-info-row readonly-resource" data-basic-row="owned-ep"><label>보유 EP</label><b id="autoEpView">0</b></div>
+<div class="basic-info-row readonly-resource" data-basic-row="used-ep"><label>사용한 EP</label><b id="epUsedBasicView">0</b></div>
+<div class="basic-info-row readonly-resource" data-basic-row="remain-ep"><label>남은 EP</label><b id="epRemainBasicView">0</b></div>
+</div>
+<div class="basic-info-lane-group is-rp" aria-label="RP">
+<div class="basic-info-row manual-resource" data-basic-row="owned-rp"><label for="rp">보유 RP</label><input class="money-input" id="rp" inputmode="numeric" type="text" value="0"/></div>
+<div class="basic-info-row readonly-resource" data-basic-row="used-rp"><label>사용한 RP</label><b id="rpUsedBasicView">0</b></div>
+<div class="basic-info-row readonly-resource" data-basic-row="remain-rp"><label>남은 RP</label><b id="rpRemainBasicView">0</b></div>
+</div>
+</section>
+<input id="ep" type="hidden" value="0"/>
+</div>
+</div>
+</div>
+<!-- 목표설정: 난이도·진행 목표 -->
+<div class="sg xp-sp-card goal-settings-card">
+<div class="basic-goal-section-heading"><span class="basic-goal-section-copy"><strong>목표 설정</strong></span></div>
+<div class="xp-sp-split basic-info-grid">
+<div class="xp-sp-panel basic-info-panel">
+<section class="basic-info-lane is-primary" aria-label="개인전 및 협동전 설정">
+<div class="basic-info-lane-group is-mode" aria-label="게임 모드, 스피드 모드, 전투 모드 및 출발 지원 인원수">
+<div class="basic-info-row" data-basic-row="battle-mode"><label>게임 모드</label><div class="mode-choice-group" role="group" aria-label="개인전 또는 협동전"><button type="button" data-mode-choice="battle" data-value="solo" aria-pressed="true">개인전</button><button type="button" data-mode-choice="battle" data-value="coop" aria-pressed="false">협동전</button></div></div>
+<div hidden><select id="soloMode" aria-hidden="true"><option selected="" value="ON">ON</option><option value="OFF">OFF</option></select><select id="coopMode" aria-hidden="true"><option selected="" value="OFF">OFF</option><option value="ON">ON</option></select></div>
+<div class="basic-info-row" data-basic-row="speed-mode"><label>스피드 모드</label><div class="spec-dps-speed-switch-wrap goal-mode-switch-wrap" aria-label="스피드 모드 전환"><button class="artifact-dps-switch goal-mode-switch" id="specDpsSpeedModeToggle" type="button" role="switch" aria-checked="false" data-spec-dps-speed-toggle><span class="artifact-dps-switch-text">OFF</span><span class="artifact-dps-switch-text">ON</span><i aria-hidden="true"></i></button></div></div>
+<div class="basic-info-row" data-basic-row="game-mode"><label>전투 모드</label><div class="artifact-dps-switch-wrap goal-mode-switch-wrap" aria-label="일반 또는 유물 DPS 표시"><button class="artifact-dps-switch goal-mode-switch" id="artifactDpsViewToggle" type="button" role="switch" aria-checked="false"><span class="artifact-dps-switch-text">일반</span><span class="artifact-dps-switch-text">유물</span><i aria-hidden="true"></i></button></div></div>
+<div class="basic-info-row" data-basic-row="team"><label id="teamCountLabel">출발 지원 인원수</label><select id="team" hidden aria-hidden="true"><option selected="" value="1">1</option><option value="2">2</option><option value="3">3</option></select><div class="team-count-switch" role="group" aria-labelledby="teamCountLabel"><button type="button" data-team-count="1" aria-pressed="true">1</button><button type="button" data-team-count="2" aria-pressed="false">2</button><button type="button" data-team-count="3" aria-pressed="false">3</button></div></div>
+</div>
+<div class="basic-info-lane-group is-match" aria-label="난이도와 고행 단계">
+<div class="basic-info-row" data-basic-row="difficulty"><label for="diff">난이도</label><select id="diff">
+<option selected="">Practice</option><option>Very Easy</option><option>Easy</option>
+<option>Normal</option><option>Hard</option><option>Very Hard</option>
+<option>Hell</option><option>Inferno</option><option>Lunatic</option>
+<option>Holic</option><option>Epic</option><option>Ultimate</option>
+<option>Impossible</option><option>The Final</option>
+<option>Hall Of Fame</option><option>Abyss road</option><option>Deep Abyss</option><option>도전의 탑</option>
+<option value="행성탐사-코랄">행성탐사</option>
+</select></div>
+<div class="basic-info-row" data-basic-row="penance"><label for="penance">고행 단계</label><select id="penance"><option selected="" value="0">선택 안함</option><option value="1">1 고행</option><option value="2">2 고행</option><option value="3">3 고행</option><option value="4">4 고행</option><option value="5">5 고행</option><option value="6">6 고행</option><option value="7">7 고행</option><option value="8">8 고행</option><option value="9">9 고행</option><option value="10">10 고행</option><option value="11">11 고행</option><option value="12">12 고행</option><option value="13">13 고행</option><option value="14">14 고행</option><option value="15">15 고행</option><option value="16">16 고행</option><option value="17">17 고행</option><option value="18">18 고행</option><option value="19">19 고행</option><option value="20">20 고행</option></select></div>
+</div>
+</section>
+<section class="basic-info-lane is-secondary" aria-label="목표와 버프 및 파편">
+<div class="basic-info-lane-group is-floor" aria-label="목표 라운드와 진행 층">
+<div class="basic-info-row manual-resource" data-basic-row="round"><label for="round">목표 라운드</label><input id="round" type="text" value="1" inputmode="numeric" max="300"/></div>
+<div class="basic-info-row" data-basic-row="challenge-tower-floor"><label for="challengeTowerFloor">도전의 탑 층</label><input id="challengeTowerFloor" type="text" value="1" inputmode="numeric" min="1" max="90" data-challenge-tower-floor-value="1"/></div>
+<div class="basic-info-row" data-basic-row="planet-exploration-floor"><label for="planetExplorationFloor">행성탐사 층</label><input id="planetExplorationFloor" type="text" value="1" inputmode="numeric" min="1" max="100" data-planet-exploration-floor-value="1"/></div>
+</div>
+<div class="basic-info-lane-group is-bonus" aria-label="타이틀과 파워 블레스 및 협동전 방어력 감소">
+<div class="basic-info-row title-td-row" data-basic-row="title-total-damage"><label for="titleTdBonus">타이틀 총 데미지</label><select id="titleTdBonus"><option selected="" value="0">선택 안함</option><option value="2">전문 · +2%</option><option value="4">장인 · +4%</option><option value="6">명장 · +6%</option><option value="8">도인 · +8%</option><option value="10">지존 · +10%</option><option value="12">패왕 · +12%</option><option value="13">패왕+ · +13%</option><option value="14">제왕 · +14%</option><option value="15">제왕+ · +15%</option><option value="16">신황 · +16%</option><option value="17">신황+ · +17%</option></select></div>
+<div class="basic-info-row" data-basic-row="power-bless"><label for="pbless">파워 블레스</label><select id="pbless"><option selected="" value="0">선택 안함</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="60">60</option><option value="90">90</option></select></div>
+<div class="basic-info-row" data-basic-row="coop-passenger-2-defense-reduce"><label for="coopPassenger2Dr">협동전 2P 방어력 감소</label><select id="coopPassenger2Dr"><option selected="" value="0">0</option><option value="15">15</option><option value="25">25</option><option value="50">50</option><option value="60">60</option></select></div>
+<div class="basic-info-row" data-basic-row="coop-passenger-3-defense-reduce"><label for="coopPassenger3Dr">협동전 3P 방어력 감소</label><select id="coopPassenger3Dr"><option selected="" value="0">0</option><option value="15">15</option><option value="25">25</option><option value="50">50</option><option value="60">60</option></select></div>
+</div>
+<div class="basic-info-lane-group is-erosion" aria-label="침식과 내성">
+<div class="basic-info-row" data-basic-row="erosion-stack"><label for="erosionStack">어비스 침식 스택</label><input id="erosionStack" data-erosion-value="500" type="text" value="500" inputmode="numeric"/></div>
+<div class="basic-info-row" data-basic-row="erosion-resist"><label for="jewelErosionRes">어비스 심연 내성</label><input id="jewelErosionRes" data-erosion-value="30" type="text" value="30" inputmode="numeric"/></div>
+</div>
+<div class="basic-info-lane-group is-shards" aria-label="파편 자원">
+<div class="basic-info-row manual-resource" data-basic-row="coral-shard"><label for="coralShard">코랄의 파편</label><input class="money-input" id="coralShard" inputmode="numeric" max="9999" min="0" type="text" value="0"/></div>
+<div class="basic-info-row manual-resource" data-basic-row="aiur-shard"><label for="aiurShard">아이어의 파편</label><input class="money-input" id="aiurShard" inputmode="numeric" max="9999" min="0" type="text" value="0"/></div>
+<div class="basic-info-row manual-resource" data-basic-row="xerus-shard"><label for="xerusShard">제루스의 파편</label><input class="money-input" id="xerusShard" inputmode="numeric" max="9999" min="0" type="text" value="0"/></div>
+</div>
+</section>
+<input id="dt" type="hidden" value="ON"/>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+<div id="basicSettingsPanel1" class="integrated-content basic-rune-panel" role="tabpanel" aria-labelledby="basicSettingsTab1" data-integrated-panel="basicSettings" data-integrated-index="1" hidden>
+<div class="sg unit-enhance-card rune-effect-panel rune-enhance-summary-top">
+<div class="unit-enhance-right">
+<div class="unit-enhance-summary-stack" aria-label="강화 효과 계산 요약">
+<div class="enhance-summary-card" data-metric="probability"><span>강화 확률</span><b id="enhanceChanceView">—</b></div>
+<div class="enhance-summary-card" data-metric="attempts"><span>강화 횟수</span><b id="enhanceCountView">—</b></div>
+<div class="enhance-summary-card" data-metric="expectation"><span>강화 기대값</span><b id="enhanceValueView">—</b></div>
+<div class="enhance-summary-card rune-impact-card rune-impact-combined-card" data-metric="impact"><span>수량 / 공격력</span><b id="sepRuneImpactView" class="rune-impact-measures"><span class="rune-impact-item"><strong id="sepRuneQuantityView">—</strong><small>마리</small></span><i class="rune-impact-divider" aria-hidden="true"></i><span class="rune-impact-item"><strong id="sepRuneAttackView">—</strong><small>공격력</small></span></b></div>
+</div>
+<input id="unitGrade" type="hidden" value=""/>
+<input id="unitLevel" type="hidden" value="0"/>
+</div>
+</div><div class="sg rune-spec clean-rune-card rune-unified-card"><div id="runeInfoPanel0" class="integrated-content is-active">
+
+<div class="rune-panel tidy-rune-panel">
+<div class="rune-option-card">
+<div class="rune-panel-title rune-card-heading">룬 옵션 설정</div>
+<div class="rune-option-grid">
+<label>룬 강화 수</label>
+<select id="rReinf"><option selected="" value="0">선택 안함</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option></select>
+<label>룬 각성</label>
+<select id="rAsc"><option selected="" value="없음">선택 안함</option><option>a</option><option>b</option><option>c</option><option>d</option><option>e</option><option>f</option><option value="g">g</option></select>
+<label>종족업</label>
+<select class="choice-input" id="raceOpt"><option selected="" value="없음">선택 안함</option><option>테란 바이오닉</option><option>테란 메카닉</option><option value="플토 바이오닉">토스 바이오닉</option><option value="플토 메카닉">토스 메카닉</option><option>저그</option><option>중립</option></select>
+<label>룬 10강 옵션</label>
+<select class="choice-input" id="opt10"><option selected="" value="none">선택 안함</option><option value="cd50">크리티컬 피해량 +50%</option><option value="ua15">유닛 가속 +15%</option><option value="cri22">크리 확률 +22%</option><option value="dr25">적 방어력 감소 25%</option><option value="mc3">다중 크리티컬 +3</option><option value="reinf5">유닛 최대 강화수 +5</option><option value="removeBuff">적버프 50% 확률로 제거</option><option value="raceAll1">모든 종족업 +1(최대21)</option><option value="ad15">공격력 +15%</option><option value="td2">총 데미지 2배</option><option value="shieldImmune">슈퍼쉴드 면역</option></select>
+<label>룬 15강 옵션</label>
+<select class="choice-input" id="opt15"><option selected="" value="none">선택 안함</option><option value="cd50">크리티컬 피해량 +50%</option><option value="ua15">유닛 가속 +15%</option><option value="cri22">크리 확률 +22%</option><option value="dr25">적 방어력 감소 25%</option><option value="mc3">다중 크리티컬 +3</option><option value="reinf5">유닛 최대 강화수 +5</option><option value="removeBuff">적버프 50% 확률로 제거</option><option value="raceAll1">모든 종족업 +1(최대21)</option><option value="ad15">공격력 +15%</option></select>
+<label>룬 초월 옵션</label>
+<select class="choice-input" id="transOpt"><option selected="" value="none">선택 안함</option><option value="cd50">크리티컬 피해량 +50%</option><option value="ua15">유닛 가속 +15%</option><option value="cri22">크리 확률 +22%</option><option value="dr25">적 방어력 감소 25%</option><option value="mc3">다중 크리티컬 +3</option><option value="reinf5">유닛 최대 강화수 +5</option><option value="removeBuff">적버프 50% 확률로 제거</option><option value="raceAll1">모든 종족업 +1(최대21)</option><option value="ad15">공격력 +15%</option></select>
+</div>
+</div>
+<div class="rune-basic-card">
+<div class="rune-panel-title rune-card-heading rune-stat-title"><span>룬 스텟</span><strong id="runeGradeName" class="rune-grade-name" data-rune-grade="none">미설정</strong></div>
+<div class="rune-stat-row rune-stat-head">
+<div></div><div>기본 스텟</div><div>개조 스텟</div>
+</div>
+<div class="rune-stat-row">
+<label>룬 공격력</label>
+<input id="rAD" type="text" value="0" inputmode="decimal"/>
+<input id="rModAD" type="text" value="0" inputmode="decimal"/>
+</div>
+<div class="rune-stat-row">
+<select id="runeChoiceType">
+<option selected="" value="none">선택 안함</option>
+<option value="ap">룬 마법공격력</option>
+<option value="ua">룬 유닛 가속</option>
+<option value="td">룬 총 데미지</option>
+<option value="harmony">룬 총 데미지 &amp; 유닛 가속</option>
+</select>
+<span class="rune-special-value"><input id="runeChoiceValue" type="text" value="0" inputmode="decimal" disabled/></span>
+<div class="rune-mod-empty" aria-hidden="true"></div>
+</div>
+<div class="rune-stat-row">
+<label>룬 공격속도</label>
+<input id="rAS" type="text" value="0" inputmode="decimal"/>
+<input id="rModAS" type="text" value="0" inputmode="decimal"/>
+</div>
+<div class="rune-stat-row">
+<label>룬 크리 데미지</label>
+<input id="rCD" type="text" value="0" inputmode="decimal"/>
+<input id="rModCD" type="text" value="0" inputmode="decimal"/>
+</div>
+<div class="rune-stat-row">
+<label>룬 크리 확률</label>
+<input id="rCRI" type="text" value="0" inputmode="decimal"/>
+<input id="rModCRI" type="text" value="0" inputmode="decimal"/>
+</div>
+</div>
+<div class="enchant-combined">
+<div class="rune-panel-title rune-card-heading">인첸트 레벨</div>
+<div class="enchant-combined-grid">
+<div class="enchant-combined-row">
+<label class="enchant-result-label"><span>인첸트 공격력</span><b id="enchOutAD" class="enchant-result-value">65</b></label>
+<input id="enchAD" type="text" value="0" inputmode="decimal"/>
+</div>
+<div class="enchant-combined-row">
+<label class="enchant-result-label"><span>인첸트 크리 확률</span><b id="enchOutCRI" class="enchant-result-value">24</b></label>
+<input id="enchCRI" type="text" value="0" inputmode="decimal"/>
+</div>
+<div class="enchant-combined-row">
+<label class="enchant-result-label"><span>인첸트 유닛 가속</span><b id="enchOutUA" class="enchant-result-value">1.16×</b></label>
+<input id="enchUA" type="text" value="0" inputmode="decimal"/>
+</div>
+<div class="enchant-combined-row">
+<label class="enchant-result-label"><span>인첸트 총 데미지</span><b id="enchOutTD" class="enchant-result-value">7</b></label>
+<input id="enchTD" type="text" value="0" inputmode="decimal"/>
+</div>
+<div class="enchant-combined-row">
+<label class="enchant-result-label"><span>인첸트 실드 감소</span><b id="enchOutSR" class="enchant-result-value">16.02</b></label>
+<input id="enchSR" type="text" value="0" inputmode="decimal"/>
+</div>
+<div class="enchant-combined-row">
+<label class="enchant-result-label"><span>인첸트 체력 감소</span><b id="enchOutHR" class="enchant-result-value">16.02</b></label>
+<input id="enchHR" type="text" value="0" inputmode="decimal"/>
+</div>
+</div>
+<input id="enchantCode" type="hidden" value="000000"/>
+</div>
+<div class="additional-editor">
+<div class="rune-panel-title rune-card-heading additional-title-row"><span class="rune-card-heading-name">에디셔널</span><span class="additional-controls"><button type="button" id="additionalRuneOpen" class="additional-settings-button">에디설정</button></span></div>
+<input id="additionalRuneSlots" type="hidden" value="[]"/>
+<div class="additional-list">
+<div class="additional-row"><label>에디셔널 공격력</label><input id="addAD" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 공격속도</label><input id="addAS" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 크리 데미지</label><input id="addCD" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 크리 확률</label><input id="addCRI" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 마법공격력</label><input id="addAP" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 총 데미지</label><input id="addTD" type="text" value="0" readonly aria-readonly="true"/></div>
+<div class="additional-row"><label>에디셔널 유닛 가속</label><input id="addUA" type="text" value="0" readonly aria-readonly="true"/></div>
+</div>
+</div>
+</div>
+<input id="rAP" type="hidden" value="0"/>
+<input id="rTD" type="hidden" value="0"/>
+<input id="rUA" type="hidden" value="0"/>
+<input id="rHarmony" type="hidden" value="0"/>
+</div></div>
+<div class="sg rune-spec clean-rune-card rune-unified-card"><div id="runeInfoPanel1" class="integrated-content is-active"><div class="sg unit-enhance-card spec-unit-enhance rune-effect-panel">
+
+<div class="unit-enhance-main-row">
+<div class="unit-enhance-left">
+<div class="unit-enhance-control-stack">
+<div class="month-rune-selects">
+<section class="buff-config-group is-donation" aria-label="나눔 유저">
+<div class="buff-config-heading"><div><strong>나눔 유저</strong></div></div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row donation-buff-row">
+<label id="donationBuffLabel" for="donationBuffType">나눔 적용</label>
+<div class="unit-enhance-button-grid donation-buff-grid" role="group" aria-labelledby="donationBuffLabel">
+<button class="ui-choice-btn" type="button" data-action="donationBuff" data-value="none" aria-pressed="true">미적용</button>
+<button class="ui-choice-btn" type="button" data-action="donationBuff" data-value="sp" aria-pressed="false">일반 나눔</button>
+<button class="ui-choice-btn" type="button" data-action="donationBuff" data-value="paid" aria-pressed="false">특별 나눔</button>
+</div>
+<select class="hidden-field" id="donationBuffType" aria-hidden="true" tabindex="-1"><option selected value="none">선택 안함</option><option value="sp">일반 나눔 - 15만 차감</option><option value="paid">특별 나눔</option></select>
+</div>
+</section>
+<section class="buff-config-group is-season" aria-label="이달의 룬 효과">
+<div class="buff-config-heading"><div><strong>이달의 룬 효과</strong><small>4월·9월 일반 / 강화</small></div></div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row month-rune-row"><label>4월 일반</label><div class="seg-btns unit-enhance-button-grid month-rune-grid" data-target="aprRuneNormal"><button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button><button class="ui-choice-btn" data-action="selectButton" data-value="1" type="button">1</button><button class="ui-choice-btn" data-action="selectButton" data-value="2" type="button">2</button><button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button><button class="ui-choice-btn" data-action="selectButton" data-value="4" type="button">4</button><button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button><button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button></div><select class="hidden-field" id="aprRuneNormal"><option selected="" value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row month-rune-row"><label>4월 강화(+)</label><div class="seg-btns unit-enhance-button-grid month-rune-grid" data-target="aprRunePlus"><button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button><button class="ui-choice-btn" data-action="selectButton" data-value="1" type="button">1</button><button class="ui-choice-btn" data-action="selectButton" data-value="2" type="button">2</button><button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button><button class="ui-choice-btn" data-action="selectButton" data-value="4" type="button">4</button><button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button><button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button></div><select class="hidden-field" id="aprRunePlus"><option selected="" value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row month-rune-row"><label>9월 일반</label><div class="seg-btns unit-enhance-button-grid month-rune-grid" data-target="sepRuneNormal"><button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button><button class="ui-choice-btn" data-action="selectButton" data-value="1" type="button">1</button><button class="ui-choice-btn" data-action="selectButton" data-value="2" type="button">2</button><button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button><button class="ui-choice-btn" data-action="selectButton" data-value="4" type="button">4</button><button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button><button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button></div><select class="hidden-field" id="sepRuneNormal"><option selected="" value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row month-rune-row"><label>9월 강화(+)</label><div class="seg-btns unit-enhance-button-grid month-rune-grid" data-target="sepRunePlus"><button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button><button class="ui-choice-btn" data-action="selectButton" data-value="1" type="button">1</button><button class="ui-choice-btn" data-action="selectButton" data-value="2" type="button">2</button><button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button><button class="ui-choice-btn" data-action="selectButton" data-value="4" type="button">4</button><button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button><button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button></div><select class="hidden-field" id="sepRunePlus"><option selected="" value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+</section>
+</div>
+<div class="enhance-controls unit-enhance-inline-controls">
+<section class="buff-config-group is-enhance" aria-label="강화 효과">
+<div class="buff-config-heading"><div><strong>강화 효과</strong><small>오버핸스·리페핸스·강화의 달인·방어력 관통</small></div></div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row">
+<label>오버핸스</label>
+<div class="seg-btns unit-enhance-button-grid" data-target="overEnhance">
+<button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button>
+</div>
+<select class="hidden-field" id="overEnhance"><option selected="" value="0">선택 안함</option><option value="3">3</option><option value="5">5</option><option value="6">6</option></select>
+</div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row">
+<label>리페핸스</label>
+<div class="seg-btns unit-enhance-button-grid" data-target="repairEnhance">
+<button class="ui-choice-btn" data-action="selectButton" data-value="OFF" type="button">선택 안함</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="ON" type="button">리페핸스</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="ON+" type="button">리페핸스+</button>
+</div>
+<select class="hidden-field" id="repairEnhance"><option selected="" value="OFF">OFF</option><option value="ON">ON</option><option value="ON+">ON+</option></select>
+</div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row">
+<label>강화의 달인</label>
+<div class="seg-btns unit-enhance-button-grid" data-target="enhanceMaster">
+<button class="ui-choice-btn" data-action="selectButton" data-value="OFF" type="button">선택 안함</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="ON" type="button">전체활성화</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="ON+" type="button">선택 강화</button>
+</div>
+<select class="hidden-field" id="enhanceMaster"><option selected="" value="OFF">OFF</option><option value="ON">ON</option><option value="ON+">ON+</option></select>
+</div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row spec-board-pierce-row">
+<label for="specBoardPierce">방어력 관통</label>
+<div class="seg-btns unit-enhance-button-grid spec-board-pierce-grid" data-target="specBoardPierce">
+<button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="10" type="button">10</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="15" type="button">15</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="20" type="button">20</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="25" type="button">25</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="30" type="button">30</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="35" type="button">35</button>
+<button class="ui-choice-btn" data-action="selectButton" data-value="40" type="button">40</button>
+</div>
+<select class="hidden-field" id="specBoardPierce"><option selected="" value="0">선택 안함</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option></select>
+</div>
+</section>
+<section class="buff-config-group is-selection" aria-label="선택 버프">
+<div class="buff-config-heading"><div><strong>선택 버프</strong><small>필요한 효과를 여러 개 선택할 수 있습니다</small></div></div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row select-buff-row">
+<span class="select-buff-label" id="unitBuffLabel">유닛 버프</span>
+<div class="unit-enhance-button-grid select-buff-grid" role="group" aria-labelledby="unitBuffLabel">
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodArtifact" type="checkbox"/><span>유물</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodNova" type="checkbox"/><span>비밀 작전 노바</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodTeratron" type="checkbox"/><span>테라트론</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodAmon" type="checkbox"/><span>아몬</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodAdun" type="checkbox"/><span>아둔의 창</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodKerrigan" type="checkbox"/><span>불새 케리건</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodOvermind" type="checkbox"/><span>초월체</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodNarud" type="checkbox"/><span>나루드</span></label>
+</div>
+</div>
+<div class="mini-ir mini-ir-button-row unit-enhance-option-row flower-buff-row">
+<span class="select-buff-label" id="flowerBuffLabel">꽃 버프</span>
+<div class="unit-enhance-button-grid flower-buff-grid" role="group" aria-labelledby="flowerBuffLabel">
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="flowerSkill1" type="checkbox"/><span>근성의 꽃가루</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="flowerSkill2" type="checkbox"/><span>바람의 꽃가루</span></label>
+<label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="flowerSkill3" type="checkbox"/><span>안개의 꽃가루</span></label>
+</div>
+</div>
+</section>
+
+</div>
+</div>
+</div>
+
+</div>
+</div></div></div></div>
+<!-- 더제로 승단정보 -->
+<div
+              id="basicSettingsPanel3"
+              class="integrated-content basic-settings-zero-panel zero-rank-card"
+              role="tabpanel"
+              aria-labelledby="basicSettingsTab3"
+              data-integrated-panel="basicSettings"
+              data-integrated-index="2"
+              hidden
+            >
+              <div class="zero-rank-content">
+                <section class="zero-rank-panel zero-rank-calc-panel">
+                  <div class="zero-score-calc">
+                    <div class="zero-calc-summary">
+                      <div class="zero-calc-result-card zero-current-score-box">
+                        <span class="zero-score-label-row">현재 승단 점수</span
+                        ><b class="zero-current-score">0</b>
+                      </div>
+                      <div class="zero-calc-result-card">
+                        <span>목표 추가점수</span><b class="zero-total-add">+0</b>
+                      </div>
+                      <div class="zero-calc-result-card">
+                        <span>목표 완료</span><b class="zero-target-score">0</b>
+                      </div>
+                      <div class="zero-calc-result-card zero-rank-result-card">
+                        <span class="zero-rank-label-row">현재 / 목표 승단</span
+                        ><b
+                          ><em class="zero-current-rank">입문</em><i>→</i
+                          ><em class="zero-target-rank">입문</em></b
+                        >
+                      </div>
+                    </div>
+
+                    <div class="zero-rank-guide" id="zeroRankGuide">
+                      <button
+                        type="button"
+                        class="zero-guide-toggle"
+                        data-zero-guide-toggle
+                        aria-expanded="false"
+                        aria-controls="zeroGuideContent"
+                      >
+                        <span>승단 혜택 · 점수 기준</span
+                        ><span class="zero-guide-state" aria-hidden="true"></span>
+                      </button>
+                      <div class="zero-rank-guide-content" id="zeroGuideContent" hidden>
+                        <section
+                          class="zero-rank-info-section zero-rank-benefits-section"
+                          aria-label="승단 혜택"
+                        >
+                          <h4 class="reference-section-heading">승단 혜택</h4>
+                          <section
+                            id="zeroTitleBenefitsPopover"
+                            class="zero-title-benefits-popover zero-inline-benefits"
+                          >
+                            <section class="zero-current-benefits" aria-label="승단별 타이틀 혜택">
+                              <nav class="zero-current-benefits-heading" aria-label="타이틀 혜택 단계 탐색">
+                                <button
+                                  type="button"
+                                  id="zeroBenefitsPrev"
+                                  data-zero-benefits-step="-1"
+                                  aria-label="이전 단계 혜택"
+                                >
+                                  〈 이전
+                                </button>
+                                <div class="zero-benefits-title-group">
+                                  <strong id="zeroCurrentBenefitsTitle">현재 승단 혜택</strong>
+                                  <div class="zero-benefits-meta">
+                                    <small id="zeroBenefitsViewLabel">현재 타이틀</small
+                                    ><span id="zeroBenefitsPosition" aria-label="현재 조회 중인 단계"
+                                      >1 / 17</span
+                                    >
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  id="zeroBenefitsNext"
+                                  data-zero-benefits-step="1"
+                                  aria-label="다음 단계 혜택"
+                                >
+                                  다음 〉
+                                </button>
+                              </nav>
+                              <div
+                                id="zeroCurrentBenefitsItems"
+                                class="zero-current-benefits-items"
+                                aria-live="polite"
+                                aria-atomic="true"
+                              ></div>
+                            </section>
+                          </section>
+                        </section>
+                        <section
+                          class="zero-rank-info-section zero-rank-score-section"
+                          aria-label="승단 점수 기준"
+                        >
+                          <h4 class="reference-section-heading">점수 기준</h4>
+                          <section
+                            id="zeroRankScorePopover"
+                            class="zero-rank-score-popover zero-inline-scores"
+                          >
+                            <section class="unit-achievement-help-section zero-score-tab-section">
+                              <div
+                                class="unit-achievement-help-panel zero-score-help-panel"
+                                id="zeroScoreHelpPanel0"
+                              >
+                                <h5>일반 고행</h5>
+                                <div class="zero-rank-score-lines">
+                                  <div class="zero-rank-score-row zero-rank-score-star-row">
+                                    <span class="zero-rank-score-range">0단계</span
+                                    ><span class="zero-rank-score-rate">24스타</span
+                                    ><strong class="zero-rank-score-points">2점</strong
+                                    ><small class="zero-rank-score-note"
+                                      >한 난이도 개인전/협동전 8별 모두 달성 시</small
+                                    >
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">1~13단계</span
+                                    ><span class="zero-rank-score-rate">단계당</span
+                                    ><strong class="zero-rank-score-points">1점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">14~16단계</span
+                                    ><span class="zero-rank-score-rate">단계당</span
+                                    ><strong class="zero-rank-score-points">2점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">17단계</span
+                                    ><span class="zero-rank-score-rate">달성 시</span
+                                    ><strong class="zero-rank-score-points">3점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">18~20단계</span
+                                    ><span class="zero-rank-score-rate">단계당</span
+                                    ><strong class="zero-rank-score-points">7점</strong>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="unit-achievement-help-panel zero-score-help-panel"
+                                id="zeroScoreHelpPanel1"
+                              >
+                                <h5>명예 고행</h5>
+                                <div class="zero-rank-score-lines">
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">0단계</span
+                                    ><span class="zero-rank-score-rate">B등급</span
+                                    ><strong class="zero-rank-score-points">2점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">10단계</span
+                                    ><span class="zero-rank-score-rate">A등급</span
+                                    ><strong class="zero-rank-score-points">2점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">17단계</span
+                                    ><span class="zero-rank-score-rate">S등급</span
+                                    ><strong class="zero-rank-score-points">2점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">19단계</span
+                                    ><span class="zero-rank-score-rate">X등급</span
+                                    ><strong class="zero-rank-score-points">2점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">20단계</span
+                                    ><span class="zero-rank-score-rate">XD등급</span
+                                    ><strong class="zero-rank-score-points">2점</strong>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="unit-achievement-help-panel zero-score-help-panel"
+                                id="zeroScoreHelpPanel2"
+                              >
+                                <h5>일반 도전의 탑</h5>
+                                <div class="zero-rank-score-lines">
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">41~60층</span
+                                    ><span class="zero-rank-score-rate">1층당</span
+                                    ><strong class="zero-rank-score-points">1점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">61~70층</span
+                                    ><span class="zero-rank-score-rate">1층당</span
+                                    ><strong class="zero-rank-score-points">2점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">71~90층</span
+                                    ><span class="zero-rank-score-rate">1층당</span
+                                    ><strong class="zero-rank-score-points">3점</strong>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="unit-achievement-help-panel zero-score-help-panel"
+                                id="zeroScoreHelpPanel3"
+                              >
+                                <h5>명예 도전의 탑</h5>
+                                <div class="zero-rank-score-lines">
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">50~68층</span
+                                    ><span class="zero-rank-score-rate">2층당</span
+                                    ><strong class="zero-rank-score-points">1점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">70~79층</span
+                                    ><span class="zero-rank-score-rate">1층당</span
+                                    ><strong class="zero-rank-score-points">1점</strong>
+                                  </div>
+                                  <div class="zero-rank-score-row">
+                                    <span class="zero-rank-score-range">80~90층</span
+                                    ><span class="zero-rank-score-rate">1층당</span
+                                    ><strong class="zero-rank-score-points">2점</strong>
+                                  </div>
+                                </div>
+                              </div>
+                            </section>
+                          </section>
+                        </section>
+                        <button type="button" class="zero-guide-close" data-zero-guide-close>
+                          접고 승단 입력하기 ↓
+                        </button>
+                      </div>
+                    </div>
+                    <div class="zero-calc-table-wrap">
+                      <h4 class="workspace-section-title">난이도별 승단 점수</h4>
+                      <div class="zero-calc-table" aria-label="난이도별 승단 점수 입력">
+                        <div class="zero-calc-list-head">
+                          <span class="zero-calc-list-label">난이도</span
+                          ><span class="zero-calc-column-labels"
+                            ><span>구분</span><span>현재</span><span>목표</span
+                            ><span>목표 추가점수</span></span
+                          >
+                        </div>
+
+                        <div id="zeroScoreRows" class="zero-calc-rows"></div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+</div>
+<!-- 룬 정보·스탯 -->
+
+<!-- 효과 및 버프: 독립 카드 -->
+
+
+</div>
+<div class="col-mid">
+<div class="trait-board-panel build-polish">
+<section class="trait-build-merged-panel integrated-card trait-workspace">
+<header class="optimizer-head integrated-build-heading"><span class="optimizer-head-title">특성 유틸 관리</span><button id="traitExpansionToggle" class="ui-toolbar-btn trait-expansion-toggle" type="button" hidden data-action="toggleTraitExpansionMode" aria-label="접힌 상태 유지 · 펼친 상태 유지로 전환" aria-pressed="false" data-nexus-control-name="접힌 상태 유지 · 펼친 상태 유지로 전환"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16M4 16h16"/><path class="trait-expand-arrows" d="m9 4 3-2 3 2m-6 16 3 2 3-2"/><path class="trait-collapse-arrows" d="m9 3 3 2 3-2m-6 18 3-2 3 2"/></svg></button></header>
+<div class="integrated-tabs trait-workspace-tabs" role="tablist" aria-label="특성 유틸 관리" data-integrated-tabs="traitWorkspace">
+<button type="button" class="integrated-tab is-active" role="tab" id="traitWorkspaceTab0" aria-controls="traitWorkspacePanel0" aria-selected="true" tabindex="0" data-integrated-tab="traitWorkspace" data-integrated-index="0">제한 최적화</button>
+<button type="button" class="integrated-tab" role="tab" id="traitUtilityListHeading" aria-controls="traitWorkspacePanel1" aria-selected="false" tabindex="-1" data-integrated-tab="traitWorkspace" data-integrated-index="1">특성 유틸 목록</button>
+<button type="button" class="integrated-tab" role="tab" id="basicSettingsTab2" aria-controls="basicSettingsPanel2" aria-selected="false" data-integrated-tab="traitWorkspace" data-integrated-index="2" tabindex="-1">버스 성소</button>
+</div>
+<div class="integrated-content is-active" id="traitWorkspacePanel0" role="tabpanel" aria-labelledby="traitWorkspaceTab0" data-integrated-panel="traitWorkspace" data-integrated-index="0"><div class="trait-build-section trait-build-limit" aria-label="투자 제한"><header class="trait-limit-guide-heading"><h3 class="workspace-section-title" id="battleModeGuideTitle">투자 제한</h3><button class="additional-settings-button inline-guide-trigger battle-mode-guide-trigger" id="battleModeGuideOpen" type="button" aria-expanded="false" aria-controls="battleModeGuideDetails"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiInfoGlyph"/></svg><span>최적화 안내</span></button></header><div id="traitLimitContent" class="trait-board-integrated-section trait-limit-section" aria-label="특성 투자제한">
+
+<div class="trait-limit-grid">
+<label class="trait-limit-field" for="traitLimitAS"><span>공격속도 제한</span><input id="traitLimitAS" type="text" inputmode="decimal" value="0" aria-label="공격속도 제한"></label>
+<label class="trait-limit-field" for="traitLimitCRI"><span>크리 확률 제한</span><input id="traitLimitCRI" type="text" inputmode="decimal" value="0" aria-label="크리 확률 제한"></label>
+<div class="trait-limit-field trait-limit-special"><span id="traitLimitMagicAPTitle">마법공격력</span>
+<select id="traitLimitMagicAP" class="trait-limit-source" aria-label="마법공격력 1·2·3 자동 투자" tabindex="-1" aria-hidden="true"><option value="ON" selected>투자 가능</option><option value="OFF">투자 제한</option></select>
+<div class="trait-limit-segments" role="group" aria-labelledby="traitLimitMagicAPTitle"><button type="button" class="trait-limit-segment" data-limit-select="traitLimitMagicAP" data-limit-value="ON" aria-pressed="true">투자 가능</button><button type="button" class="trait-limit-segment" data-limit-select="traitLimitMagicAP" data-limit-value="OFF" aria-pressed="false">투자 제한</button></div>
+</div>
+<div class="trait-limit-field trait-limit-special"><span id="traitLimitMultiTargetTitle">멀티 타겟</span>
+<select id="traitLimitMultiTarget" class="trait-limit-source" aria-label="멀티 타겟 투자" tabindex="-1" aria-hidden="true"><option value="ON">투자 가능</option><option value="OFF" selected>투자 제한</option></select>
+<div class="trait-limit-segments" role="group" aria-labelledby="traitLimitMultiTargetTitle"><button type="button" class="trait-limit-segment" data-limit-select="traitLimitMultiTarget" data-limit-value="ON" aria-pressed="false">투자 가능</button><button type="button" class="trait-limit-segment" data-limit-select="traitLimitMultiTarget" data-limit-value="OFF" aria-pressed="true">투자 제한</button></div>
+</div>
+<div class="trait-limit-field trait-limit-special"><span id="traitLimitLifeBonusTitle">목숨 보너스</span>
+<select id="traitLimitLifeBonus" class="trait-limit-source" aria-label="목숨 보너스 자동 투자" tabindex="-1" aria-hidden="true"><option value="ON" selected>투자 가능</option><option value="OFF">투자 제한</option></select>
+<div class="trait-limit-segments" role="group" aria-labelledby="traitLimitLifeBonusTitle"><button type="button" class="trait-limit-segment" data-limit-select="traitLimitLifeBonus" data-limit-value="ON" aria-pressed="true">투자 가능</button><button type="button" class="trait-limit-segment" data-limit-select="traitLimitLifeBonus" data-limit-value="OFF" aria-pressed="false">투자 제한</button></div>
+</div>
+<div class="trait-limit-field trait-limit-special"><span id="traitLimitInfiniteTitle">무한 특성</span>
+<select id="traitLimitInfinite" class="trait-limit-source" aria-label="무한 특성 투자" tabindex="-1" aria-hidden="true"><option value="ON">투자 가능</option><option value="OFF" selected>투자 제한</option></select>
+<div class="trait-limit-segments" role="group" aria-labelledby="traitLimitInfiniteTitle"><button type="button" class="trait-limit-segment" data-limit-select="traitLimitInfinite" data-limit-value="ON" aria-pressed="false">투자 가능</button><button type="button" class="trait-limit-segment" data-limit-select="traitLimitInfinite" data-limit-value="OFF" aria-pressed="true">투자 제한</button></div>
+</div>
+</div>
+</div>
+<section id="battleModeGuideDetails" class="battle-mode-guide-inline" aria-labelledby="battleModeGuideTitle" hidden>
+  <div class="battle-mode-guide-panel">
+    <section class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">01</span><span>모드 변경 및 최적화</span></h3><p>모드를 변경해도 기존 유닛 구성과 특성 투자값은 유지됩니다.</p><p class="guide-emphasis">변경된 모드를 반영하려면 최적화를 다시 실행하세요. 자동으로 재실행되지 않습니다.</p></section>
+    <section class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">02</span><span>모드별 최적화 비교</span></h3>
+      <table class="battle-guide-comparison" aria-label="모드별 최적화 비교"><colgroup><col class="battle-guide-label-col"><col><col></colgroup><thead><tr><th scope="col">항목</th><th scope="col">일반 모드</th><th scope="col">유물 모드</th></tr></thead><tbody>
+        <tr><th scope="row">최적화 기준</th><td>일반 DPS</td><td>유물 DPS</td></tr>
+        <tr class="battle-guide-difference"><th scope="row">공격속도 제한</th><td>설정 적용</td><td><strong>적용 안 함</strong></td></tr>
+        <tr><th scope="row">크리 확률 제한</th><td>설정 적용</td><td>설정 적용</td></tr>
+        <tr><th scope="row">멀티 타겟</th><td>설정 적용</td><td>설정 적용</td></tr>
+        <tr><th scope="row">무한 특성</th><td>설정 적용</td><td>설정 적용</td></tr>
+        <tr><th scope="row">최적화 종료 구간</th><td>설정 적용</td><td>설정 적용</td></tr>
+      </tbody></table>
+    </section>
+    <section class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">03</span><span>공통 적용 조건</span></h3><p>보유 재화·최대 투자량·난이도 조건은 두 모드에 공통 적용됩니다.</p><p>공격속도·크리 확률 제한값의 <strong class="guide-emphasis">0은 제한 없음</strong>을 의미합니다.</p></section>
+    <section class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">04</span><span>유물 모드 자동 투자 제외 특성</span></h3><p>공격속도 9종과 방어력 관통 1종은 자동 투자 대상에서 제외됩니다.</p>
+      <table class="battle-guide-comparison battle-guide-traits" aria-label="유물 모드 자동 투자 제외 특성 10종"><thead><tr><th scope="col">특성명</th><th scope="col">구간</th></tr></thead><tbody><tr><th scope="row">공격속도 증가1</th><td>루키</td></tr><tr><th scope="row">공격속도 증가2</th><td>아마추어</td></tr><tr><th scope="row">공격속도 증가3</th><td>프로</td></tr><tr><th scope="row">팀 공격속도 증가</th><td>디바인</td></tr><tr><th scope="row">공격속도 증가4</th><td>더원1</td></tr><tr><th scope="row">공격속도 증가∞</th><td>무한∞</td></tr><tr><th scope="row">공격속도 증가 E</th><td>EP특성</td></tr><tr><th scope="row">공격속도 증가 R</th><td>RP특성</td></tr><tr><th scope="row">공격속도 증가 A</th><td>심연특성</td></tr><tr><th scope="row">방어력 관통 R</th><td>RP특성</td></tr></tbody></table>
+      <p>자동 투자에서 제외된 특성의 기존 투자값은 유지되며 직접 투자할 수 있습니다.</p>
+    </section>
+    <aside class="guide-step guide-note"><h3>ⓘ 유물 모드 사용 제한</h3><p>Abyss road, Deep Abyss, 행성탐사에서는 유물 모드를 사용할 수 없습니다.</p></aside>
+  </div>
+</section>
+</div><div class="trait-build-section trait-build-optimize" id="traitOptimizeContent" aria-label="최적화"><div class="trait-optimizer-panel">
+
+<div class="trait-dashboard-tools trait-board-control-grid">
+  <section class="trait-optimizer-row" aria-labelledby="traitOptimizeScopeTitle">
+    <div class="trait-scope-heading"><strong id="traitOptimizeScopeTitle">특성 최적화</strong><button class="btn subtle ui-action-btn ui-reset-btn trait-scope-reset" data-action="clearAll" type="button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>특성 초기화</span></button></div>
+    <div class="trait-scope-pickers">
+      <div class="trait-scope-field"><span>시작 구간</span><strong class="trait-scope-fixed">루키</strong></div>
+      <span class="trait-scope-arrow" aria-hidden="true">→</span>
+      <label class="trait-scope-field" for="optTier"><span>종료 구간</span><select id="optTier" aria-label="특성 최적화 종료 구간"><option selected>루키</option><option>비기너</option><option>아마추어</option><option>프로</option><option>엑스퍼트</option><option>마스터</option><option>디바인</option><option>더원1</option><option>더원2</option><option>무한∞</option><option>EP특성</option><option>RP특성</option><option>심연특성</option></select></label>
+      <button class="btn pri ui-action-btn trait-scope-run" data-action="optimizeSP" type="button" aria-label="특성 최적화 실행"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiRunGlyph"/></svg><span>실행</span></button>
+    </div>
+  </section>
+  <section class="trait-optimizer-row" aria-labelledby="traitUtilityScopeTitle">
+    <div class="trait-scope-heading"><strong id="traitUtilityScopeTitle">유틸 마스터</strong><button class="btn subtle ui-action-btn ui-reset-btn trait-scope-reset" data-action="clearUtility" type="button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>유틸 초기화</span></button></div>
+    <div class="trait-scope-pickers">
+      <div class="trait-scope-field"><span>시작 구간</span><strong class="trait-scope-fixed">루키</strong></div>
+      <span class="trait-scope-arrow" aria-hidden="true">→</span>
+      <label class="trait-scope-field" for="utilOptTier"><span>종료 구간</span><select id="utilOptTier" aria-label="유틸 마스터 종료 구간"><option selected>루키</option><option>비기너</option><option>아마추어</option><option>프로</option><option>엑스퍼트</option><option>마스터</option><option>디바인</option><option>더원1</option><option>더원2</option><option>무한∞</option><option>EP특성</option><option>RP특성</option><option>심연특성</option></select></label>
+      <button class="btn pri ui-action-btn trait-scope-run" data-action="optimizeUtility" type="button" aria-label="유틸 마스터 실행"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiRunGlyph"/></svg><span>실행</span></button>
+    </div>
+  </section>
+</div>
+</div></div></div>
+
+<section class="trait-standalone-panel trait-utility-panel integrated-content" id="traitWorkspacePanel1" role="tabpanel" aria-labelledby="traitUtilityListHeading" data-integrated-panel="traitWorkspace" data-integrated-index="1" hidden>
+  <div class="tp-body" id="traitBody"></div>
+</section>
+<div id="basicSettingsPanel2" class="integrated-content basic-settings-bus-panel" role="tabpanel" aria-labelledby="basicSettingsTab2" data-integrated-panel="traitWorkspace" data-integrated-index="2" hidden>
+<section class="basic-settings-inline-section" aria-label="버스 기사"><header class="basic-settings-box-header"><h4 class="basic-settings-inline-title">버스 기사</h4></header><div class="basic-tab-bus">
+<div class="data-card bus-cut-card board-modal-card">
+<div class="bus-cut-list" id="xpCutRows"></div>
+</div>
+</div></section>
+<section class="basic-settings-inline-section" aria-label="성소 스킬"><header class="basic-settings-box-header"><h4 class="basic-settings-inline-title">성소 스킬</h4></header><div class="basic-tab-sanctuary">
+<div class="data-card final-damage-card board-modal-card">
+<div class="skill-damage-layout" id="skillDamageLayout">
+<div class="skill-setting-panel">
+<div class="ir skill-ir"><label>더블스페</label><select id="skillDouble"><option selected="" value="1">더블스페</option><option value="1.5">더블스페+</option><option value="1.67">더블스페++</option></select></div>
+<div class="ir skill-ir"><label>모드</label><select id="skillMode"><option selected="" value="normal">일반모드</option><option value="tower">도전의 탑</option><option value="planet">행성탐사</option></select></div>
+<div class="ir skill-ir"><label>라운드</label><input id="skillRound" inputmode="numeric" max="300" type="text" value="1"/></div>
+<div class="ir skill-ir"><label>마법공격력</label><b class="skill-display-value" id="skillAPView">자동</b></div>
+<div class="ir skill-ir"><label>데미지 감소율</label><b class="skill-display-value" id="skillPenaltyView">—</b></div>
+</div>
+<div class="skill-result-panel">
+<div class="skill-list-head"><span>스킬</span><span>피해량</span></div>
+<table class="mini-table skill-damage-list"><thead><tr><th>스킬</th><th>총 피해량(%)</th><th>설정</th></tr></thead><tbody id="skillRows"></tbody></table>
+</div>
+</div>
+</div>
+</div></section>
+</div>
+</section>
+</div>
+</div>
+<div class="col-right">
+<!-- 스펙·유닛 보드: 전환 버튼·결과 -->
+<div class="data-card stat-dps-card right-analytics-workspace analytics-polish">
+<div class="right-workspace-navigation"><header class="right-workspace-head"><span class="right-workspace-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><span class="right-workspace-copy"><strong>분석 보드</strong></span><button class="ui-action-btn right-workspace-clear-record" data-clear-record-open type="button" aria-haspopup="dialog" aria-controls="traitClearRecordPanel"><svg aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewBox="0 0 24 24"><path d="M8 4h9a2 2 0 0 1 2 2v14H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M6 8H4v12a2 2 0 0 0 2 2h9"/><path d="M10 10h6M10 14h6"/></svg><span>클리어 리포트</span></button></header>
+<section class="damage-board-analysis-view" id="damageBoardAnalysisPanel" aria-label="분석 보드 내용">
+<div class="damage-board-subtabs integrated-tabs" role="tablist" aria-label="분석 보드 세부 선택" data-damage-board-subtabs>
+<button class="integrated-tab is-active" id="damageBoardSpecTab" type="button" role="tab" aria-selected="true" aria-controls="damageBoardSpecPanel" data-damage-board-subtab="spec" tabindex="0">스펙 보드</button>
+<button class="integrated-tab" id="damageBoardUnitTab" type="button" role="tab" aria-selected="false" aria-controls="damageBoardUnitPanel" data-damage-board-subtab="unit" tabindex="-1">유닛 보드</button>
+<button class="integrated-tab" id="damageBoardJewelTab" type="button" role="tab" aria-selected="false" aria-controls="unitDetailsPanel1" data-damage-board-subtab="jewel" tabindex="-1">쥬얼 설정</button>
+<button class="integrated-tab" id="dpsCompareOpen" type="button" role="tab" aria-selected="false" aria-haspopup="dialog" aria-controls="dpsCompareModal" data-damage-board-subtab="dps" tabindex="-1">DPS표</button>
+</div>
+<div class="damage-board-tab-shell">
+<section class="damage-board-panel is-active" id="damageBoardSpecPanel" role="tabpanel" aria-labelledby="damageBoardSpecTab" data-damage-board-panel="spec">
+<section class="analytics-group analytics-summary-group" aria-label="모드 난이도 및 DPS">
+<input id="specDpsSpeedMode" type="hidden" value="OFF"/>
+<div class="dps-card stat-dps-summary right-dps-hero board-context-header" id="statDpsSummary">
+  <div class="right-hero-context"><span class="spec-hero-caption">모드 / 난이도</span><strong class="right-hero-compact-mode" id="rightHeroCompactContext">—</strong><div class="dps-context-summary" id="dpsContextSummary"><strong id="dpsContextMode">—</strong><span class="right-hero-divider">/</span><strong id="dpsContextDiff">—</strong><small id="dpsContextModeDetail" hidden></small><small id="dpsContextDiffDetail" hidden></small></div></div>
+  <div class="right-hero-stage" aria-label="현재 고행 및 라운드"><span class="spec-hero-caption" id="specHeroStageLabel">현재 고행 / 라운드</span><strong id="specHeroStage">—</strong><small id="specHeroRound">—</small></div>
+  <div class="right-hero-metric"><span class="dps-spec-board-dps"><span class="dps-feature-heading"><span class="dps-lbl" id="dpsMainLabel">스펙 DPS</span></span><strong class="dps-num" id="dpsVal">—</strong></span></div>
+</div>
+</section>
+
+<div class="stat-grid stat-compare-grid right-spec-sections" id="statCompareGrid" data-damage-board-panel="spec">
+<section class="analytics-group analytics-detail-group" aria-label="스펙표">
+<div class="right-spec-unified-table" role="table" aria-label="전투 스펙 통합 비교표">
+<div class="stat-row stat-head-row" role="row"><div class="sc-name" role="columnheader">능력치</div><div class="sc-val" role="columnheader">표기 스텟</div><div class="sc-val" role="columnheader">실기 스텟</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">공격력</div><div class="sc-val" role="cell" id="sADDisplay">—</div><div class="sc-val" role="cell" id="sADActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">성소 마법공격력</div><div class="sc-val" role="cell" id="sAPSDisplay">—</div><div class="sc-val" role="cell" id="sAPSActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">유닛 마법공격력</div><div class="sc-val" role="cell" id="sAPUDisplay">—</div><div class="sc-val" role="cell" id="sAPUActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">공격속도</div><div class="sc-val" role="cell" id="sASDisplay">—</div><div class="sc-val" role="cell" id="sASActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">크리 확률</div><div class="sc-val" role="cell" id="sCRIDisplay">—</div><div class="sc-val" role="cell" id="sCRIActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">크리 데미지</div><div class="sc-val" role="cell" id="sCDDisplay">—</div><div class="sc-val" role="cell" id="sCDActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">다중 크리티컬</div><div class="sc-val" role="cell" id="sMCDisplay">—</div><div class="sc-val" role="cell" id="sMCActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">총 데미지</div><div class="sc-val" role="cell" id="sTDDisplay">—</div><div class="sc-val" role="cell" id="sTDActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">멀티 타겟</div><div class="sc-val" role="cell" id="sMDDisplay">—</div><div class="sc-val" role="cell" id="sMDActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">멀티 확률</div><div class="sc-val" role="cell" id="sMPDisplay">—</div><div class="sc-val" role="cell" id="sMPActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">멀티 크리 확률</div><div class="sc-val" role="cell" id="sMCPDisplay">—</div><div class="sc-val" role="cell" id="sMCPActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">방어력 감소</div><div class="sc-val" role="cell" id="sDRDisplay">—</div><div class="sc-val" role="cell" id="sDRActual">—</div></div>
+<div class="stat-row" role="row" data-coop-stat-row="2" hidden><div class="sc-name" role="cell">방어력 감소 · 2P</div><div class="sc-val" role="cell" id="sDR2PDisplay">—</div><div class="sc-val" role="cell" id="sDR2PActual">—</div></div>
+<div class="stat-row" role="row" data-coop-stat-row="3" hidden><div class="sc-name" role="cell">방어력 감소 · 3P</div><div class="sc-val" role="cell" id="sDR3PDisplay">—</div><div class="sc-val" role="cell" id="sDR3PActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">방어력 관통</div><div class="sc-val" role="cell" id="sPIERCEDisplay">—</div><div class="sc-val" role="cell" id="sPIERCEActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">유닛 가속</div><div class="sc-val" role="cell" id="sUADisplay">—</div><div class="sc-val" role="cell" id="sUAActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">체력 감소</div><div class="sc-val" role="cell" id="sHRDisplay">—</div><div class="sc-val" role="cell" id="sHRActual">—</div></div>
+<div class="stat-row" role="row"><div class="sc-name" role="cell">실드 감소</div><div class="sc-val" role="cell" id="sSRDisplay">—</div><div class="sc-val" role="cell" id="sSRActual">—</div></div>
+</div>
+</section>
+
+</div>
+</section>
+<section class="damage-board-panel" id="damageBoardUnitPanel" role="tabpanel" aria-labelledby="damageBoardUnitTab" data-damage-board-panel="unit" hidden>
+<div id="unitDetailsPanel0" class="integrated-content is-active" role="tabpanel" aria-labelledby="damageBoardUnitTab" data-damage-board-unit-panel="unit">
+<div class="dps-base-unit-panel" data-dps-base-unit-control>
+<section class="analytics-group analytics-unit-summary-group" aria-label="쥬얼 설정 및 유닛 클리어 정보">
+<div class="dps-base-unit-summary" id="dpsBaseUnitSummary" aria-label="유닛 보드 모드 및 달성 정보" hidden></div>
+</section>
+<input id="dpsBaseUnits" type="hidden" value=""/>
+<input id="dpsBaseUnitSlots" type="hidden" value=""/>
+<input id="dpsBaseUnitVisibleSlotCount" type="hidden" value="0"/>
+<input id="dpsJewelSettings" type="hidden" value="{}"/>
+<input id="dpsBaseUnitExtraSettings" type="hidden" value="{}"/>
+<input id="dpsBaseUnitSlotExpansions" type="hidden" value="[]"/>
+<input id="dpsBaseUnitSpeedMode" type="hidden" value="OFF"/>
+<input id="dpsSanctuaryInfo" type="hidden" value=""/>
+<div id="dpsBaseUnitQuantityStore" hidden></div>
+
+
+</div>
+<section class="analytics-group analytics-unit-slots-group" aria-label="유닛 슬롯 관리" id="damageBoardUnitSlotsPanel" data-damage-board-panel="unit" data-dps-base-unit-control hidden>
+<div class="dps-base-unit-slot-stack" id="dpsBaseUnitSlotStack" aria-label="유닛 보드"></div>
+</section>
+
+<section id="unitSanctuaryPanel" class="unit-sanctuary-panel" aria-label="성소 정보">
+  <header class="unit-sanctuary-heading">
+    <h3><span class="unit-sanctuary-title" id="unitSanctuaryGuideTitle">성소 정보</span> <span id="unitSanctuaryCount">0 / 10</span></h3>
+    <button type="button" class="unit-sanctuary-guide-trigger inline-guide-trigger additional-settings-button" id="unitSanctuaryGuideOpen" aria-expanded="false" aria-controls="unitSanctuaryGuideDetails"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiInfoGlyph"/></svg><span>사용 방법</span></button>
+    <button type="button" class="unit-sanctuary-reset ui-reset-btn" id="unitSanctuaryReset" aria-label="전체 초기화"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg></button>
+  </header>
+  <div id="unitSanctuarySummary" class="unit-basic-summary unit-sanctuary-summary" aria-label="설정된 성소 정보 요약"></div>
+  <div id="unitSanctuaryRows" class="unit-sanctuary-slots" role="group" aria-label="성소 정보 슬롯 목록"></div>
+  <div class="unit-sanctuary-footer" id="unitSanctuaryFooter">
+    <button type="button" class="unit-slot-add-card" id="unitSanctuaryAdd"><span class="unit-slot-add-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M12 5v14"/></svg></span><span class="unit-slot-add-copy"><strong>성소 슬롯 추가</strong><small>1번 슬롯 · 최대 10개</small></span></button>
+  </div>
+  <section id="unitSanctuaryGuideDetails" aria-labelledby="unitSanctuaryGuideTitle" hidden>
+  <div class="sanctuary-guide-body">
+    <p class="sanctuary-guide-intro">클리어에 사용한 성소 스킬과 사용 구간을 기록하는 기능입니다. 버스 성소 설정과는 별도로 관리됩니다.</p>
+    <ol class="sanctuary-guide-steps">
+      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">01</span><span>성소 슬롯 추가</span></h3><p>성소 슬롯 추가 버튼을 눌러 기록할 슬롯을 생성합니다. 최대 10개까지 추가할 수 있습니다.</p></li>
+      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">02</span><span>사용 구간 설정</span></h3><p>스킬을 사용한 시작·종료 라운드 또는 층을 입력합니다. 종료 구간은 시작 구간 이상이어야 합니다.</p></li>
+      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">03</span><span>스킬 및 사용 횟수 설정</span></h3><p>1번·2번 스킬과 각각의 사용 횟수를 설정합니다.</p><p class="guide-emphasis">선택한 스킬은 최소 1회, 두 스킬의 사용 횟수 합계는 최대 4회입니다.</p></li>
+      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">04</span><span>프리셋 저장 및 리포트 공유</span></h3><p>프리셋을 저장하면 설정을 보관할 수 있습니다. 유효한 구간과 스킬이 입력된 슬롯은 클리어 리포트 복사에 포함됩니다.</p></li>
+    </ol>
+    <table class="sanctuary-guide-ranges">
+      <caption>입력 가능 구간</caption>
+      <thead><tr><th scope="col">게임 모드</th><th scope="col">입력 범위</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">일반 라운드</th><td>1~300 라운드</td></tr>
+        <tr><th scope="row">도전의 탑</th><td>1~90층</td></tr>
+        <tr><th scope="row">행성탐사</th><td>1~100층</td></tr>
+      </tbody>
+    </table>
+    <aside class="guide-step guide-note"><h3>ⓘ 입력 시 유의사항</h3><p>라운드·층의 0과 스킬의 ‘선택 안함’은 미입력 상태입니다.</p><p>입력이 완료되지 않은 슬롯은 요약에 표시되더라도 클리어 리포트 복사에서 제외될 수 있습니다.</p></aside>
+  </div>
+  </section>
+</section>
+</div>
+<div id="unitDetailsPanel1" class="integrated-content" role="tabpanel" aria-labelledby="damageBoardJewelTab" data-damage-board-unit-panel="jewel" hidden><section class="trait-preset-unit-jewel-panel trait-preset-unit-jewel-settings-panel" data-trait-preset-unit-jewel-panel="jewel"><div class="dps-jewel-settings-body trait-preset-unit-jewel-settings-body" data-dps-jewel-config><div class="dps-jewel-config-grid" id="dpsJewelConfigGrid"></div></div></section></div>
+
+
+</section>
+
+</div>
+</section>
+
+</div>
+
+
+</div>
+</div>
+</div>
+
+
+
+<div id="additionalRuneModal" class="additional-rune-modal" hidden>
+  <div class="additional-rune-backdrop" data-additional-close aria-hidden="true"></div>
+  <section class="additional-rune-dialog" role="dialog" aria-modal="true" aria-labelledby="additionalRuneTitle" tabindex="-1">
+    <header class="additional-rune-dialog-head"><div><h2 id="additionalRuneTitle">에디셔널 룬 설정</h2><p>룬 10칸 · 스탯 평균 자동 계산</p></div><div class="additional-rune-header-actions"><button type="button" class="additional-rune-done" data-additional-close>설정완료</button><button type="button" class="additional-rune-close" data-additional-close aria-label="닫기">×</button></div></header>
+    <div class="additional-rune-modal-content">
+      <div class="additional-rune-grid-scroll"><div id="additionalRuneGrid" class="additional-rune-grid" aria-label="룬 1번부터 10번까지"></div></div>
+    </div>
+  </section>
+</div>
+<div id="dpsCompareModalOverlay" class="dps-compare-overlay" hidden>
+      <section
+        id="dpsCompareModal"
+        class="dps-compare-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dpsCompareModalTitle"
+        tabindex="-1"
+      >
+        <header class="dps-compare-header">
+          <h2 id="dpsCompareModalTitle">
+            <span id="dpsCompareModalLabel">DPS표</span>
+          </h2>
+          <button type="button" class="dps-compare-close" data-dps-compare-close aria-label="DPS표 닫기">
+            ×
+          </button>
+        </header>
+        <div class="dps-compare-tabs" role="tablist" aria-label="DPS표 기준">
+          <button
+            id="dpsCompareTab-solo"
+            class="dps-compare-tab is-active"
+            type="button"
+            role="tab"
+            data-dps-compare-tab="solo"
+            aria-controls="dpsCompareContent"
+            aria-selected="true"
+            tabindex="0"
+          >
+            개인전
+          </button>
+          <button
+            id="dpsCompareTab-coop"
+            class="dps-compare-tab"
+            type="button"
+            role="tab"
+            data-dps-compare-tab="coop"
+            aria-controls="dpsCompareContent"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            협동전
+          </button>
+          <button
+            id="dpsCompareTab-floor"
+            class="dps-compare-tab"
+            type="button"
+            role="tab"
+            data-dps-compare-tab="floor"
+            aria-controls="dpsCompareContent"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            도탑 / 행성
+          </button>
+        </div>
+        <div
+          id="dpsCompareContent"
+          class="dps-compare-content"
+          role="tabpanel"
+          aria-labelledby="dpsCompareTab-solo"
+        ></div>
+      </section>
+    </div>
+<div aria-live="polite" class="toast-root" id="toastRoot"></div>
+
+<!-- 슬롯 상세 설정은 우측 패널의 overflow에 잘리지 않도록 body 최상위 모달로 배치 -->
+<div id="dpsUnitSlotModal" class="unit-slot-modal-shell" data-dps-base-unit-control hidden>
+  <div class="unit-slot-modal-backdrop" data-unit-detail-backdrop aria-hidden="true"></div>
+  <section class="unit-slot-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="dpsUnitSlotDetailTitle">
+    <header class="unit-slot-modal-header">
+      <span class="unit-slot-modal-heading" id="dpsUnitSlotDetailTitle"><span class="unit-slot-modal-icon" id="dpsUnitSlotDetailNumber">01</span><strong>슬롯 상세 설정</strong></span>
+    </header>
+    <div class="unit-slot-modal-scroll"><div class="unit-detail-panel" id="dpsUnitSlotDetail"></div></div>
+    <footer class="unit-slot-modal-footer"><button type="button" class="unit-slot-modal-cancel" id="unitSlotModalClose" data-unit-detail-close><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg><span>취소</span></button><button type="button" class="unit-slot-modal-done" data-unit-detail-confirm><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><span>설정 완료</span></button></footer>
+  </section>
+</div>
+<dialog id="dpsUnitSlotRemoveDialog" class="unit-slot-remove-dialog" aria-labelledby="dpsUnitSlotRemoveTitle" aria-describedby="dpsUnitSlotRemoveDescription">
+  <div class="unit-slot-remove-dialog-inner">
+    <h2 id="dpsUnitSlotRemoveTitle">슬롯 삭제</h2>
+    <p id="dpsUnitSlotRemoveDescription">슬롯의 설정을 초기화하시겠습니까?</p>
+    <div class="unit-slot-remove-dialog-actions">
+      <button type="button" class="unit-slot-remove-cancel" data-unit-slot-remove-cancel>취소</button>
+      <button type="button" class="unit-slot-remove-confirm" data-unit-slot-remove-confirm>슬롯 삭제</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 프리셋 클리어 리포트: 로컬 미리보기·클립보드 복사만 지원 -->
+<div id="traitClearRecordOverlay" class="trait-clear-record-overlay" hidden>
+  <section id="traitClearRecordPanel" class="trait-clear-record-panel" role="dialog" aria-modal="true" aria-labelledby="traitClearRecordTitle" tabindex="-1">
+    <header class="trait-preset-modal-head trait-clear-record-head">
+      <h2 id="traitClearRecordTitle">클리어 리포트</h2>
+      <div class="trait-clear-record-controls">
+        <button type="button" class="trait-clear-record-copy" data-clear-record-copy><svg class="ui-command-glyph" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span>리포트 복사</span></button>
+        <button type="button" class="trait-preset-modal-close" data-clear-record-close aria-label="클리어 리포트 닫기">×</button>
+      </div>
+    </header>
+    <p class="trait-clear-record-help">리포트를 복사하여 다른 유저들과 공유해 보세요.</p>
+    <div id="traitClearRecordBody" class="trait-clear-record-body" tabindex="0"></div>
+  </section>
+</div>
+<div id="traitPresetManagerOverlay" class="trait-preset-manager-overlay" hidden><div class="trait-preset-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetManagerTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><h2 id="traitPresetManagerTitle">프리셋 관리</h2></div><div class="trait-preset-header-controls"><button class="trait-preset-header-reset ui-reset-btn" data-action="resetAllTraitPresetState" disabled="" id="traitPresetResetAllBtn" aria-label="프리셋 초기화" type="button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>초기화</span></button><button type="button" class="trait-preset-modal-close" data-trait-preset-manager-close aria-label="프리셋 닫기">×</button></div></header>
+<div class="trait-preset-body trait-subgroup-body">
+
+<div class="trait-preset-management">
+<div class="trait-preset-status" id="traitPresetFirstUse" role="status" aria-live="polite" aria-atomic="true" data-status="empty"><span class="trait-preset-status-icon"><svg class="trait-preset-status-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-empty"/></svg></span><div class="trait-preset-status-copy"><strong>저장된 프리셋이 없습니다.</strong><small>가져오거나 새로 저장해 주세요.</small></div></div>
+<div class="trait-preset-work-grid">
+<div class="trait-preset-form-grid" aria-label="프리셋 저장과 적용">
+<div class="trait-preset-form-card">
+<div class="trait-preset-form-heading"><label class="trait-preset-label" for="traitPresetName">프리셋 저장</label></div>
+<div class="trait-preset-name-row">
+<input autocomplete="off" id="traitPresetName" maxlength="40" placeholder="프리셋 이름 입력" type="text"/>
+</div>
+<button class="btn pri ui-action-btn trait-preset-form-action preset-command is-save-command" data-action="saveTraitPreset" aria-label="프리셋 저장" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24"><path d="M4 4h13l3 3v13H4zM8 4v6h8V4M8 20v-7h8v7"></path></svg><span class="trait-preset-button-copy"><strong>저장</strong></span></button></div>
+<div class="trait-preset-form-card is-load">
+<div class="trait-preset-form-heading"><label class="trait-preset-label" for="traitPresetSelect">프리셋 목록</label></div>
+<div class="trait-preset-load-row">
+<select aria-label="프리셋 목록" disabled="" id="traitPresetSelect"><option disabled="" selected="" value="">저장된 프리셋 없음</option></select>
+</div>
+<button class="btn pri ui-action-btn trait-preset-form-action preset-command is-load-command" data-action="loadTraitPreset" aria-label="프리셋 적용" type="button"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3"></path></svg><span class="trait-preset-button-copy"><strong>적용</strong></span></button></div>
+</div>
+<div class="trait-preset-actions" aria-label="프리셋 관리 메뉴">
+<button class="btn subtle ui-action-btn preset-command is-import" data-action="importTraitPresets" data-state="idle" aria-label="프리셋 가져오기" type="button"><i class="preset-command-indicator" aria-hidden="true"></i><svg aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24"><path d="M12 16V4m-4 4 4-4 4 4"></path><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path></svg><span class="preset-command-main"><strong>가져오기</strong><small class="preset-command-hint">파일 불러오기</small></span></button>
+<button class="btn subtle ui-action-btn preset-command is-update" data-action="updateTraitPreset" aria-label="프리셋 업데이트" type="button"><i class="preset-command-indicator" aria-hidden="true"></i><svg aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-5L4 8m0-5v5h5M4 13a8 8 0 0 0 14 5l2-2m0 5v-5h-5"></path></svg><span class="preset-command-main"><strong>업데이트</strong><small class="preset-command-hint">변경사항 반영</small></span></button>
+<button class="btn subtle ui-action-btn preset-command is-backup" data-action="backupTraitPresets" data-state="idle" aria-label="프리셋 백업" type="button"><i class="preset-command-indicator" aria-hidden="true"></i><svg aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24"><path d="M12 4v12m-4-4 4 4 4-4"></path><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path></svg><span class="preset-command-main"><strong>백업</strong><small class="preset-command-hint">프리셋 최신화</small></span></button>
+</div>
+
+</div>
+<input id="traitPresetImportFile" class="hidden-field" type="file" accept=".txt,.json,text/plain,application/json"/>
+
+</div>
+</div>
+<button type="button" class="trait-preset-support" data-trait-preset-support><svg class="trait-preset-support-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-chat"/></svg><span class="trait-preset-support-copy"><strong>제작자 문의</strong><small>오류 제보 및 사용 관련 문의</small></span><span class="trait-preset-support-by">by VAERON <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></span></button></div></div>
+<div id="traitPresetBackupOverlay" class="trait-preset-backup-overlay" hidden><section id="traitPresetBackupPanel" class="trait-preset-backup-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetBackupTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><span class="trait-preset-modal-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><h2 id="traitPresetBackupTitle">프리셋 최신화</h2></div><button type="button" class="ui-icon-btn trait-preset-modal-close" data-trait-preset-backup-close="1" aria-label="프리셋 최신화 닫기">×</button></header><div class="trait-preset-modal-body trait-preset-backup-body" id="traitPresetBackupBody"></div></section></div>
+
+    
+    </div>
+    </section>
+    <script id="builderDirectIntegration">
+    // 빌더는 같은 문서에서 직접 실행하며, DOM·스타일 적용 범위만 분리한다.
+    const DPS_ROOT=document.getElementById('buildDirectPane');
+    const DPS_BODY=document.getElementById('buildDirectBody');
+    window.DPS_BUILD_VERSION=window.APP_VERSION;
+    window.DPS_STANDALONE_VIEW=['board','utility','both'].includes(dpsWindowView) ? dpsWindowView : '';
+    if(window.DPS_STANDALONE_VIEW) DPS_ROOT.dataset.dpsStandaloneView=window.DPS_STANDALONE_VIEW;
+
+(function(){
+  function copyTextFallback(text){
+    var area=document.createElement('textarea');
+    area.value=text;
+    area.setAttribute('readonly','');
+    area.style.position='fixed';
+    area.style.left='-9999px';
+    DPS_BODY.appendChild(area);
+    area.select();
+    try{document.execCommand('copy');}catch(e){ window.DPS_LAST_BOOT_COPY_ERROR=e; }
+    area.remove();
+  }
+  function copyBootErrorCode(code,btn){
+    var done=function(){ if(btn){ var old=btn.textContent; btn.textContent='복사됨'; setTimeout(function(){btn.textContent=old;},1200); } };
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(code).then(done).catch(function(){ copyTextFallback(code); done(); });
+    }else{
+      copyTextFallback(code); done();
+    }
+  }
+  window.dpsShowBootError=function(code, err){
+    if(window.__dpsBootError && window.DPS_LAST_BOOT_ERROR && window.DPS_LAST_BOOT_ERROR.code!==code) return;
+    window.__dpsBootError=true;
+    try{window.DPS_LAST_BOOT_ERROR={code:code,error:err||'unknown',time:Date.now()};}catch(e){window.__dpsBootErrorRecordFailed=e;}
+    if(document.readyState==='loading' && !document.getElementById('dpsBootScreen')){
+      document.addEventListener('DOMContentLoaded',function(){window.dpsShowBootError(code,err);},{once:true});
+      return;
+    }
+    try{
+      var types={
+        B1001:{title:'빌더 실행 오류',guide:'초기화 중 오류가 발생했습니다. 아래 상세 원인을 확인하세요.'},
+        B1002:{title:'스크립트 파일 로드 실패',guide:'표시된 JavaScript 파일의 경로와 배포 여부를 확인하세요.'},
+        B1003:{title:'앱 시작 함수 확인 실패',guide:'build/app.js 로드 및 dpsStartApp 함수 정의를 확인하세요.'},
+        B1004:{title:'필수 리소스 로드 실패',guide:'표시된 CSS·이미지 파일이 정상적으로 제공되는지 확인하세요.'},
+        S1001:{title:'서비스가 중지됨',guide:'서비스가 중지됨, 제작자에게 문의해주세요'}
+      };
+      var info=types[code]||{title:'빌더 초기화 오류',guide:'오류 정보를 확인하세요.'};
+      var reason=err && err.message ? String(err.message) : String(err || '상세 원인 정보가 없습니다.');
+      var matched=(reason + "\n" + (err && err.stack || "")).match(/((?:(?:build|nexus)\/)?[\w.-]+\.(?:js|css|png|jpe?g|webp|svg))(?:\?[^\s]*)?/i);
+      var file=err && (err.file || err.fileName) || (matched && matched[1]) || (code==='B1003'?'build/app.js':'');
+      DPS_ROOT.classList.add('dps-booting','dps-boot-error');
+      var boot=document.getElementById('dpsBootScreen');
+      if(boot){
+        boot.removeAttribute('aria-hidden');
+        boot.innerHTML='<div class="boot-card"><div class="boot-title" id="dpsBootTitle"></div><div class="boot-desc" id="dpsBootDesc"></div><div class="boot-error-code" id="dpsBootCode" aria-label="오류코드"></div><div class="boot-error-info"><div class="boot-error-label">상세 원인</div><div class="boot-error-reason" id="dpsBootReason"></div><div class="boot-error-file" id="dpsBootFile" hidden></div></div><div class="boot-actions"><button class="boot-action-btn" id="dpsBootCopyBtn" type="button">오류 정보 복사</button><button class="boot-action-btn primary" id="dpsBootReloadBtn" type="button">새로고침</button></div></div>';
+        if(code==='S1001'){
+          boot.querySelector('.boot-error-info').hidden=true;
+          var contact=document.createElement('div');
+          contact.className='boot-error-info boot-service-contact';
+          contact.innerHTML='<div class="boot-error-label">제작자 배틀태그</div><div class="boot-error-reason">VAERON#3787</div><div class="boot-error-label" style="margin-top:12px">디스코드</div><a href="https://discord.gg/z7DwqvGeB5" target="_blank" rel="noopener noreferrer">https://discord.gg/z7DwqvGeB5</a>';
+          boot.querySelector('.boot-actions').before(contact);
+        }
+        document.getElementById('dpsBootTitle').textContent=info.title;
+        document.getElementById('dpsBootDesc').textContent=info.guide;
+        document.getElementById('dpsBootCode').textContent=code;
+        document.getElementById('dpsBootReason').textContent=reason;
+        var fileElement=document.getElementById('dpsBootFile');
+        if(file){fileElement.textContent='관련 파일: '+file;fileElement.hidden=false;}
+        var copyBtn=document.getElementById('dpsBootCopyBtn');
+        var reloadBtn=document.getElementById('dpsBootReloadBtn');
+        if(copyBtn) copyBtn.addEventListener('click',function(){
+          var report=code==='S1001'
+            ? [code,info.title,info.guide,'제작자 배틀태그: VAERON#3787','디스코드: https://discord.gg/z7DwqvGeB5']
+            : [code,info.title,reason,file?'관련 파일: '+file:''];
+          copyBootErrorCode(report.filter(Boolean).join('\n'),copyBtn);
+        });
+        if(reloadBtn) reloadBtn.addEventListener('click',function(){window.location.reload();});
+      }
+    }catch(e){window.__dpsBootRenderError=e;}
+  };
+  window.dpsReportBootResourceError=function(code,error){
+    if(window.__dpsBootErrorPending || window.__dpsBootError)return;
+    window.__dpsBootErrorPending=true;
+    var complete=function(resolved){
+      window.__dpsBootErrorPending=false;
+      window.dpsShowBootError(resolved,error);
+    };
+    if(typeof window.nexusDiagnoseServiceFailure==='function'){
+      window.nexusDiagnoseServiceFailure(code,complete);
+    }else complete(code);
+  };
+  window.addEventListener('error',function(event){
+    if(event.error && /(?:^|\/)build\/[^/]+\.js(?:\?|$)/.test(event.filename||'') && !window.__dpsAppReady && !window.__dpsBootError && !window.__dpsBootErrorPending){
+      window.dpsShowBootError('B1001',event.error);
+    }
+  });
+  function waitForEssentialResources(){
+    function waitForDocument(){
+      if(document.readyState!=='loading') return Promise.resolve();
+      return new Promise(function(resolve){document.addEventListener('DOMContentLoaded',resolve,{once:true});});
+    }
+    function waitForStyle(){
+      var links=Array.from(document.querySelectorAll('link[data-dps-boot-style]'));
+      if(links.length!==3) return Promise.reject(new Error('required builder stylesheet missing'));
+      return Promise.all(links.map(function(link){
+        if(link.dataset.loadFailed==='1') return Promise.reject(new Error('required stylesheet failed'));
+        if(link.sheet) return Promise.resolve();
+        return new Promise(function(resolve,reject){
+          link.addEventListener('load',resolve,{once:true});
+          link.addEventListener('error',function(){reject(new Error('required stylesheet failed'));},{once:true});
+        });
+      }));
+    }
+    function waitForPageLoad(){
+      if(document.readyState==='complete') return Promise.resolve();
+      return new Promise(function(resolve){window.addEventListener('load',resolve,{once:true});});
+    }
+    function waitForImages(){
+      // 지연 로딩·숨겨진 상세 화면은 첫 화면 필수 리소스가 아닙니다.
+      var images=Array.from(DPS_BODY.querySelectorAll('img')).filter(function(img){
+        return img.src && img.loading!=='lazy' && !img.closest('[hidden]');
+      });
+      return Promise.all(images.map(function(img){
+        function check(){
+          if(img.naturalWidth>0) return;
+          throw new Error('required image failed: '+(img.currentSrc || img.src));
+        }
+        if(img.complete){try{check();return Promise.resolve();}catch(error){return Promise.reject(error);}}
+        return new Promise(function(resolve,reject){
+          img.addEventListener('load',resolve,{once:true});
+          img.addEventListener('error',function(){reject(new Error('required image failed: '+(img.currentSrc || img.src)));},{once:true});
+        });
+      }));
+    }
+    function waitForPaint(){
+      return new Promise(function(resolve){
+        requestAnimationFrame(function(){requestAnimationFrame(resolve);});
+      });
+    }
+    // 준비 완료 조건은 유지하고 독립 리소스 대기만 병렬화한다.
+    return waitForDocument().then(function(){
+      return Promise.all([
+        waitForStyle(),waitForPageLoad(),
+        document.fonts ? document.fonts.ready : null,
+        waitForImages()
+      ]);
+    }).then(waitForPaint);
+  }
+  function dpsReleaseBootScreen(){
+    if(window.__dpsBootError || !window.__dpsAppReady || !window.__dpsResponsiveLayoutReady || window.__dpsBootReleaseStarted) return;
+    window.__dpsBootReleaseStarted=true;
+    waitForEssentialResources().then(function(){
+      if(window.__dpsBootError) return;
+      finishRelease();
+    }).catch(function(error){window.dpsReportBootResourceError('B1004',error);});
+  }
+  function finishRelease(){
+    if(window.__dpsBootError) return;
+    DPS_ROOT.classList.remove('dps-booting','dps-boot-error');
+    var boot=document.getElementById('dpsBootScreen');
+    if(boot) boot.setAttribute('aria-hidden','true');
+  }
+  window.dpsMarkAppReady=function(){
+    window.__dpsAppReady=true;
+    dpsReleaseBootScreen();
+  };
+  window.dpsMarkResponsiveLayoutReady=function(){
+    window.__dpsResponsiveLayoutReady=true;
+    dpsReleaseBootScreen();
+  };
+})();
+
+    (function(){
+        'use strict';
+        var initialized=false;
+        var standalone=window.NEXUS_WINDOW_MODE==='builder';
+        var combined=window.NEXUS_WINDOW_MODE==='combined';
+
+function loadScriptSequence(files, onComplete){
+  var remaining=files.length,failed=false;
+  if(!remaining){if(typeof onComplete==='function')onComplete();return;}
+  files.forEach(function(fileName){
+    var script=document.createElement('script');
+    script.src=window.nexusAssetUrl(fileName);
+    script.charset='UTF-8';
+    script.async=false; // 파일 다운로드는 병렬, 실행은 기존 배열 순서 그대로
+    script.addEventListener('load',function(){
+      if(--remaining===0 && !failed && typeof onComplete==='function')onComplete();
+    },{once:true});
+    script.addEventListener('error',function(){
+      failed=true;
+      --remaining;
+      if(typeof window.dpsReportBootResourceError==='function')
+        window.dpsReportBootResourceError('B1002',new Error(fileName+' load failed'));
+    },{once:true});
+    document.head.appendChild(script);
+  });
+}
+
+        function ensureBuilder(){
+            if(initialized)return;
+            initialized=true;
+            DPS_ROOT.classList.add('dps-booting');
+            var font=document.createElement('link');
+            font.rel='stylesheet';
+            font.crossOrigin='anonymous';
+            font.href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css';
+            document.head.appendChild(font);
+            var styles=['build/style.css','build/preset.css','build/unit.css'];
+            Promise.all(styles.map(function(src){
+                return new Promise(function(resolve,reject){
+                    var link=document.createElement('link');
+                    link.rel='stylesheet';link.dataset.dpsBootStyle='1';
+                    link.href=window.nexusAssetUrl(src);
+                    link.addEventListener('load',resolve,{once:true});
+                    link.addEventListener('error',function(){link.dataset.loadFailed='1';reject(new Error(src+' load failed'));},{once:true});
+                    document.head.appendChild(link);
+                });
+            })).then(function(){
+                loadScriptSequence(['build/data.js','build/calc.js','build/app.js','build/unit.js','build/preset_io.js','build/report.js','build/preset.js','build/responsive.js'],function(){
+                    if(typeof window.dpsStartApp==='function')window.dpsStartApp();
+                    else window.dpsShowBootError('B1003',new Error('app start function missing'));
+                });
+            }).catch(function(error){window.dpsReportBootResourceError('B1004',error);});
+        }
+        window.NEXUS_ACTIVATE_BUILDER=function(active){
+            var main=document.getElementById('mainLayout');if(!main)return;
+            var entering=DPS_ROOT.hidden;
+            DPS_ROOT.hidden=combined ? false : !active;
+            main.hidden=combined ? false : active;
+            document.documentElement.classList.toggle('nexus-builder-active',!!active && !combined);
+            if(active || combined){
+                ensureBuilder();
+                window.dpsSyncResponsiveLayout?.();
+                if(entering && window.__dpsAppReady) window.DpsPreset?.openIfUnloaded();
+            }
+        };
+        if(standalone || combined){
+            var startBuilderWindow=function(){
+                if(standalone)document.title='개복디 빌더 · 독립창';
+                window.NEXUS_ACTIVATE_BUILDER(true);
+            };
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startBuilderWindow,{once:true});
+            else startBuilderWindow();
+        }
+    })();
+    </script>
+
+    <script>
+        (function(){
+            var files = ['nexus/data.js','nexus/checklist.js','nexus/responsive.js','nexus/app.js'];
+            function loadScripts(){
+                files.forEach(function(src){
+                    var script=document.createElement('script');
+                    script.src=window.nexusAssetUrl(src);
+                    script.async=false; // 다운로드는 병렬, 실행은 기존 넥서스 의존성 순서대로
+                    script.onerror=function(){
+                        window.nexusReportBootResourceError('N1002',new Error(src+' load failed'));
+                    };
+                    document.body.appendChild(script);
+                });
+            }
+            if (window.NEXUS_WINDOW_MODE !== 'builder') loadScripts();
+        })();
+    </script>
+</body>
+</html>
