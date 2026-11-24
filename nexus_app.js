@@ -2308,7 +2308,7 @@
     function setFontScale(scale) {
         if (!Number.isFinite(scale)) return;
         _fontScale = Math.max(APP_INTERNAL.fontScaleMin, Math.min(APP_INTERNAL.fontScaleMax, scale));
-        window.NEXUS_SYNC_BUILDER_FONT?.(_fontScale);
+        window.NEXUS_SET_BUILDER_FONT_SCALE?.(_fontScale);
         document.documentElement.style.setProperty('--fs-scale', _fontScale);
         const label = getEl('fontSizeLabel');
         if (label) label.innerText = `${Math.round(_fontScale * 100)}%`;
@@ -2361,6 +2361,7 @@
         _smartChangePointerCardUid = null;
         const card = e.target.closest('.unit-card[data-action="toggleUnit"]');
         if ((pointerCardUid && card?.dataset.uid === pointerCardUid) || e.target.closest('.unit-card .uc-ctrl-area')) return;
+        if(e.target.closest('#buildDirectPane'))return;
         const actionEl = e.target.closest('[data-action]');
         if (!actionEl) {
             if (_currentHighlight) toggleHighlight(null);
@@ -2450,6 +2451,7 @@
     });
 
     document.addEventListener('pointerdown', e => {
+        if(e.target.closest('#buildDirectPane'))return;
         _smartChangePointerCardUid = null;
         const actionEl = e.target.closest('[data-action="smartChange"]');
         if (actionEl) {
@@ -2462,6 +2464,7 @@
         if (e.target.closest('[data-action="decreaseFont"]')) { e.preventDefault(); startFontHold(-(APP_INTERNAL.fontScaleStep)); return; }
     });
     document.addEventListener('keydown', e => {
+        if (e.target?.closest?.('#buildDirectPane'))return;
         if (e.target?.matches?.('#unitboardTabs [role="tab"]') && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
             e.preventDefault();
             const tabs = Array.from(getEl('unitboardTabs').querySelectorAll('[role="tab"]'));

@@ -401,7 +401,7 @@ function getJewelImageSource(name){
   const jewelName=String(name||'').trim();
   const fileName=Object.hasOwn(JEWEL_IMAGE_NAMES,jewelName) ? JEWEL_IMAGE_NAMES[jewelName] : '';
   const localUrl=fileName ? `./asset/jw/${fileName}.png` : '';
-  return localUrl ? window.dpsAssetUrl(localUrl) : '';
+  return localUrl ? window.nexusAssetUrl(localUrl) : '';
 }
 
 function handleJewelImageError(img){
@@ -412,7 +412,7 @@ function handleJewelImageError(img){
 }
 
 function bindJewelImageEvents(){
-  document.addEventListener('error', e=>{
+  DPS_BODY.addEventListener('error', e=>{
     const img=e.target?.closest?.('.jewel-card-visual img[data-jewel-image]');
     if(img) handleJewelImageError(img);
   }, true);
@@ -1318,8 +1318,7 @@ function setDpsBaseUnitStoredValue(value, notify=true, options={}){
   const input=$('dpsBaseUnits');
   const slotInput=$('dpsBaseUnitSlots');
   if(!input || !slotInput) return;
-  const initialIds=dpsBaseUnitSelectionIds(normalizeDpsBaseUnitsValue(value));
-  const selectedIds=filterDpsBaseUnitIdsForCurrentPlanet(initialIds).slice(0,dpsBaseUnitSelectionLimit());
+  const selectedIds=filterDpsBaseUnitIdsForCurrentPlanet(dpsBaseUnitSelectionIds(value)).slice(0,dpsBaseUnitSelectionLimit());
   const requestedSlots=options.slots ? normalizeDpsBaseUnitSlotValues(options.slots) : currentDpsBaseUnitSlots();
   const slots=reconcileDpsBaseUnitSlots(filterDpsBaseUnitSlotsForCurrentPlanet(requestedSlots),selectedIds);
   writeDpsBaseUnitSelection(input,slotInput,slots);
@@ -1429,7 +1428,7 @@ function syncDpsUnitSlotModal(slots){
   if(!shell || !panel || !title) return;
   shell.hidden=!dpsUnitDetailOpen;
   shell.classList.toggle('is-open',dpsUnitDetailOpen);
-  document.body.classList.toggle('unit-slot-modal-open',dpsUnitDetailOpen);
+  DPS_BODY.classList.toggle('unit-slot-modal-open',dpsUnitDetailOpen);
   if(!dpsUnitDetailOpen){
     if(panel.innerHTML) panel.replaceChildren();
     return;
@@ -1555,7 +1554,7 @@ function restoreDpsBaseUnitViewState(stack,state){
   const focus=state?.focus;
   if(!stack || !focus) return;
   if(focus.type==='id'){
-    const target=document.getElementById(focus.id);
+    const target=DPS_BODY.querySelector('#'+CSS.escape(focus.id));
     if(target && stack.contains(target)){
       target.focus({preventScroll:true});
       if(typeof focus.start==='number' && target.setSelectionRange) target.setSelectionRange(focus.start,focus.end);
@@ -1586,7 +1585,7 @@ function syncDpsBaseUnitControl(options={}){
   const input=$('dpsBaseUnits');
   const slotInput=$('dpsBaseUnitSlots');
   if(!input || !slotInput) return;
-  const selectedIds=filterDpsBaseUnitIdsForCurrentPlanet(dpsBaseUnitSelectionIds(normalizeDpsBaseUnitsValue(input.value || '')));
+  const selectedIds=filterDpsBaseUnitIdsForCurrentPlanet(dpsBaseUnitSelectionIds(input.value || ''));
   sanitizeDpsBaseUnitVoidPowerAvailability();
   const rawSlots=String(slotInput.value || '');
   let slots=filterDpsBaseUnitSlotsForCurrentPlanet(rawSlots ? normalizeDpsBaseUnitSlotValues(rawSlots) : compactDpsBaseUnitSlots(selectedIds));
@@ -1628,9 +1627,9 @@ function applyDpsBaseUnitAddDefaults(unitId){
 
 /* ── 11 · UI 이벤트 연결 ── */
 function bindDpsBaseUnitControlEvents(){
-  if(document.documentElement.dataset.dpsBaseUnitControlBound==='1') return;
-  document.documentElement.dataset.dpsBaseUnitControlBound='1';
-  document.addEventListener('keydown', e=>{
+  if(DPS_ROOT.dataset.dpsBaseUnitControlBound==='1') return;
+  DPS_ROOT.dataset.dpsBaseUnitControlBound='1';
+  DPS_BODY.addEventListener('keydown', e=>{
     if(!dpsUnitDetailOpen) return;
     const shell=$('dpsUnitSlotModal');
     if(!shell || shell.hidden) return;
@@ -1646,7 +1645,7 @@ function bindDpsBaseUnitControlEvents(){
       else if(!e.shiftKey && (document.activeElement===last || !shell.contains(document.activeElement))){e.preventDefault();first.focus();}
     }
   },true);
-  document.addEventListener('click', e=>{
+  DPS_BODY.addEventListener('click', e=>{
     const cancelSlotRemoval=e.target?.closest?.('[data-unit-slot-remove-cancel]');
     if(cancelSlotRemoval?.closest?.('#dpsUnitSlotRemoveDialog')){
       e.preventDefault();
@@ -1734,12 +1733,12 @@ function bindDpsBaseUnitControlEvents(){
     toggleDpsBaseUnitSlotExpansion(slotExpansion.getAttribute('data-dps-base-unit-slot-expansion-toggle') || '');
     scheduleAutoSave();
   }, true);
-  document.addEventListener('input', e=>{
+  DPS_BODY.addEventListener('input', e=>{
     const input=e.target?.closest?.('[data-dps-base-unit-slot-enhance]');
     if(!input?.closest?.('[data-dps-base-unit-control]')) return;
     syncDpsBaseUnitEnhanceControl(input,false);
   }, true);
-  document.addEventListener('change', e=>{
+  DPS_BODY.addEventListener('change', e=>{
     const select=e.target?.closest?.('[data-dps-base-unit-slot]');
     if(select?.closest?.('[data-dps-base-unit-control]')){
       dpsUnitSelectedSlot=Number(select.getAttribute('data-dps-base-unit-slot'))||0;

@@ -907,10 +907,22 @@ function dpsDataArray(key,fallback=[]){
 function dpsBaseUnitList(){
   return dpsDataArray('DPS_BASE_UNITS');
 }
+let dpsBaseUnitLookupSource=null;
+let dpsBaseUnitLookup=null;
 function resolveDpsBaseUnit(unitOrId){
   if(unitOrId && typeof unitOrId==='object') return unitOrId;
   const id=String(unitOrId ?? '');
-  return dpsBaseUnitList().find(unit=>String(unit.id)===id) || null;
+  const units=dpsBaseUnitList();
+  if(!Object.isFrozen(units)) return units.find(unit=>String(unit.id)===id) || null;
+  if(units!==dpsBaseUnitLookupSource){
+    dpsBaseUnitLookupSource=units;
+    dpsBaseUnitLookup=new Map();
+    for(const unit of units){
+      const key=String(unit.id);
+      if(!dpsBaseUnitLookup.has(key)) dpsBaseUnitLookup.set(key,unit);
+    }
+  }
+  return dpsBaseUnitLookup.get(id) || null;
 }
 function dpsBaseUnitById(id){
   return resolveDpsBaseUnit(id);
@@ -2166,7 +2178,7 @@ function normalizeSpBankApplyValue(value){
   return (raw==='반영' || raw==='적용' || upper==='ON' || upper==='TRUE' || upper==='1' || upper==='YES') ? '반영' : '미반영';
 }
 function isSpBankApplied(){
-  const select=(typeof $==='function' ? $('spBankApply') : (typeof document!=='undefined' ? document.getElementById('spBankApply') : null));
+  const select=(typeof $==='function' ? $('spBankApply') : (typeof document!=='undefined' ? DPS_BODY.querySelector('#spBankApply') : null));
   return select ? normalizeSpBankApplyValue(select.value)==='반영' : false;
 }
 function spBankRawBonus(){
@@ -2380,8 +2392,8 @@ function syncTraitLimitInputs(){
   TRAIT_LIMIT_INPUT_IDS.forEach(id=>syncTraitLimitInputDisplay($(id)));
 }
 function bindTraitLimitDisplayEvents(){
-  document.addEventListener('focusin', e=>prepareTraitLimitInputForEdit(e.target), true);
-  document.addEventListener('focusout', e=>{
+  DPS_BODY.addEventListener('focusin', e=>prepareTraitLimitInputForEdit(e.target), true);
+  DPS_BODY.addEventListener('focusout', e=>{
     if(e.target && TRAIT_LIMIT_INPUT_IDS.has(e.target.id)){
       syncTraitLimitInputDisplay(e.target);
       commitAppUpdate();

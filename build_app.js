@@ -37,7 +37,7 @@ function withCalculationElementOverrides(ids,callback){
   const previous=calculationElementOverrides;
   const next=previous ? new Map(previous) : new Map();
   (ids || []).forEach(id=>{
-    const real=document.getElementById(id);
+    const real=id ? DPS_BODY.querySelector('#'+CSS.escape(String(id))) : null;
     if(!real) return;
     const clone=real.cloneNode(true);
     if('value' in real) clone.value=real.value;
@@ -49,9 +49,9 @@ function withCalculationElementOverrides(ids,callback){
   try{return callback();}
   finally{calculationElementOverrides=previous;}
 }
-const $=id=>calculationElementOverrides?.get(id) || document.getElementById(id);
-const qs=selector=>document.querySelector(selector);
-const qsa=selector=>document.querySelectorAll(selector);
+const $=id=>calculationElementOverrides?.get(id) || (id ? DPS_BODY.querySelector('#'+CSS.escape(String(id))) : null);
+const qs=selector=>DPS_BODY.querySelector(selector);
+const qsa=selector=>DPS_BODY.querySelectorAll(selector);
 function escapeHtml(value){
   return String(value ?? '').replace(/[&<>"']/g, char=>({
     '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
@@ -82,7 +82,7 @@ function showToast(message, type='ok', durationMs){
       root.id='toastRoot';
       root.className='toast-root';
       root.setAttribute('aria-live','polite');
-      document.body.appendChild(root);
+      DPS_BODY.appendChild(root);
     }
     const text=String(message ?? '').trim();
     if(!text) return;
@@ -341,18 +341,18 @@ function syncAdditionalRuneCard(index,rune){
 function closeAdditionalRuneModal(){
   const modal=$('additionalRuneModal');
   if(modal) modal.hidden=true;
-  document.body.classList.remove('additional-rune-open');
+  DPS_BODY.classList.remove('additional-rune-open');
   $('additionalRuneOpen')?.focus();
 }
 function openAdditionalRuneModal(){
   renderAdditionalRuneGrid();
   const modal=$('additionalRuneModal');
   if(modal) modal.hidden=false;
-  document.body.classList.add('additional-rune-open');
+  DPS_BODY.classList.add('additional-rune-open');
   modal?.querySelector('[data-additional-close]')?.focus();
 }
 function bindAdditionalRuneEvents(){
-  document.addEventListener('click',event=>{
+  DPS_BODY.addEventListener('click',event=>{
     if(event.target.closest?.('#additionalRuneOpen')){openAdditionalRuneModal();return;}
     if(event.target.closest?.('[data-additional-close]')){closeAdditionalRuneModal();return;}
     const reset=event.target.closest?.('[data-additional-rune-reset]');
@@ -777,13 +777,13 @@ function syncTraitLimitControlPresentation(){
   for(const id of ['traitLimitLifeBonus','traitLimitMagicAP','traitLimitMultiTarget','traitLimitInfinite']){
     const field=$(id);
     if(!field) continue;
-    document.querySelectorAll(`[data-limit-select="${id}"]`).forEach(button=>{
+    DPS_BODY.querySelectorAll(`[data-limit-select="${id}"]`).forEach(button=>{
       button.setAttribute('aria-pressed',String(button.dataset.limitValue===field.value));
     });
   }
 }
 function bindTraitLimitChoiceEvents(){
-  document.addEventListener('click',event=>{
+  DPS_BODY.addEventListener('click',event=>{
     const button=event.target.closest?.('[data-limit-select][data-limit-value]');
     if(!button || button.disabled) return;
     const field=$(button.dataset.limitSelect);
@@ -793,7 +793,7 @@ function bindTraitLimitChoiceEvents(){
     field.dispatchEvent(new Event('change',{bubbles:true}));
   });
   ['input','change'].forEach(type=>{
-    document.addEventListener(type,event=>{
+    DPS_BODY.addEventListener(type,event=>{
       if(TRAIT_LIMIT_STATUS_FIELDS.includes(event.target?.id)) syncTraitLimitControlPresentation();
     },true);
   });
@@ -913,7 +913,7 @@ function syncArtifactDpsViewSwitch(){
   setText('dpsCompareOpen',dpsTableTitle);
   setText('dpsCompareModalLabel',dpsTableTitle);
   setText('traitOptimizeScopeTitle',active ? '유물 최적화 범위' : '특성 최적화 범위');
-  const optimizeButton=document.querySelector('[data-action="optimizeSP"]');
+  const optimizeButton=DPS_BODY.querySelector('[data-action="optimizeSP"]');
   if(optimizeButton) optimizeButton.textContent=active ? '유물 최적화' : '특성 최적화';
   syncOnOffSwitch(toggle,{
     active,disabled,label:'유물 DPS',disabledLabel:'유물 DPS 사용 불가',
@@ -1112,7 +1112,7 @@ function openDpsCompareModal(trigger){
   dpsCompareReturnFocus=trigger||document.activeElement;
   activeDpsCompareMode=isTowerDifficulty() || isPlanetExplorationDifficulty() ? 'floor' : (isCoopActive() ? 'coop' : 'solo');
   overlay.hidden=false;
-  document.body.classList.add('dps-compare-modal-open');
+  DPS_BODY.classList.add('dps-compare-modal-open');
   renderDpsCompareContent();
   $('dpsCompareModal')?.focus({preventScroll:true});
 }
@@ -1120,7 +1120,7 @@ function closeDpsCompareModal(){
   const overlay=$('dpsCompareModalOverlay');
   if(!overlay || overlay.hidden) return;
   overlay.hidden=true;
-  document.body.classList.remove('dps-compare-modal-open');
+  DPS_BODY.classList.remove('dps-compare-modal-open');
   const focus=dpsCompareReturnFocus;
   dpsCompareReturnFocus=null;
   if(focus?.isConnected) focus.focus({preventScroll:true});
@@ -1287,12 +1287,12 @@ function activateIntegratedTab(group,index){
   }
 }
 function bindIntegratedTabEvents(){
-  document.addEventListener('click',event=>{
+  DPS_BODY.addEventListener('click',event=>{
     const button=event.target.closest?.('[data-integrated-tab]');
     if(!button) return;
     activateIntegratedTab(button.dataset.integratedTab,Number(button.dataset.integratedIndex));
   });
-  document.addEventListener('keydown',event=>{
+  DPS_BODY.addEventListener('keydown',event=>{
     const button=event.target.closest?.('[data-integrated-tab]');
     if(!button || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
     const group=button.dataset.integratedTab;
@@ -1304,7 +1304,7 @@ function bindIntegratedTabEvents(){
     tabs[next].focus({preventScroll:true});
   });
   // Each jewel disclosure retains its controls and data when folded.
-  document.addEventListener('click',event=>{
+  DPS_BODY.addEventListener('click',event=>{
     const toggle=event.target.closest?.('[data-dps-jewel-toggle]');
     if(!toggle) return;
     const card=toggle.closest('[data-dps-jewel-card]');
@@ -1352,13 +1352,13 @@ function setDamageBoardTab(active){
   if(next==='jewel') renderDpsJewelConfigGrids();
 }
 function bindDamageBoardTabEvents(){
-  document.addEventListener('click',event=>{
+  DPS_BODY.addEventListener('click',event=>{
     const tab=event.target?.closest?.('[data-damage-board-subtab]');
     if(!tab || tab.disabled || tab.dataset.damageBoardSubtab==='dps') return;
     event.preventDefault();
     setDamageBoardTab(tab.dataset.damageBoardSubtab);
   },true);
-  document.addEventListener('keydown',event=>{
+  DPS_BODY.addEventListener('keydown',event=>{
     const tab=event.target?.closest?.('[data-damage-board-subtab]');
     if(!tab || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
     const tabs=[...tab.parentElement.querySelectorAll('[data-damage-board-subtab]')].filter(button=>!button.disabled);
@@ -1419,7 +1419,7 @@ function bindDamageBoardSwitchEvents(){
       if(event.clientX<bounds.left || event.clientX>bounds.right || event.clientY<bounds.top || event.clientY>bounds.bottom) guide.close();
     });
   }
-  document.addEventListener('click', e=>{
+  DPS_BODY.addEventListener('click', e=>{
     const speedToggle=e.target?.closest?.('[data-spec-dps-speed-toggle]');
     if(speedToggle){
       e.preventDefault();
@@ -1604,7 +1604,7 @@ function commitTraitInput(el){
   setInv(row,+el.value);
 }
 function getTraitScrollHost(){
-  return qs('.mobile-page-trait.active') || qs('.col-mid') || document.scrollingElement || document.documentElement;
+  return qs('.mobile-page-trait.active') || qs('.col-mid') || DPS_BODY;
 }
 function getNextTraitInputRow(el,dir){
   const inputs=Array.from(qsa('.tv-input[data-row]:not(:disabled)'));
@@ -1622,18 +1622,19 @@ function focusTraitInputRow(row,hostScroll,pageX,pageY){
     try{next.focus({preventScroll:true});}catch{next.focus();}
     if(typeof next.select==='function') next.select();
     if(host) host.scrollTop=hostScroll;
-    window.scrollTo(pageX,pageY);
+    const page=window.NEXUS_WINDOW_MODE==='combined' ? window : window.NEXUS_WINDOW_MODE==='builder' ? DPS_ROOT : DPS_BODY;
+    page.scrollTo(pageX,pageY);
     return true;
   };
   setTimeout(()=>{ if(!focusNow()) requestAnimationFrame(focusNow); },0);
 }
 function bindTraitInputEvents(){
-  document.addEventListener('change', e=>{
+  DPS_BODY.addEventListener('change', e=>{
     if(Date.now()<traitKeyNavGuardUntil) return;
     const input=e.target.closest && e.target.closest('.tv-input[data-row]');
     if(input) commitTraitInput(input);
   }, true);
-  document.addEventListener('keydown', e=>{
+  DPS_BODY.addEventListener('keydown', e=>{
     const input=e.target.closest && e.target.closest('.tv-input[data-row]');
     if(!input || (e.key!=='Tab' && e.key!=='Enter')) return;
     e.preventDefault();
@@ -1642,12 +1643,14 @@ function bindTraitInputEvents(){
     const nextRow=getNextTraitInputRow(input,dir);
     const host=getTraitScrollHost();
     const hostScroll=host ? host.scrollTop : 0;
-    const pageX=window.scrollX, pageY=window.scrollY;
+    const page=window.NEXUS_WINDOW_MODE==='combined' ? window : window.NEXUS_WINDOW_MODE==='builder' ? DPS_ROOT : DPS_BODY;
+    const pageX=page===window ? window.scrollX : page.scrollLeft;
+    const pageY=page===window ? window.scrollY : page.scrollTop;
     traitKeyNavGuardUntil=Date.now()+250;
     commitTraitInput(input);
     focusTraitInputRow(nextRow,hostScroll,pageX,pageY);
   }, true);
-  document.addEventListener('click', e=>{
+  DPS_BODY.addEventListener('click', e=>{
     const target=e.target;
     if(!(target instanceof Element)) return;
     const input=target.closest('.tv-input[data-row]');
@@ -1716,7 +1719,7 @@ function commitTraitInvestmentChange(){
   commitAppUpdate({recalculate:'now'});
 }
 function bindTraitHoldEvents(){
-  document.addEventListener('pointerdown', e=>{
+  DPS_BODY.addEventListener('pointerdown', e=>{
     const btn=e.target.closest('[data-action="traitAdjust"]');
     if(!btn) return;
     startTraitAdjustHold(btn,e);
@@ -1839,13 +1842,13 @@ function clearAll(){
 /* 11-A · 글자 크기·화면 설정 */
 /* 11-A · 넥서스 공통 글씨 크기 설정 · 메인/독립 창 동기화 */
 function getFontScale(){
-  const raw=document.documentElement.style.getPropertyValue('--app-font-scale');
+  const raw=DPS_ROOT.style.getPropertyValue('--app-font-scale');
   const scale=parseFloat(raw);
   return Number.isFinite(scale) ? scale : DPS_CONFIG.ui.fontScaleDefault;
 }
 function applyFontScale(scale,options={}){
   const next=Math.max(DPS_CONFIG.ui.fontScaleMin,Math.min(DPS_CONFIG.ui.fontScaleMax,Number(scale)||DPS_CONFIG.ui.fontScaleDefault));
-  document.documentElement.style.setProperty('--app-font-scale',next.toFixed(2));
+  DPS_ROOT.style.setProperty('--app-font-scale',next.toFixed(2));
   if(!options.fromHost){
     try{localStorage.setItem(DPS_CONFIG.storage.fontKey,String(next));}catch(error){rememberAppIssue('warn','글씨 크기 저장',error);}
   }
@@ -2175,8 +2178,8 @@ function setZeroScoreRowExpanded(header,expanded,exclusive=true){
 }
 /* 11-G · 승단 UI 이벤트 연결 */
 function bindZeroScoreCalculator(){
-  if(document.documentElement.dataset.zeroScoreCalcBound==='1') return;
-  document.documentElement.dataset.zeroScoreCalcBound='1';
+  if(DPS_ROOT.dataset.zeroScoreCalcBound==='1') return;
+  DPS_ROOT.dataset.zeroScoreCalcBound='1';
   const card=qs('.zero-rank-card');
   const benefitsHelp=$('zeroTitleBenefitsPopover');
   benefitsHelp?.addEventListener('click',event=>{
@@ -2221,9 +2224,9 @@ function bindZeroScoreCalculator(){
     normalizeZeroHonorInputElement(target);
     commitZeroScoreChange();
   };
-  document.addEventListener('input', e=>updateAndSave(e.target), true);
-  document.addEventListener('change', e=>updateAndSave(e.target,true), true);
-  document.addEventListener('focusout', e=>{
+  DPS_BODY.addEventListener('input', e=>updateAndSave(e.target), true);
+  DPS_BODY.addEventListener('change', e=>updateAndSave(e.target,true), true);
+  DPS_BODY.addEventListener('focusout', e=>{
     const target=e.target;
     if(target?.matches?.('.zero-calc-row[data-row-type="penance"] .zero-calc-current,.zero-calc-row[data-row-type="penance"] .zero-calc-target') && target.value==='') updateAndSave(target,true);
   }, true);
@@ -2259,7 +2262,7 @@ const ACTION_HANDLERS={
 };
 /* 12-A · 사용자 조작 이벤트 */
 function bindActionEvents(){
-  document.addEventListener('click', e=>{
+  DPS_BODY.addEventListener('click', e=>{
     const trigger=e.target.closest('[data-action]');
     if(!trigger) return;
     const action=trigger.getAttribute('data-action');
@@ -2296,7 +2299,7 @@ function shouldHandleReactiveInput(target){
   return target.matches && target.matches('input, select, textarea');
 }
 function bindReactiveInputs(){
-  document.addEventListener('click',event=>{
+  DPS_BODY.addEventListener('click',event=>{
     const teamButton=event.target?.closest?.('[data-team-count]');
     if(teamButton){
       if(teamButton.disabled) return;
@@ -2324,7 +2327,7 @@ function bindReactiveInputs(){
     }
   });
   let raf=0;
-  const schedule=(target,finalize=false)=>{
+  const schedule=target=>{
     if(!shouldHandleReactiveInput(target)) return;
     if(target.matches('.money-input')) formatMoneyInput(target);
     if(target.id==='spBankApply') syncSpBankApplyControl();
@@ -2364,12 +2367,12 @@ function bindReactiveInputs(){
       commitAppUpdate();
     });
   };
-  document.addEventListener('input', e=>{ if(!e.isComposing) schedule(e.target); }, true);
-  document.addEventListener('change', e=>schedule(e.target,true), true);
+  DPS_BODY.addEventListener('input', e=>{ if(!e.isComposing) schedule(e.target); }, true);
+  DPS_BODY.addEventListener('change', e=>schedule(e.target), true);
 }
 function bindButtonPressFeedback(){
   const selector='button,.btn';
-  document.addEventListener('pointerdown', e=>{
+  DPS_BODY.addEventListener('pointerdown', e=>{
     const btn=e.target && e.target.closest ? e.target.closest(selector) : null;
     if(!btn || btn.disabled) return;
     btn.classList.add('is-pressed');
@@ -2419,13 +2422,13 @@ function initAppSelectDropdowns(){
   menu.setAttribute('role','listbox');
   menu.setAttribute('aria-label','선택 항목');
   menu.hidden=true;
-  document.body.appendChild(menu);
+  DPS_BODY.appendChild(menu);
   let activeSelect=null;
   let activeButton=null;
   let scheduled=false;
   const buttons=new Map();
   const isSupported=select=>select?.matches?.(nativeSelector) && !select.closest('[data-trait-preset-custom-select]');
-  const label=select=>select.getAttribute('aria-label') || (select.id ? document.querySelector(`label[for="${CSS.escape(select.id)}"]`)?.textContent.trim() : '') || select.closest('label')?.querySelector('span')?.textContent.trim() || '항목 선택';
+  const label=select=>select.getAttribute('aria-label') || (select.id ? DPS_BODY.querySelector(`label[for="${CSS.escape(select.id)}"]`)?.textContent.trim() : '') || select.closest('label')?.querySelector('span')?.textContent.trim() || '항목 선택';
   function syncButton(select,button){
     if(!select.isConnected || !button.isConnected) return;
     const option=select.selectedOptions?.[0];
@@ -2490,10 +2493,14 @@ function initAppSelectDropdowns(){
     if(!activeButton?.isConnected){closeMenu();return;}
     const rect=activeButton.getBoundingClientRect();
     const viewport=window.visualViewport;
-    const viewTop=viewport ? viewport.offsetTop : 0;
-    const viewHeight=viewport ? viewport.height : window.innerHeight;
-    const viewLeft=viewport ? viewport.offsetLeft : 0;
-    const viewWidth=viewport ? viewport.width : window.innerWidth;
+    const pane=DPS_ROOT.getBoundingClientRect();
+    const contained=!window.DPS_STANDALONE_VIEW;
+    const originX=contained ? pane.left : 0, originY=contained ? pane.top : 0;
+    const viewTop=Math.max(originY,viewport ? viewport.offsetTop : 0);
+    const viewLeft=Math.max(originX,viewport ? viewport.offsetLeft : 0);
+    const viewBottom=Math.min(contained ? pane.bottom : window.innerHeight,(viewport ? viewport.offsetTop+viewport.height : window.innerHeight));
+    const viewRight=Math.min(contained ? pane.right : window.innerWidth,(viewport ? viewport.offsetLeft+viewport.width : window.innerWidth));
+    const viewHeight=Math.max(0,viewBottom-viewTop),viewWidth=Math.max(0,viewRight-viewLeft);
     const padding=8;
     const below=Math.max(0,viewTop+viewHeight-rect.bottom-padding);
     const above=Math.max(0,rect.top-viewTop-padding);
@@ -2503,9 +2510,9 @@ function initAppSelectDropdowns(){
     const left=Math.max(viewLeft+padding,Math.min(rect.left,viewLeft+viewWidth-padding-width));
     menu.style.width=`${Math.round(width)}px`;
     menu.style.maxHeight=`${Math.max(72,Math.min(300,Math.floor(room)))}px`;
-    menu.style.left=`${Math.round(left)}px`;
-    menu.style.top=openAbove ? 'auto' : `${Math.round(rect.bottom+5)}px`;
-    menu.style.bottom=openAbove ? `${Math.round(window.innerHeight-rect.top+5)}px` : 'auto';
+    menu.style.left=`${Math.round(left-originX)}px`;
+    menu.style.top=openAbove ? 'auto' : `${Math.round(rect.bottom-originY+5)}px`;
+    menu.style.bottom=openAbove ? `${Math.round((contained?pane.bottom:window.innerHeight)-rect.top+5)}px` : 'auto';
     menu.classList.toggle('opens-up',openAbove);
   }
   function getItems(){ return [...menu.querySelectorAll('[data-app-select-value]')]; }
@@ -2568,7 +2575,7 @@ function initAppSelectDropdowns(){
   function refresh(){
     scheduled=false;
     // 기존 버튼은 아래 등록 목록에서 동기화하므로 중복 검사하지 않는다.
-    document.querySelectorAll(nativeSelector).forEach(select=>{
+    DPS_BODY.querySelectorAll(nativeSelector).forEach(select=>{
       if(!select.classList.contains('app-select-native-source')) enhance(select);
     });
     for(const [select,button] of buttons){
@@ -2584,7 +2591,7 @@ function initAppSelectDropdowns(){
     scheduled=true;
     window.requestAnimationFrame(refresh);
   }
-  document.addEventListener('click',event=>{
+  DPS_BODY.addEventListener('click',event=>{
     const option=event.target.closest?.('.app-select-option');
     if(option?.closest('.app-select-menu')){selectItem(option);return;}
     const trigger=event.target.closest?.(`.${triggerClass}`);
@@ -2596,7 +2603,7 @@ function initAppSelectDropdowns(){
     }
     const targetLabel=event.target.closest?.('label[for]');
     if(targetLabel){
-      const select=document.getElementById(targetLabel.htmlFor);
+      const select=DPS_BODY.querySelector('#'+CSS.escape(targetLabel.htmlFor));
       const button=buttons.get(select);
       if(button && !targetLabel.contains(button)){
         event.preventDefault();
@@ -2611,7 +2618,7 @@ function initAppSelectDropdowns(){
   // 에디설정 모달이 열린 상태에서는 메뉴와 모달을 Escape 한 번에 닫습니다.
   // 다른 화면에서는 기존 커스텀 Select의 Escape 동작을 유지합니다.
   window.addEventListener('keydown',event=>{
-    if(event.key!=='Escape') return;
+    if(DPS_ROOT.hidden || !DPS_BODY.contains(event.target) || event.key!=='Escape') return;
     if(!$('additionalRuneModal')?.hidden){
       event.preventDefault();
       event.stopPropagation();
@@ -2625,7 +2632,7 @@ function initAppSelectDropdowns(){
       closeMenu(true);
     }
   },true);
-  document.addEventListener('keydown',event=>{
+  DPS_BODY.addEventListener('keydown',event=>{
     const trigger=event.target.closest?.(`.${triggerClass}`);
     if(trigger && ['ArrowDown','ArrowUp','Home','End',' '].includes(event.key)){
       event.preventDefault();
@@ -2652,11 +2659,11 @@ function initAppSelectDropdowns(){
     }
     if(event.key==='Tab') closeMenu();
   });
-  document.addEventListener('change',event=>{
+  DPS_BODY.addEventListener('change',event=>{
     if(event.target.matches?.('select')) requestSync();
   });
-  document.addEventListener('input',requestSync);
-  document.addEventListener('focusin',event=>{
+  DPS_BODY.addEventListener('input',requestSync);
+  DPS_BODY.addEventListener('focusin',event=>{
     if(activeSelect && !menu.contains(event.target) && event.target!==activeButton) closeMenu();
   });
   const observer=new MutationObserver(records=>{
@@ -2666,7 +2673,7 @@ function initAppSelectDropdowns(){
       return [...record.addedNodes].some(node=>node.nodeType===1 && (node.matches?.('select') || node.querySelector?.('select')));
     })) requestSync();
   });
-  observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled','hidden','selected','value']});
+  observer.observe(DPS_BODY,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled','hidden','selected','value']});
   window.addEventListener('resize',()=>{ if(activeSelect) placeMenu();requestSync(); },{passive:true});
   window.addEventListener('scroll',event=>{if(activeSelect && !menu.contains(event.target)) closeMenu();},{passive:true,capture:true});
   window.visualViewport?.addEventListener('resize',()=>{if(activeSelect) placeMenu();},{passive:true});
@@ -2699,7 +2706,7 @@ function markAppReady(){
     window.dpsMarkAppReady();
     return;
   }
-  document.documentElement.classList.remove('dps-booting');
+  DPS_ROOT.classList.remove('dps-booting');
   try{
     const boot=$('dpsBootScreen');
     if(boot) boot.setAttribute('aria-hidden','true');
@@ -2717,7 +2724,6 @@ window.dpsStartApp=function(){
   try{
     initApp();
     markAppReady();
-    try{window.parent.postMessage('nexus:builder-ready',window.parent.location.origin);}catch{}
   }catch(e){
     markAppError('B1001', e);
   }

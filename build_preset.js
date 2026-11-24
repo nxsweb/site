@@ -791,7 +791,7 @@ function renderTraitPresetRequiredNotice(){
   const compatibility=storedTraitPresetCompatibility();
   const required=compatibility.requiresUpdate;
   const incompatible=!!compatibility.error;
-  const manager=document.querySelector('.trait-preset-panel');
+  const manager=DPS_BODY.querySelector('.trait-preset-panel');
   if(manager){
     manager.classList.toggle('is-migration-pending',required);
     manager.classList.toggle('is-compatibility-error',incompatible);
@@ -1281,8 +1281,9 @@ function setTraitPresetCustomSelectOpen(custom, open){
   custom.closest('.trait-preset-panel')?.classList.toggle('is-menu-open',active);
   if(active){
     const rect=custom.getBoundingClientRect();
-    const availableBelow=window.innerHeight-rect.bottom;
-    const availableAbove=rect.top;
+    const pane=DPS_ROOT.getBoundingClientRect();
+    const availableBelow=Math.min(window.innerHeight,window.DPS_STANDALONE_VIEW ? window.innerHeight : pane.bottom)-rect.bottom;
+    const availableAbove=rect.top-(window.DPS_STANDALONE_VIEW ? 0 : pane.top);
     const opensUp=availableBelow<205 && availableAbove>availableBelow;
     custom.classList.toggle('opens-up',opensUp);
     custom.style.setProperty('--trait-preset-menu-height',`${Math.max(0,Math.floor((opensUp?availableAbove:availableBelow)-8))}px`);
@@ -1612,7 +1613,7 @@ function traitPresetImportReadableName(id){
   if(id==='unitBoard') return '유닛 보드';
   const name=traitPresetChangeKeyLabel(id?.startsWith('inv:') || id?.startsWith('value:') ? id : `value:${id}`);
   if(name && name!==id && name!==`value:${id}`) return name;
-  const field=document.querySelector(`label[for="${CSS.escape(String(id))}"]`);
+  const field=DPS_BODY.querySelector(`label[for="${CSS.escape(String(id))}"]`);
   return field?.textContent?.trim() || '저장 항목';
 }
 function traitPresetImportErrorLocation(path){
@@ -2649,7 +2650,7 @@ function showTraitPresetUnifiedPanel(plan){
   traitPresetBackupPreviousFocus=document.activeElement;
   if(overlay) overlay.hidden=false;
   if(panel) panel.classList.add('is-open');
-  document.body.classList.add('trait-preset-backup-open');
+  DPS_BODY.classList.add('trait-preset-backup-open');
   panel?.focus({preventScroll:true});
 }
 function openTraitPresetBackupPanel(){
@@ -2681,7 +2682,7 @@ function hideTraitPresetBackupPanel(){
   if(panel) panel.classList.remove('is-open');
   const overlay=$('traitPresetBackupOverlay');
   if(overlay) overlay.hidden=true;
-  document.body.classList.remove('trait-preset-backup-open');
+  DPS_BODY.classList.remove('trait-preset-backup-open');
   if(traitPresetBackupPreviousFocus?.isConnected) traitPresetBackupPreviousFocus.focus({preventScroll:true});
   traitPresetBackupPreviousFocus=null;
 }
@@ -2715,7 +2716,7 @@ function createTraitPresetBackupFile(customName=''){
   const a=document.createElement('a');
   a.href=url;
   a.download=fileName;
-  document.body.appendChild(a);
+  DPS_BODY.appendChild(a);
   a.click();
   a.remove();
   window.setTimeout(()=>URL.revokeObjectURL(url),0);
@@ -3476,7 +3477,7 @@ function renderTraitClearRecord(text,{empty=false}={}){
 }
 function resetTraitClearRecordCopyButtons(){
   clearTimeout(traitClearRecordCopyTimer);
-  document.querySelectorAll('[data-clear-record-copy]').forEach(button=>{
+  DPS_BODY.querySelectorAll('[data-clear-record-copy]').forEach(button=>{
     button.textContent='기록 복사';
   });
 }
@@ -3492,9 +3493,9 @@ function openTraitClearRecord(){
   else{
     renderTraitClearRecord(report.error || '현재 표시할 클리어 기록이 없습니다.',{empty:true});
   }
-  document.querySelectorAll('[data-clear-record-copy]').forEach(button=>{button.disabled=!traitClearRecordText;});
+  DPS_BODY.querySelectorAll('[data-clear-record-copy]').forEach(button=>{button.disabled=!traitClearRecordText;});
   overlay.hidden=false;
-  document.body.classList.add('trait-clear-record-open');
+  DPS_BODY.classList.add('trait-clear-record-open');
   panel.focus();
   const body=$('traitClearRecordBody');
   if(body) body.scrollTop=0;
@@ -3503,7 +3504,7 @@ function closeTraitClearRecord(){
   const overlay=$('traitClearRecordOverlay');
   if(!overlay || overlay.hidden) return;
   overlay.hidden=true;
-  document.body.classList.remove('trait-clear-record-open');
+  DPS_BODY.classList.remove('trait-clear-record-open');
   traitClearRecordText='';
   resetTraitClearRecordCopyButtons();
   if(traitClearRecordTrigger?.isConnected) traitClearRecordTrigger.focus();
@@ -3525,7 +3526,7 @@ async function copyTraitClearRecord(button){
     input.value=text;
     input.setAttribute('readonly','');
     input.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0';
-    document.body.append(input);
+    DPS_BODY.append(input);
     input.select();
     try{copied=document.execCommand('copy');}catch(error){copied=false;}
     input.remove();
@@ -3691,12 +3692,12 @@ function handleTraitPresetKeydown(e){
 let traitPresetEventsBound=false;
 function bindTraitPresetEvents(){
   if(traitPresetEventsBound) return;
-  document.addEventListener('change',handleTraitPresetChange);
-  document.addEventListener('click',handleTraitPresetClick);
-  document.addEventListener('keydown',handleTraitPresetKeydown);
-  document.addEventListener('input',scheduleTraitPresetChangePrompt);
-  document.addEventListener('change',scheduleTraitPresetChangePrompt);
-  document.addEventListener('click',scheduleTraitPresetChangePrompt);
+  DPS_BODY.addEventListener('change',handleTraitPresetChange);
+  DPS_BODY.addEventListener('click',handleTraitPresetClick);
+  DPS_BODY.addEventListener('keydown',handleTraitPresetKeydown);
+  DPS_BODY.addEventListener('input',scheduleTraitPresetChangePrompt);
+  DPS_BODY.addEventListener('change',scheduleTraitPresetChangePrompt);
+  DPS_BODY.addEventListener('click',scheduleTraitPresetChangePrompt);
   traitPresetEventsBound=true;
 }
 

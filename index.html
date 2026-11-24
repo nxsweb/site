@@ -2,7 +2,7 @@
 <html lang="ko" class="nexus-booting">
 <head>
     <script>
-        window.APP_VERSION = "NXSBuild-V4";
+        window.APP_VERSION = "NXSBuild-V5";
         window.NEXUS_ANDROID_APP = false; // GitHub Pages 웹 배포에서는 기존 버전 확인을 유지한다.
         window.NEXUS_BUILD_VERSION = window.APP_VERSION;
         // 독립창의 실행 모드는 메인 화면의 마지막 탭 설정과 분리한다.
@@ -125,6 +125,28 @@
         html.nexus-boot-error #nexusBootScreen .boot-card{border-color:#855d48;}
         html:not(.nexus-booting) #nexusBootScreen{display:none;}
     </style>
+    <style id="builderBootStyle">
+
+section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background:#000000;color:#e6edf7;overflow:hidden}
+#buildDirectPane.dps-booting .wrap{visibility:hidden}
+#dpsBootScreen{--btn-action-bg:#141518;--btn-action-border-hover:#8795a4;--btn-action-text:#f8fbff;position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:#0b0c0f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#dpsBootScreen .boot-card{box-sizing:border-box;width:min(320px,calc(calc(var(--dps-vw,1vw) * 100) - 48px));max-height:calc(calc(var(--dps-vh,1dvh) * 100) - 24px);overflow-y:auto;padding:22px 20px;border:1px solid #272c32;border-radius:18px;background:#0c0d10;box-shadow:0 16px 44px rgba(0,0,0,.34);text-align:center}
+#dpsBootScreen .boot-title{font-size:18px;margin-bottom:8px;color:#cfe0ff}
+#dpsBootScreen .boot-desc{font-size:13px;line-height:1.5;color:#aebdd1}
+#dpsBootScreen .boot-error-code{display:inline-flex;align-items:center;justify-content:center;margin:12px 0 10px;padding:7px 12px;border:1px solid #7f1d2d;border-radius:999px;background:#0c0d10;color:#ff9aaa;letter-spacing:.4px;font-variant-numeric:tabular-nums}
+#dpsBootScreen .boot-error-info{margin-top:10px;padding:12px;border:1px solid #394558;border-radius:10px;background:#14171c;text-align:left}
+#dpsBootScreen .boot-error-label{margin-bottom:5px;font-size:12px;font-weight:700;color:#cfe0ff}
+#dpsBootScreen .boot-error-reason{font-size:13px;line-height:1.6;color:#e6edf7;white-space:pre-wrap;overflow-wrap:anywhere}
+#dpsBootScreen .boot-error-file{margin-top:8px;font-size:12px;color:#aebdd1;overflow-wrap:anywhere}
+#dpsBootScreen .boot-actions{display:flex;justify-content:center;gap:8px;margin-top:12px}
+#dpsBootScreen .boot-action-btn{height:34px;padding:0 12px;border:1px solid #394558;border-radius:10px;background:#0d0e11;color:#a9c8ff;cursor:pointer}
+#dpsBootScreen .boot-action-btn.primary{border-color:var(--btn-action-border-hover);background:var(--btn-action-bg);color:var(--btn-action-text)}
+#dpsBootScreen .boot-service-contact a{color:#a9c8ff;overflow-wrap:anywhere}
+#buildDirectPane.dps-boot-error #dpsBootScreen .boot-card{border-color:#7f1d2d;background:#0c0d10}
+#buildDirectPane.dps-boot-error #dpsBootScreen .boot-title{color:#ff9aaa}
+#buildDirectPane:not(.dps-booting) #dpsBootScreen{display:none}
+
+    </style>
     <script>
         (function(){
             function copyTextFallback(text){
@@ -224,7 +246,7 @@
                 });
             };
             window.addEventListener('error',function(event){
-                if(event.error && !window.__nexusAppReady && !window.__nexusBootError && !window.__nexusBootErrorPending){
+                if(event.error && !/(?:^|\/)build_[^/]+\.js(?:\?|$)/.test(event.filename||'') && !window.__nexusAppReady && !window.__nexusBootError && !window.__nexusBootErrorPending){
                     window.nexusShowBootError('N1001',event.error);
                 }
             });
@@ -259,7 +281,7 @@
                 function waitForImages(){
 
                     var images=Array.from(document.images).filter(function(img){
-                        return img.src && img.loading!=='lazy' && !img.closest('[hidden]');
+                        return img.src && img.loading!=='lazy' && !img.closest('[hidden],#buildDirectPane');
                     });
                     return Promise.all(images.map(function(img){
                         function check(){
@@ -463,33 +485,11 @@
     <div id="boardActionStatus" class="action-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
     <div id="recipeTooltip" class="recipe-tooltip" role="tooltip" aria-live="polite"></div>
 
-    <section id="buildFrameShell" class="builder-frame-shell" aria-label="개복디 빌더" hidden>
-        <iframe id="buildAppFrame" title="개복디 빌더 실행 화면" referrerpolicy="same-origin" allow="clipboard-read; clipboard-write"></iframe>
-    </section>
-    <!-- 빌더 실행 문서: 하나의 index 안에 원본 기능 마크업과 초기화 스크립트 유지 -->
-    <template id="buildAppTemplate">
+    <section id="buildDirectPane" class="builder-direct-pane" aria-label="개복디 빌더" hidden>
+    <div id="buildDirectBody" class="builder-direct-body">
 
 <svg class="ui-header-glyph-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="dpsUiSparklesGlyph" viewBox="0 0 24 24"><path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></symbol><symbol id="dpsUiWarningGlyph" viewBox="0 0 24 24"><path d="m10.29 3.86-8.18 14.1A2 2 0 0 0 3.84 21h16.32a2 2 0 0 0 1.73-3.04l-8.18-14.1a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></symbol></svg>
-<script>
-(function(){
-  var root=document.documentElement;
-  var w=root.clientWidth||window.innerWidth||0;
-  var h=root.clientHeight||window.innerHeight||0;
-  var shortSide=Math.min(w,h);
-  var longSide=Math.max(w,h);
-  var mode=(shortSide<=600)?'is-mobile':((shortSide<=1024&&longSide<=1366)?'is-tablet':(h>w?'is-pc-portrait':'is-pc-landscape'));
-  var dir=h>w?' is-portrait-view':'';
-  var device=(mode==='is-mobile')?' is-mobile-device':(mode==='is-tablet'?' is-tablet-device':'');
-  var extra=(mode==='is-mobile'&&shortSide<=430)?' is-narrow-mobile':'';
-  var tabbed=(mode==='is-mobile'||mode==='is-tablet'||mode==='is-pc-portrait')?' is-tabbed':'';
-  document.body.className=(document.body.className+' '+mode+dir+device+extra+tabbed).trim();
-  root.className=(root.className+' '+mode+dir+device+extra+tabbed).trim();
-  root.style.setProperty('--mobile-vw', w + 'px');
-  root.style.setProperty('--mobile-vh', h + 'px');
-  root.style.setProperty('--mobile-header-h', mode==='is-mobile' ? '52px' : '44px');
-  root.style.setProperty('--mobile-tabs-h', (mode==='is-mobile'||mode==='is-tablet'||mode==='is-pc-portrait') ? '52px' : '0px');
-})();
-</script>
+
 <div id="dpsBootScreen" aria-live="polite"><div class="boot-card"><div class="boot-title">개복디 빌더 적용 중</div><div class="boot-desc">최신 빌드와 스타일을 불러오는 중입니다.</div></div></div>
 <div class="wrap">
 <div class="col-work">
@@ -1369,36 +1369,7 @@
       </section>
     </div>
 <div aria-live="polite" class="toast-root" id="toastRoot"></div>
-<script>
-function loadScriptSequence(files, onComplete){
-  var remaining=files.length,failed=false;
-  if(!remaining){if(typeof onComplete==='function')onComplete();return;}
-  files.forEach(function(fileName){
-    var script=document.createElement('script');
-    script.src=window.dpsAssetUrl('./' + fileName, fileName);
-    script.charset='UTF-8';
-    script.async=false; // 파일 다운로드는 병렬, 실행은 기존 배열 순서 그대로
-    script.addEventListener('load',function(){
-      if(--remaining===0 && !failed && typeof onComplete==='function')onComplete();
-    },{once:true});
-    script.addEventListener('error',function(){
-      failed=true;
-      --remaining;
-      if(typeof window.dpsReportBootResourceError==='function')
-        window.dpsReportBootResourceError('B1002',new Error(fileName+' load failed'));
-    },{once:true});
-    document.body.appendChild(script);
-  });
-}
-loadScriptSequence(['build_data.js','build_calc.js','build_app.js','build_unit.js','build_preset.js','build_responsive.js'],function(){
-  function startApp(){
-    if(typeof window.dpsStartApp==='function') window.dpsStartApp();
-    else if(typeof window.dpsShowBootError==='function') window.dpsShowBootError('B1003',new Error('app start function missing'));
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startApp,{once:true});
-  else startApp();
-});
-</script>
+
 <!-- 슬롯 상세 설정은 우측 패널의 overflow에 잘리지 않도록 body 최상위 모달로 배치 -->
 <div id="dpsUnitSlotModal" class="unit-slot-modal-shell" data-dps-base-unit-control hidden>
   <div class="unit-slot-modal-backdrop" data-unit-detail-backdrop aria-hidden="true"></div>
@@ -1510,77 +1481,248 @@ loadScriptSequence(['build_data.js','build_calc.js','build_app.js','build_unit.j
 </div>
 <div id="traitPresetBackupOverlay" class="trait-preset-backup-overlay" hidden><section id="traitPresetBackupPanel" class="trait-preset-backup-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetBackupTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><span class="trait-preset-modal-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><h2 id="traitPresetBackupTitle">프리셋 최신화</h2></div><button type="button" class="ui-icon-btn trait-preset-modal-close" data-trait-preset-backup-close="1" aria-label="프리셋 최신화 닫기">×</button></header><div class="trait-preset-modal-body trait-preset-backup-body" id="traitPresetBackupBody"></div></section></div>
 
-    </template>
-    <script id="builderFrameIntegration">
+    
+    </div>
+    </section>
+    <script id="builderDirectIntegration">
+    // 빌더는 같은 문서에서 직접 실행하며, DOM·스타일 적용 범위만 분리한다.
+    const DPS_ROOT=document.getElementById('buildDirectPane');
+    const DPS_BODY=document.getElementById('buildDirectBody');
+    window.DPS_BUILD_VERSION=window.APP_VERSION;
+    window.DPS_STANDALONE_VIEW=['board','utility','both'].includes(dpsWindowView) ? dpsWindowView : '';
+    if(window.DPS_STANDALONE_VIEW) DPS_ROOT.dataset.dpsStandaloneView=window.DPS_STANDALONE_VIEW;
+
+(function(){
+  function copyTextFallback(text){
+    var area=document.createElement('textarea');
+    area.value=text;
+    area.setAttribute('readonly','');
+    area.style.position='fixed';
+    area.style.left='-9999px';
+    DPS_BODY.appendChild(area);
+    area.select();
+    try{document.execCommand('copy');}catch(e){ window.DPS_LAST_BOOT_COPY_ERROR=e; }
+    area.remove();
+  }
+  function copyBootErrorCode(code,btn){
+    var done=function(){ if(btn){ var old=btn.textContent; btn.textContent='복사됨'; setTimeout(function(){btn.textContent=old;},1200); } };
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(code).then(done).catch(function(){ copyTextFallback(code); done(); });
+    }else{
+      copyTextFallback(code); done();
+    }
+  }
+  window.dpsShowBootError=function(code, err){
+    if(window.__dpsBootError && window.DPS_LAST_BOOT_ERROR && window.DPS_LAST_BOOT_ERROR.code!==code) return;
+    window.__dpsBootError=true;
+    try{window.DPS_LAST_BOOT_ERROR={code:code,error:err||'unknown',time:Date.now()};}catch(e){window.__dpsBootErrorRecordFailed=e;}
+    if(document.readyState==='loading' && !document.getElementById('dpsBootScreen')){
+      document.addEventListener('DOMContentLoaded',function(){window.dpsShowBootError(code,err);},{once:true});
+      return;
+    }
+    try{
+      var types={
+        B1001:{title:'빌더 실행 오류',guide:'초기화 중 오류가 발생했습니다. 아래 상세 원인을 확인하세요.'},
+        B1002:{title:'스크립트 파일 로드 실패',guide:'표시된 JavaScript 파일의 경로와 배포 여부를 확인하세요.'},
+        B1003:{title:'앱 시작 함수 확인 실패',guide:'app.js 로드 및 dpsStartApp 함수 정의를 확인하세요.'},
+        B1004:{title:'필수 리소스 로드 실패',guide:'표시된 CSS·이미지 파일이 정상적으로 제공되는지 확인하세요.'},
+        S1001:{title:'서비스가 중지됨',guide:'서비스가 중지됨, 제작자에게 문의해주세요'}
+      };
+      var info=types[code]||{title:'빌더 초기화 오류',guide:'오류 정보를 확인하세요.'};
+      var reason=err && err.message ? String(err.message) : String(err || '상세 원인 정보가 없습니다.');
+      var matched=(reason + "\n" + (err && err.stack || "")).match(/([\w.-]+\.(?:js|css|png|jpe?g|webp|svg))(?:\?[^\s]*)?/i);
+      var file=err && (err.file || err.fileName) || (matched && matched[1]) || (code==='B1003'?'app.js':'');
+      DPS_ROOT.classList.add('dps-booting','dps-boot-error');
+      var boot=document.getElementById('dpsBootScreen');
+      if(boot){
+        boot.removeAttribute('aria-hidden');
+        boot.innerHTML='<div class="boot-card"><div class="boot-title" id="dpsBootTitle"></div><div class="boot-desc" id="dpsBootDesc"></div><div class="boot-error-code" id="dpsBootCode" aria-label="오류코드"></div><div class="boot-error-info"><div class="boot-error-label">상세 원인</div><div class="boot-error-reason" id="dpsBootReason"></div><div class="boot-error-file" id="dpsBootFile" hidden></div></div><div class="boot-actions"><button class="boot-action-btn" id="dpsBootCopyBtn" type="button">오류 정보 복사</button><button class="boot-action-btn primary" id="dpsBootReloadBtn" type="button">새로고침</button></div></div>';
+        if(code==='S1001'){
+          boot.querySelector('.boot-error-info').hidden=true;
+          var contact=document.createElement('div');
+          contact.className='boot-error-info boot-service-contact';
+          contact.innerHTML='<div class="boot-error-label">제작자 배틀태그</div><div class="boot-error-reason">VAERON#3787</div><div class="boot-error-label" style="margin-top:12px">디스코드</div><a href="https://discord.gg/z7DwqvGeB5" target="_blank" rel="noopener noreferrer">https://discord.gg/z7DwqvGeB5</a>';
+          boot.querySelector('.boot-actions').before(contact);
+        }
+        document.getElementById('dpsBootTitle').textContent=info.title;
+        document.getElementById('dpsBootDesc').textContent=info.guide;
+        document.getElementById('dpsBootCode').textContent=code;
+        document.getElementById('dpsBootReason').textContent=reason;
+        var fileElement=document.getElementById('dpsBootFile');
+        if(file){fileElement.textContent='관련 파일: '+file;fileElement.hidden=false;}
+        var copyBtn=document.getElementById('dpsBootCopyBtn');
+        var reloadBtn=document.getElementById('dpsBootReloadBtn');
+        if(copyBtn) copyBtn.addEventListener('click',function(){
+          var report=code==='S1001'
+            ? [code,info.title,info.guide,'제작자 배틀태그: VAERON#3787','디스코드: https://discord.gg/z7DwqvGeB5']
+            : [code,info.title,reason,file?'관련 파일: '+file:''];
+          copyBootErrorCode(report.filter(Boolean).join('\n'),copyBtn);
+        });
+        if(reloadBtn) reloadBtn.addEventListener('click',function(){window.location.reload();});
+      }
+    }catch(e){window.__dpsBootRenderError=e;}
+  };
+  window.dpsReportBootResourceError=function(code,error){
+    if(window.__dpsBootErrorPending || window.__dpsBootError)return;
+    window.__dpsBootErrorPending=true;
+    var complete=function(resolved){
+      window.__dpsBootErrorPending=false;
+      window.dpsShowBootError(resolved,error);
+    };
+    if(typeof window.nexusDiagnoseServiceFailure==='function'){
+      window.nexusDiagnoseServiceFailure(code,complete);
+    }else complete(code);
+  };
+  window.addEventListener('error',function(event){
+    if(event.error && /(?:^|\/)build_[^/]+\.js(?:\?|$)/.test(event.filename||'') && !window.__dpsAppReady && !window.__dpsBootError && !window.__dpsBootErrorPending){
+      window.dpsShowBootError('B1001',event.error);
+    }
+  });
+  function waitForEssentialResources(){
+    function waitForDocument(){
+      if(document.readyState!=='loading') return Promise.resolve();
+      return new Promise(function(resolve){document.addEventListener('DOMContentLoaded',resolve,{once:true});});
+    }
+    function waitForStyle(){
+      var links=Array.from(document.querySelectorAll('link[data-dps-boot-style]'));
+      if(links.length!==3) return Promise.reject(new Error('required builder stylesheet missing'));
+      return Promise.all(links.map(function(link){
+        if(link.dataset.loadFailed==='1') return Promise.reject(new Error('required stylesheet failed'));
+        if(link.sheet) return Promise.resolve();
+        return new Promise(function(resolve,reject){
+          link.addEventListener('load',resolve,{once:true});
+          link.addEventListener('error',function(){reject(new Error('required stylesheet failed'));},{once:true});
+        });
+      }));
+    }
+    function waitForPageLoad(){
+      if(document.readyState==='complete') return Promise.resolve();
+      return new Promise(function(resolve){window.addEventListener('load',resolve,{once:true});});
+    }
+    function waitForImages(){
+      // 지연 로딩·숨겨진 상세 화면은 첫 화면 필수 리소스가 아닙니다.
+      var images=Array.from(DPS_BODY.querySelectorAll('img')).filter(function(img){
+        return img.src && img.loading!=='lazy' && !img.closest('[hidden]');
+      });
+      return Promise.all(images.map(function(img){
+        function check(){
+          if(img.naturalWidth>0) return;
+          throw new Error('required image failed: '+(img.currentSrc || img.src));
+        }
+        if(img.complete){try{check();return Promise.resolve();}catch(error){return Promise.reject(error);}}
+        return new Promise(function(resolve,reject){
+          img.addEventListener('load',resolve,{once:true});
+          img.addEventListener('error',function(){reject(new Error('required image failed: '+(img.currentSrc || img.src)));},{once:true});
+        });
+      }));
+    }
+    function waitForPaint(){
+      return new Promise(function(resolve){
+        requestAnimationFrame(function(){requestAnimationFrame(resolve);});
+      });
+    }
+    // 준비 완료 조건은 유지하고 독립 리소스 대기만 병렬화한다.
+    return waitForDocument().then(function(){
+      return Promise.all([
+        waitForStyle(),waitForPageLoad(),
+        document.fonts ? document.fonts.ready : null,
+        waitForImages()
+      ]);
+    }).then(waitForPaint);
+  }
+  function dpsReleaseBootScreen(){
+    if(window.__dpsBootError || !window.__dpsAppReady || !window.__dpsResponsiveLayoutReady || window.__dpsBootReleaseStarted) return;
+    window.__dpsBootReleaseStarted=true;
+    waitForEssentialResources().then(function(){
+      if(window.__dpsBootError) return;
+      finishRelease();
+    }).catch(function(error){window.dpsReportBootResourceError('B1004',error);});
+  }
+  function finishRelease(){
+    if(window.__dpsBootError) return;
+    DPS_ROOT.classList.remove('dps-booting','dps-boot-error');
+    var boot=document.getElementById('dpsBootScreen');
+    if(boot) boot.setAttribute('aria-hidden','true');
+  }
+  window.dpsMarkAppReady=function(){
+    window.__dpsAppReady=true;
+    dpsReleaseBootScreen();
+  };
+  window.dpsMarkResponsiveLayoutReady=function(){
+    window.__dpsResponsiveLayoutReady=true;
+    dpsReleaseBootScreen();
+  };
+})();
+
     (function(){
         'use strict';
         var initialized=false;
-        var frameHead="<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover\">\n<link rel=\"preconnect\" href=\"https://cdn.jsdelivr.net\">\n<link rel=\"stylesheet\" crossorigin href=\"https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css\">\n<script>\nwindow.APP_VERSION=parent.APP_VERSION;\nwindow.DPS_BUILD_VERSION=window.APP_VERSION;\nwindow.DPS_STANDALONE_VIEW=(new URLSearchParams(parent.location.search).get('dpsWindow')||'');\nif(!['board','utility','both'].includes(window.DPS_STANDALONE_VIEW))window.DPS_STANDALONE_VIEW='';\nif(window.DPS_STANDALONE_VIEW)document.documentElement.dataset.dpsStandaloneView=window.DPS_STANDALONE_VIEW;\nwindow.dpsAssetUrl=function(src){var name=String(src||'').replace(/^\\.\\//,'');return name+(name.includes('?')?'&':'?')+'v='+encodeURIComponent(window.APP_VERSION);};\n<\/script>\n<style>\nhtml.dps-booting body{margin:0;background:#000000;color:#e6edf7;overflow:hidden}\nhtml.dps-booting .wrap{visibility:hidden}\n#dpsBootScreen{--btn-action-bg:#141518;--btn-action-border-hover:#8795a4;--btn-action-text:#f8fbff;position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:#0b0c0f;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif}\n#dpsBootScreen .boot-card{box-sizing:border-box;width:min(320px,calc(100vw - 48px));max-height:calc(100dvh - 24px);overflow-y:auto;padding:22px 20px;border:1px solid #272c32;border-radius:18px;background:#0c0d10;box-shadow:0 16px 44px rgba(0,0,0,.34);text-align:center}\n#dpsBootScreen .boot-title{font-size:18px;margin-bottom:8px;color:#cfe0ff}\n#dpsBootScreen .boot-desc{font-size:13px;line-height:1.5;color:#aebdd1}\n#dpsBootScreen .boot-error-code{display:inline-flex;align-items:center;justify-content:center;margin:12px 0 10px;padding:7px 12px;border:1px solid #7f1d2d;border-radius:999px;background:#0c0d10;color:#ff9aaa;letter-spacing:.4px;font-variant-numeric:tabular-nums}\n#dpsBootScreen .boot-error-info{margin-top:10px;padding:12px;border:1px solid #394558;border-radius:10px;background:#14171c;text-align:left}\n#dpsBootScreen .boot-error-label{margin-bottom:5px;font-size:12px;font-weight:700;color:#cfe0ff}\n#dpsBootScreen .boot-error-reason{font-size:13px;line-height:1.6;color:#e6edf7;white-space:pre-wrap;overflow-wrap:anywhere}\n#dpsBootScreen .boot-error-file{margin-top:8px;font-size:12px;color:#aebdd1;overflow-wrap:anywhere}\n#dpsBootScreen .boot-actions{display:flex;justify-content:center;gap:8px;margin-top:12px}\n#dpsBootScreen .boot-action-btn{height:34px;padding:0 12px;border:1px solid #394558;border-radius:10px;background:#0d0e11;color:#a9c8ff;cursor:pointer}\n#dpsBootScreen .boot-action-btn.primary{border-color:var(--btn-action-border-hover);background:var(--btn-action-bg);color:var(--btn-action-text)}\n#dpsBootScreen .boot-service-contact a{color:#a9c8ff;overflow-wrap:anywhere}\nhtml.dps-boot-error #dpsBootScreen .boot-card{border-color:#7f1d2d;background:#0c0d10}\nhtml.dps-boot-error #dpsBootScreen .boot-title{color:#ff9aaa}\nhtml:not(.dps-booting) #dpsBootScreen{display:none}\n<\/style>\n<script>\n(function(){\n  function copyTextFallback(text){\n    var area=document.createElement('textarea');\n    area.value=text;\n    area.setAttribute('readonly','');\n    area.style.position='fixed';\n    area.style.left='-9999px';\n    document.body.appendChild(area);\n    area.select();\n    try{document.execCommand('copy');}catch(e){ window.DPS_LAST_BOOT_COPY_ERROR=e; }\n    area.remove();\n  }\n  function copyBootErrorCode(code,btn){\n    var done=function(){ if(btn){ var old=btn.textContent; btn.textContent='\ubcf5\uc0ac\ub428'; setTimeout(function(){btn.textContent=old;},1200); } };\n    if(navigator.clipboard && window.isSecureContext){\n      navigator.clipboard.writeText(code).then(done).catch(function(){ copyTextFallback(code); done(); });\n    }else{\n      copyTextFallback(code); done();\n    }\n  }\n  window.dpsShowBootError=function(code, err){\n    if(window.__dpsBootError && window.DPS_LAST_BOOT_ERROR && window.DPS_LAST_BOOT_ERROR.code!==code) return;\n    window.__dpsBootError=true;\n    try{window.DPS_LAST_BOOT_ERROR={code:code,error:err||'unknown',time:Date.now()};}catch(e){window.__dpsBootErrorRecordFailed=e;}\n    if(document.readyState==='loading' && !document.getElementById('dpsBootScreen')){\n      document.addEventListener('DOMContentLoaded',function(){window.dpsShowBootError(code,err);},{once:true});\n      return;\n    }\n    try{\n      var types={\n        B1001:{title:'\ube4c\ub354 \uc2e4\ud589 \uc624\ub958',guide:'\ucd08\uae30\ud654 \uc911 \uc624\ub958\uac00 \ubc1c\uc0dd\ud588\uc2b5\ub2c8\ub2e4. \uc544\ub798 \uc0c1\uc138 \uc6d0\uc778\uc744 \ud655\uc778\ud558\uc138\uc694.'},\n        B1002:{title:'\uc2a4\ud06c\ub9bd\ud2b8 \ud30c\uc77c \ub85c\ub4dc \uc2e4\ud328',guide:'\ud45c\uc2dc\ub41c JavaScript \ud30c\uc77c\uc758 \uacbd\ub85c\uc640 \ubc30\ud3ec \uc5ec\ubd80\ub97c \ud655\uc778\ud558\uc138\uc694.'},\n        B1003:{title:'\uc571 \uc2dc\uc791 \ud568\uc218 \ud655\uc778 \uc2e4\ud328',guide:'app.js \ub85c\ub4dc \ubc0f dpsStartApp \ud568\uc218 \uc815\uc758\ub97c \ud655\uc778\ud558\uc138\uc694.'},\n        B1004:{title:'\ud544\uc218 \ub9ac\uc18c\uc2a4 \ub85c\ub4dc \uc2e4\ud328',guide:'\ud45c\uc2dc\ub41c CSS\u00b7\uc774\ubbf8\uc9c0 \ud30c\uc77c\uc774 \uc815\uc0c1\uc801\uc73c\ub85c \uc81c\uacf5\ub418\ub294\uc9c0 \ud655\uc778\ud558\uc138\uc694.'},\n        S1001:{title:'\uc11c\ube44\uc2a4\uac00 \uc911\uc9c0\ub428',guide:'\uc11c\ube44\uc2a4\uac00 \uc911\uc9c0\ub428, \uc81c\uc791\uc790\uc5d0\uac8c \ubb38\uc758\ud574\uc8fc\uc138\uc694'}\n      };\n      var info=types[code]||{title:'\ube4c\ub354 \ucd08\uae30\ud654 \uc624\ub958',guide:'\uc624\ub958 \uc815\ubcf4\ub97c \ud655\uc778\ud558\uc138\uc694.'};\n      var reason=err && err.message ? String(err.message) : String(err || '\uc0c1\uc138 \uc6d0\uc778 \uc815\ubcf4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.');\n      var matched=(reason + \"\\n\" + (err && err.stack || \"\")).match(/([\\w.-]+\\.(?:js|css|png|jpe?g|webp|svg))(?:\\?[^\\s]*)?/i);\n      var file=err && (err.file || err.fileName) || (matched && matched[1]) || (code==='B1003'?'app.js':'');\n      document.documentElement.classList.add('dps-booting','dps-boot-error');\n      var boot=document.getElementById('dpsBootScreen');\n      if(boot){\n        boot.removeAttribute('aria-hidden');\n        boot.innerHTML='<div class=\"boot-card\"><div class=\"boot-title\" id=\"dpsBootTitle\"><\/div><div class=\"boot-desc\" id=\"dpsBootDesc\"><\/div><div class=\"boot-error-code\" id=\"dpsBootCode\" aria-label=\"\uc624\ub958\ucf54\ub4dc\"><\/div><div class=\"boot-error-info\"><div class=\"boot-error-label\">\uc0c1\uc138 \uc6d0\uc778<\/div><div class=\"boot-error-reason\" id=\"dpsBootReason\"><\/div><div class=\"boot-error-file\" id=\"dpsBootFile\" hidden><\/div><\/div><div class=\"boot-actions\"><button class=\"boot-action-btn\" id=\"dpsBootCopyBtn\" type=\"button\">\uc624\ub958 \uc815\ubcf4 \ubcf5\uc0ac<\/button><button class=\"boot-action-btn primary\" id=\"dpsBootReloadBtn\" type=\"button\">\uc0c8\ub85c\uace0\uce68<\/button><\/div><\/div>';\n        if(code==='S1001'){\n          boot.querySelector('.boot-error-info').hidden=true;\n          var contact=document.createElement('div');\n          contact.className='boot-error-info boot-service-contact';\n          contact.innerHTML='<div class=\"boot-error-label\">\uc81c\uc791\uc790 \ubc30\ud2c0\ud0dc\uadf8<\/div><div class=\"boot-error-reason\">VAERON#3787<\/div><div class=\"boot-error-label\" style=\"margin-top:12px\">\ub514\uc2a4\ucf54\ub4dc<\/div><a href=\"https://discord.gg/z7DwqvGeB5\" target=\"_blank\" rel=\"noopener noreferrer\">https://discord.gg/z7DwqvGeB5<\/a>';\n          boot.querySelector('.boot-actions').before(contact);\n        }\n        document.getElementById('dpsBootTitle').textContent=info.title;\n        document.getElementById('dpsBootDesc').textContent=info.guide;\n        document.getElementById('dpsBootCode').textContent=code;\n        document.getElementById('dpsBootReason').textContent=reason;\n        var fileElement=document.getElementById('dpsBootFile');\n        if(file){fileElement.textContent='\uad00\ub828 \ud30c\uc77c: '+file;fileElement.hidden=false;}\n        var copyBtn=document.getElementById('dpsBootCopyBtn');\n        var reloadBtn=document.getElementById('dpsBootReloadBtn');\n        if(copyBtn) copyBtn.addEventListener('click',function(){\n          var report=code==='S1001'\n            ? [code,info.title,info.guide,'\uc81c\uc791\uc790 \ubc30\ud2c0\ud0dc\uadf8: VAERON#3787','\ub514\uc2a4\ucf54\ub4dc: https://discord.gg/z7DwqvGeB5']\n            : [code,info.title,reason,file?'\uad00\ub828 \ud30c\uc77c: '+file:''];\n          copyBootErrorCode(report.filter(Boolean).join('\\n'),copyBtn);\n        });\n        if(reloadBtn) reloadBtn.addEventListener('click',function(){window.location.reload();});\n      }\n    }catch(e){window.__dpsBootRenderError=e;}\n  };\n  window.dpsReportBootResourceError=function(code,error){\n    if(window.__dpsBootErrorPending || window.__dpsBootError)return;\n    window.__dpsBootErrorPending=true;\n    var complete=function(resolved){\n      window.__dpsBootErrorPending=false;\n      window.dpsShowBootError(resolved,error);\n    };\n    if(window.parent!==window && typeof window.parent.nexusDiagnoseServiceFailure==='function'){\n      window.parent.nexusDiagnoseServiceFailure(code,complete);\n    }else complete(code);\n  };\n  window.addEventListener('error',function(event){\n    if(event.error && !window.__dpsAppReady && !window.__dpsBootError && !window.__dpsBootErrorPending){\n      window.dpsShowBootError('B1001',event.error);\n    }\n  });\n  function waitForEssentialResources(){\n    function waitForDocument(){\n      if(document.readyState!=='loading') return Promise.resolve();\n      return new Promise(function(resolve){document.addEventListener('DOMContentLoaded',resolve,{once:true});});\n    }\n    function waitForStyle(){\n      var link=document.querySelector('link[data-boot-style]');\n      if(!link) return Promise.reject(new Error('required stylesheet missing'));\n      if(link.dataset.loadFailed==='1') return Promise.reject(new Error('required stylesheet failed'));\n      if(link.sheet) return Promise.resolve();\n      return new Promise(function(resolve,reject){\n        link.addEventListener('load',resolve,{once:true});\n        link.addEventListener('error',function(){reject(new Error('required stylesheet failed'));},{once:true});\n      });\n    }\n    function waitForPageLoad(){\n      if(document.readyState==='complete') return Promise.resolve();\n      return new Promise(function(resolve){window.addEventListener('load',resolve,{once:true});});\n    }\n    function waitForImages(){\n      // \uc9c0\uc5f0 \ub85c\ub529\u00b7\uc228\uaca8\uc9c4 \uc0c1\uc138 \ud654\uba74\uc740 \uccab \ud654\uba74 \ud544\uc218 \ub9ac\uc18c\uc2a4\uac00 \uc544\ub2d9\ub2c8\ub2e4.\n      var images=Array.from(document.images).filter(function(img){\n        return img.src && img.loading!=='lazy' && !img.closest('[hidden]');\n      });\n      return Promise.all(images.map(function(img){\n        function check(){\n          if(img.naturalWidth>0) return;\n          throw new Error('required image failed: '+(img.currentSrc || img.src));\n        }\n        if(img.complete){try{check();return Promise.resolve();}catch(error){return Promise.reject(error);}}\n        return new Promise(function(resolve,reject){\n          img.addEventListener('load',resolve,{once:true});\n          img.addEventListener('error',function(){reject(new Error('required image failed: '+(img.currentSrc || img.src)));},{once:true});\n        });\n      }));\n    }\n    function waitForPaint(){\n      return new Promise(function(resolve){\n        requestAnimationFrame(function(){requestAnimationFrame(resolve);});\n      });\n    }\n    // \uc900\ube44 \uc644\ub8cc \uc870\uac74\uc740 \uc720\uc9c0\ud558\uace0 \ub3c5\ub9bd \ub9ac\uc18c\uc2a4 \ub300\uae30\ub9cc \ubcd1\ub82c\ud654\ud55c\ub2e4.\n    return waitForDocument().then(function(){\n      return Promise.all([\n        waitForStyle(),waitForPageLoad(),\n        document.fonts ? document.fonts.ready : null,\n        waitForImages()\n      ]);\n    }).then(waitForPaint);\n  }\n  function dpsReleaseBootScreen(){\n    if(window.__dpsBootError || !window.__dpsAppReady || !window.__dpsResponsiveLayoutReady || window.__dpsBootReleaseStarted) return;\n    window.__dpsBootReleaseStarted=true;\n    waitForEssentialResources().then(function(){\n      if(window.__dpsBootError) return;\n      finishRelease();\n    }).catch(function(error){window.dpsReportBootResourceError('B1004',error);});\n  }\n  function finishRelease(){\n    if(window.__dpsBootError) return;\n    document.documentElement.classList.remove('dps-booting','dps-boot-error');\n    var boot=document.getElementById('dpsBootScreen');\n    if(boot) boot.setAttribute('aria-hidden','true');\n  }\n  window.dpsMarkAppReady=function(){\n    window.__dpsAppReady=true;\n    dpsReleaseBootScreen();\n  };\n  window.dpsMarkResponsiveLayoutReady=function(){\n    window.__dpsResponsiveLayoutReady=true;\n    dpsReleaseBootScreen();\n  };\n})();\n<\/script>\n<link rel=\"stylesheet\" href=\"build_style.css?v=__VERSION__\" data-boot-style=\"1\">\n<link rel=\"stylesheet\" href=\"build_preset.css?v=__VERSION__\">\n<link rel=\"stylesheet\" href=\"build_unit.css?v=__VERSION__\">\n";
         var standalone=window.NEXUS_WINDOW_MODE==='builder';
         var combined=window.NEXUS_WINDOW_MODE==='combined';
-        var frameResizeObserver=null;
-        function frame(){return document.getElementById('buildAppFrame');}
-        function layout(){return document.getElementById('mainLayout');}
-        function shell(){return document.getElementById('buildFrameShell');}
-        function adjustFrameTop(){
-            var host=shell();if(!host)return;
-            if(combined){host.style.top='auto';return;}
-            var header=document.getElementById('globalHeader');
-            host.style.top=(standalone?0:Math.ceil(header?.getBoundingClientRect().bottom || 48))+'px';
-        }
-        function fitCombinedBuilderHeight(){
-            if(!combined)return;
-            var iframe=frame();
-            var content=iframe?.contentDocument?.querySelector('.wrap');
-            if(!content)return;
-            var height=Math.ceil(content.getBoundingClientRect().height)+16;
-            if(height>200 && Math.abs((parseInt(iframe.style.height,10)||0)-height)>1)iframe.style.height=height+'px';
-        }
-        function watchCombinedBuilderHeight(){
-            if(!combined)return;
-            frameResizeObserver?.disconnect();
-            var content=frame()?.contentDocument?.querySelector('.wrap');
-            if(!content)return;
-            if(typeof ResizeObserver==='function'){
-                frameResizeObserver=new ResizeObserver(fitCombinedBuilderHeight);
-                frameResizeObserver.observe(content);
-            }
-            fitCombinedBuilderHeight();
-        }
+
+function loadScriptSequence(files, onComplete){
+  var remaining=files.length,failed=false;
+  if(!remaining){if(typeof onComplete==='function')onComplete();return;}
+  files.forEach(function(fileName){
+    var script=document.createElement('script');
+    script.src=window.nexusAssetUrl(fileName);
+    script.charset='UTF-8';
+    script.async=false; // 파일 다운로드는 병렬, 실행은 기존 배열 순서 그대로
+    script.addEventListener('load',function(){
+      if(--remaining===0 && !failed && typeof onComplete==='function')onComplete();
+    },{once:true});
+    script.addEventListener('error',function(){
+      failed=true;
+      --remaining;
+      if(typeof window.dpsReportBootResourceError==='function')
+        window.dpsReportBootResourceError('B1002',new Error(fileName+' load failed'));
+    },{once:true});
+    document.head.appendChild(script);
+  });
+}
+
         function ensureBuilder(){
             if(initialized)return;
-            var iframe=frame();var template=document.getElementById('buildAppTemplate');
-            if(!iframe||!template)return;
             initialized=true;
-            if(combined)iframe.addEventListener('load',watchCombinedBuilderHeight);
-            var version=encodeURIComponent(window.APP_VERSION);
-            iframe.srcdoc='<!doctype html><html lang="ko" class="dps-booting"><head>'+frameHead.replace(/__VERSION__/g,version)+'</head><body>'+template.innerHTML+'</body></html>';
+            DPS_ROOT.classList.add('dps-booting');
+            var font=document.createElement('link');
+            font.rel='stylesheet';
+            font.crossOrigin='anonymous';
+            font.href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css';
+            document.head.appendChild(font);
+            var styles=['build_style.css','build_preset.css','build_unit.css'];
+            Promise.all(styles.map(function(src){
+                return new Promise(function(resolve,reject){
+                    var link=document.createElement('link');
+                    link.rel='stylesheet';link.dataset.dpsBootStyle='1';
+                    link.href=window.nexusAssetUrl(src);
+                    link.addEventListener('load',resolve,{once:true});
+                    link.addEventListener('error',function(){link.dataset.loadFailed='1';reject(new Error(src+' load failed'));},{once:true});
+                    document.head.appendChild(link);
+                });
+            })).then(function(){
+                loadScriptSequence(['build_data.js','build_calc.js','build_app.js','build_unit.js','build_preset.js','build_responsive.js'],function(){
+                    if(typeof window.dpsStartApp==='function')window.dpsStartApp();
+                    else window.dpsShowBootError('B1003',new Error('app start function missing'));
+                });
+            }).catch(function(error){window.dpsReportBootResourceError('B1004',error);});
         }
         window.NEXUS_ACTIVATE_BUILDER=function(active){
-            var pane=shell();var main=layout();if(!pane||!main)return;
-            pane.hidden=combined ? false : !active;
+            var main=document.getElementById('mainLayout');if(!main)return;
+            DPS_ROOT.hidden=combined ? false : !active;
             main.hidden=combined ? false : active;
-            if(active || combined){adjustFrameTop();ensureBuilder();}
+            document.documentElement.classList.toggle('nexus-builder-active',!!active && !combined);
+            if(active || combined){
+                ensureBuilder();
+                window.dpsSyncResponsiveLayout?.();
+            }
         };
-        window.NEXUS_SYNC_BUILDER_FONT=function(value){
-            try{frame()?.contentWindow?.NEXUS_SET_BUILDER_FONT_SCALE?.(value);}catch(error){console.warn('빌더 글씨 크기 동기화 실패',error);}
-        };
-        window.NEXUS_PREPARE_BUILDER_WINDOW=function(){
-            try{frame()?.contentWindow?.NEXUS_PREPARE_BUILDER_WINDOW?.();}catch(error){console.warn('빌더 저장 후 독립창 실행 실패',error);}
-        };
-        window.addEventListener('resize',adjustFrameTop,{passive:true});
-        window.addEventListener('message',function(event){
-            if(event.source!==frame()?.contentWindow || event.data!=='nexus:builder-ready')return;
-            var scale=parseFloat(localStorage.getItem('nexusFontScaleV2')||'1');
-            window.NEXUS_SYNC_BUILDER_FONT(Number.isFinite(scale)?scale:1);
-            fitCombinedBuilderHeight();
-        });
         if(standalone || combined){
             var startBuilderWindow=function(){
                 if(standalone)document.title='개복디 빌더 · 독립창';
                 window.NEXUS_ACTIVATE_BUILDER(true);
             };
-            if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startBuilderWindow,{once:true});
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startBuilderWindow,{once:true});
             else startBuilderWindow();
         }
     })();

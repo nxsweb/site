@@ -8,7 +8,9 @@
   // 독립 창은 자체 페이지이므로 원본 모바일 탭 재배치를 적용하지 않는다.
   if(window.DPS_STANDALONE_VIEW){
     const init=()=>{
-      for(const el of [document.body,document.documentElement]){
+      DPS_ROOT.style.setProperty('--dps-vh',`${window.innerHeight/100}px`);
+      DPS_ROOT.style.setProperty('--dps-vw',`${(DPS_ROOT.clientWidth||window.innerWidth)/100}px`);
+      for(const el of [DPS_BODY,DPS_ROOT]){
         el.classList.remove(...MODES);
         el.classList.add('is-pc-landscape');
       }
@@ -16,6 +18,7 @@
       window.dpsMarkResponsiveLayoutReady?.();
     };
     window.dpsSyncResponsiveLayout=init;
+    window.addEventListener('resize',init,{passive:true});
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
     else init();
     return;
@@ -49,7 +52,7 @@
   /* 접힘 애니메이션·회전·제스처 후 변동된 특성 목록의 스크롤 경계를 보정한다.
    * 모바일/태블릿 특성 탭에만 적용하고 다른 페이지의 스크롤은 유지한다. */
   function clampTraitScroll() {
-    if (!document.body.classList.contains('is-tabbed')) return;
+    if (!DPS_BODY.classList.contains('is-tabbed')) return;
     const page = state.pages.find(item => item.key === 'trait')?.el;
     if (!page || page.hidden || !page.classList.contains('active')) return;
     const maximum = Math.max(0, page.scrollHeight - page.clientHeight);
@@ -73,7 +76,7 @@
   /* ── 02 · 뷰포트 판정·오프셋 ── */
   /* 뷰포트 판정 */
   function getViewportSize() {
-    const root = document.documentElement;
+    const root = DPS_ROOT;
     return {
       w: root.clientWidth || window.innerWidth || 0,
       h: root.clientHeight || window.innerHeight || 0
@@ -90,19 +93,21 @@
     return 'is-pc-landscape';
   }
   function setViewportProperty(key,value) {
-    const style=document.documentElement.style;
+    const style=DPS_ROOT.style;
     if(style.getPropertyValue(key)!==value) style.setProperty(key,value);
   }
   function updateMobileOffsets() {
-    const header = document.querySelector('.hdr');
-    const tabs = document.querySelector('.mobile-section-tabs');
+    const header = DPS_BODY.querySelector('.hdr');
+    const tabs = DPS_BODY.querySelector('.mobile-section-tabs');
     const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
     const tabsHeight = tabs ? Math.ceil(tabs.getBoundingClientRect().height) : 0;
     const { w, h } = getViewportSize();
+    setViewportProperty('--dps-vh',`${h/100}px`);
+    setViewportProperty('--dps-vw',`${w/100}px`);
     setViewportProperty('--mobile-vw', `${w}px`);
     setViewportProperty('--mobile-header-h', `${headerHeight}px`);
     setViewportProperty('--mobile-tabs-h', `${tabsHeight}px`);
-    const visualHeight = window.visualViewport?.height;
+    const visualHeight = window.visualViewport ? Math.max(0,window.visualViewport.offsetTop+window.visualViewport.height-DPS_ROOT.getBoundingClientRect().top) : undefined;
     const focused = document.activeElement;
     const isEditing = focused && (focused.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(focused.tagName));
     // Browser toolbar animations must not repeatedly resize the active scroll viewport.
@@ -126,7 +131,7 @@
     if (widthClass) classes.push(widthClass);
     const modeKey=classes.join(' ');
     if(state.modeKey!==modeKey){
-      for(const el of [document.body,document.documentElement]){
+      for(const el of [DPS_BODY,DPS_ROOT]){
         el.classList.remove(...MODES);
         el.classList.add(...classes);
       }
@@ -148,7 +153,7 @@
     state.restore.set(el, marker);
   }
   function getOrCreatePage(key) {
-    let page = document.querySelector(`.mobile-page[data-mobile-page="${key}"]`);
+    let page = DPS_BODY.querySelector(`.mobile-page[data-mobile-page="${key}"]`);
     if (!page) {
       page = document.createElement('div');
       page.className = `mobile-page mobile-page-${key}`;
@@ -238,7 +243,7 @@
     const pages = [];
     const keepKey = state.activeKey || state.pages[state.activeIndex]?.key || 'basic';
     TABBED_PAGES.forEach((config) => {
-      const elements = config.selectors.map(selector => document.querySelector(selector)).filter(Boolean);
+      const elements = config.selectors.map(selector => DPS_BODY.querySelector(selector)).filter(Boolean);
       if (!elements.length) return;
       const page = getOrCreatePage(config.key);
       page.textContent = '';
@@ -267,17 +272,17 @@
     state.restore.forEach((marker, el) => {
       if (marker.parentNode) marker.parentNode.insertBefore(el, marker.nextSibling);
     });
-    Array.from(document.querySelectorAll('.mobile-page')).forEach(page => page.remove());
+    Array.from(DPS_BODY.querySelectorAll('.mobile-page')).forEach(page => page.remove());
     if (state.tabs) state.tabs.remove();
-    document.querySelector('.col-work')?.classList.remove('is-mobile-arranged');
+    DPS_BODY.querySelector('.col-work')?.classList.remove('is-mobile-arranged');
     state.tabs = null;
     state.pages = [];
     state.arrangedTabbed = false;
   }
   function syncTabbedLayout() {
-    const colWork = document.querySelector('.col-work');
+    const colWork = DPS_BODY.querySelector('.col-work');
     if (!colWork) return;
-    if (document.body.classList.contains('is-tabbed')) {
+    if (DPS_BODY.classList.contains('is-tabbed')) {
       if (!state.arrangedTabbed) arrangeTabbed(colWork);
       else {
         showTabbedPage(getPageIndexByKey(state.activeKey));
@@ -294,9 +299,9 @@
     return !['button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit'].includes((el.type || '').toLowerCase());
   }
   function bindInputAutoSelect() {
-    if (document.documentElement.dataset.inputAutoSelectBound === '1') return;
-    document.documentElement.dataset.inputAutoSelectBound = '1';
-    document.addEventListener('focusin', (event) => {
+    if (DPS_ROOT.dataset.inputAutoSelectBound === '1') return;
+    DPS_ROOT.dataset.inputAutoSelectBound = '1';
+    DPS_BODY.addEventListener('focusin', (event) => {
       const el = event.target;
       if (!isTextInput(el)) return;
       requestAnimationFrame(() => {
@@ -307,6 +312,7 @@
   /* ── 04 · 이벤트·초기화 ── */
   /* 갱신·초기화 */
   function scheduleApply() {
+    if(DPS_ROOT.hidden)return;
     if (state.touchScrolling) {
       state.viewportUpdatePending = true;
       return;
@@ -318,11 +324,12 @@
       const portrait = h > w;
       const widthChanged = Math.abs(w - state.layoutWidth) > 1;
       const orientationChanged = state.layoutPortrait !== portrait;
-      if (widthChanged || orientationChanged || !document.body.classList.contains(getMode())) applyMode();
+      if (widthChanged || orientationChanged || !DPS_BODY.classList.contains(getMode())) applyMode();
       else updateMobileOffsets();
     });
   }
   function scheduleResumeApply() {
+    if(DPS_ROOT.hidden)return;
     if (state.resumeRaf) return;
     state.resumeRaf = requestAnimationFrame(() => {
       state.resumeRaf = 0;
@@ -361,7 +368,7 @@
     initializeResponsiveLayout();
   }
   // Let the browser own native touch momentum; viewport mutations resume after release.
-  document.addEventListener('touchstart', () => { state.touchScrolling = true; }, { passive: true });
+  DPS_BODY.addEventListener('touchstart', () => { state.touchScrolling = true; }, { passive: true });
   const finishTouch = () => {
     state.touchScrolling = false;
     if (state.viewportUpdatePending) {
@@ -369,8 +376,9 @@
       scheduleApply();
     }
   };
-  document.addEventListener('touchend', finishTouch, { passive: true });
-  document.addEventListener('touchcancel', finishTouch, { passive: true });
+  DPS_BODY.addEventListener('touchend', finishTouch, { passive: true });
+  DPS_BODY.addEventListener('touchcancel', finishTouch, { passive: true });
+  if(typeof ResizeObserver==='function')new ResizeObserver(scheduleApply).observe(DPS_ROOT);
   window.addEventListener('resize', scheduleApply, { passive: true });
   window.addEventListener('orientationchange', scheduleApply, { passive: true });
   if (window.visualViewport) window.visualViewport.addEventListener('resize', scheduleApply, { passive: true });
