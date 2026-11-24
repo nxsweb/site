@@ -2226,7 +2226,7 @@
             else button.removeAttribute('aria-current');
         });
         const presetTrigger = getEl('btnGlobalPreset');
-        if (presetTrigger) presetTrigger.hidden = nextMode !== 'builder';
+        if (presetTrigger) presetTrigger.hidden = nextMode !== 'builder' || window.NEXUS_WINDOW_MODE !== 'main';
         if (nextMode !== 'builder') window.DpsPreset?.closeManager();
         if (nextMode === 'builder') {
             window.NEXUS_ACTIVATE_BUILDER?.(true);
@@ -2375,7 +2375,6 @@
         const action = actionEl.dataset.action, uid = actionEl.dataset.uid;
         switch (action) {
             case 'toggleBuilderPreset': window.DpsPreset?.toggleManager(); break;
-            case 'openCreatorInfo': getEl('creatorInfoDialog')?.showModal(); break;
             case 'closeCreatorInfo': getEl('creatorInfoDialog')?.close(); break;
             case 'switchMainView': switchLayout(actionEl.dataset.view); break;
             case 'toggleBuildMaterialMode': e.preventDefault(); e.stopPropagation(); toggleBuildMaterialMode(); break;

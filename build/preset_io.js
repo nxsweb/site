@@ -288,7 +288,7 @@ function traitPresetBackupChangeListHtml(keys,details=[],presetId=''){
     const before=traitPresetBackupDisplayValue(key,traitPresetReadableStoredChange(key,item.before));
     const after=traitPresetBackupDisplayValue(key,traitPresetReadableStoredChange(key,item.after));
     const variation=traitPresetChangeVariation(before,after,key);
-    return `<li><strong>${escapeHtml(label)}</strong><span class="trait-preset-backup-values"><span>${escapeHtml(traitPresetChangeNumberText(before,key))}</span><b aria-label="변경 후">→</b><span>${escapeHtml(traitPresetChangeNumberText(after,key))}</span><em>${escapeHtml(variation)}</em></span></li>`;
+    return `<li${key.startsWith('obsolete:')?' class="is-removed"':''}><strong>${escapeHtml(label)}</strong><span class="trait-preset-backup-values"><span>${escapeHtml(traitPresetChangeNumberText(before,key))}</span><b aria-label="변경 후">→</b><span>${escapeHtml(traitPresetChangeNumberText(after,key))}</span><em>${escapeHtml(variation)}</em></span></li>`;
   });
   return rows.length ? `<ul class="trait-preset-backup-change-list">${rows.join('')}</ul>` : '<p class="trait-preset-backup-no-change">업데이트 없음</p>';
 }
@@ -306,7 +306,7 @@ function traitPresetBackupTargetsHtml(plan){
       if(!row.error && !changes.length) return '';
       const content=row.error ? `<p class="trait-preset-backup-invalid">${escapeHtml(row.error)}</p>` :
         traitPresetBackupChangeListHtml(changes.map(change=>change.key),changes,row.raw?.id);
-      return `<article class="trait-preset-backup-card"><header class="trait-preset-backup-card-head"><div class="trait-preset-backup-card-identity"><span>${row.index+1}번째</span><h3>${escapeHtml(row.name)}</h3></div></header><div class="trait-preset-backup-card-changes"><section class="trait-preset-backup-scope is-individual"><h4>${row.error?'오류':`수정 ${changes.length}건`}</h4>${content}</section></div></article>`;
+      return `<article class="trait-preset-backup-card"><header class="trait-preset-backup-card-head"><div class="trait-preset-backup-card-identity"><span>${row.index+1}번째</span><h3>${escapeHtml(row.name)}</h3></div></header><div class="trait-preset-backup-card-changes"><section class="trait-preset-backup-scope is-individual${row.error?' is-error':''}"><h4>${row.error?'오류':`수정 ${changes.length}건`}</h4>${content}</section></div></article>`;
     }).filter(Boolean).join('');
     const candidates=recovery.rows.filter(row=>row.candidate);
     const conflicting=candidates.length>1 && new Set(candidates.map(row=>traitPresetSharedStateSignature(row.candidate.presets[0].state))).size>1;
@@ -376,9 +376,6 @@ function traitPresetBackupFileNameControlHtml(plan){
     <div class="trait-preset-backup-actions"><button class="btn is-cancel ui-action-btn" type="button" data-trait-preset-backup-close="1">취소</button><button class="btn pri ui-action-btn" type="button" data-trait-preset-backup-run="apply" ${plan.mode==='import' && (plan.recovery.sharedError || plan.recovery.rows.some(row=>row.error)) ? 'disabled' : ''}>${action}</button></div>
   </section>`;
 }
-function traitPresetSupportHtml(){
-  return $('traitPresetManagerOverlay')?.querySelector('[data-trait-preset-support]')?.outerHTML || '';
-}
 function renderTraitPresetBackupPanel(plan){
   const body=$('traitPresetBackupBody');
   if(!body) return;
@@ -389,7 +386,7 @@ function renderTraitPresetBackupPanel(plan){
   $('traitPresetBackupTitle').textContent=plan.mode==='import'?'프리셋 최신화':plan.mode==='update'?'프리셋 업데이트':'프리셋 최신화';
   body.innerHTML=`
     ${traitPresetBackupTargetsHtml(plan)}
-    ${traitPresetBackupFileNameControlHtml(plan)}${traitPresetSupportHtml()}`;
+    ${traitPresetBackupFileNameControlHtml(plan)}`;
   if(plan.mode==='import'){
     const select=$('traitPresetImportSharedSource');
     if(select){
@@ -435,7 +432,7 @@ function renderTraitPresetBackupError(error=''){
   const body=$('traitPresetBackupBody');
   if(!body) return;
   body.closest('.trait-preset-backup-panel')?.classList.remove('has-pending-change');
-  body.innerHTML=`<section class="trait-preset-backup-error"><h3>프리셋 작업을 완료하지 못했습니다.</h3><p>${escapeHtml(error)}</p><button type="button" class="trait-preset-support" data-trait-preset-error-copy>오류 정보 복사</button>${traitPresetSupportHtml()}</section><div class="trait-preset-backup-file-box"><div class="trait-preset-backup-actions is-single-action"><button class="btn is-cancel ui-action-btn" type="button" data-trait-preset-backup-close="1">닫기</button></div></div>`;
+  body.innerHTML=`<section class="trait-preset-backup-error"><h3>프리셋 작업을 완료하지 못했습니다.</h3><p>${escapeHtml(error)}</p><button type="button" class="trait-preset-support" data-trait-preset-error-copy>오류 정보 복사</button></section><div class="trait-preset-backup-file-box"><div class="trait-preset-backup-actions is-single-action"><button class="btn is-cancel ui-action-btn" type="button" data-trait-preset-backup-close="1">닫기</button></div></div>`;
 }
 function notifyTraitPresetBackupFileComplete(fileName){
   const normalized=String(fileName || '').trim() || makeTraitPresetFileName('');

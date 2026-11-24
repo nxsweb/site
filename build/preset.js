@@ -1,6 +1,6 @@
 /* 프리셋 관리 레이어
  * - 저장값 정규화: 숫자/룬/유닛 보드/재화 상태
- * - 파일 입출력·최신화: preset_io.js / 클리어 리포트: report.js
+ * - 파일 입출력·최신화: preset_io.js
  * - 프리셋 목록: 필터, 정렬, 선택, 삭제, 갱신
  * - 현재 상태 적용: 특성/유닛 보드/기본 정보 동기화
  * - 변경 상태: 업데이트됨/백업 필요 표시
@@ -1985,12 +1985,13 @@ function renderTraitPresetUpdateStatus(store=loadTraitPresetStore(),status=loadT
   const detected=hasChanges?traitPresetDisplayTime(traitPresetDetectedAt):'';
   const warning=compatibility.requiresUpdate || !!compatibility.error;
   const description=[message,detected,backup && type!=='backup'?'백업 필요':''].filter(Boolean).join(' · ');
-  [document.getElementById('btnGlobalPreset'),DPS_BODY.querySelector('[data-trait-preset-manager-open]')].filter(Boolean).forEach(btn=>{
+  const btn=document.getElementById('btnGlobalPreset');
+  if(btn){
     btn.dataset.status=type;
     btn.setAttribute('aria-label',`프리셋 · ${description}`);
     btn.title=description;
     const mark=btn.querySelector('i');if(mark) mark.textContent=warning?'!':'';
-  });
+  }
   qsa('[data-action="updateTraitPreset"]').forEach(btn=>{
     btn.classList.toggle('is-change-ready',updateReady);
     btn.disabled=!current.preset || !!compatibility.error || compatibility.requiresUpdate;
@@ -2276,14 +2277,14 @@ function toggleTraitPresetManager(){
 }
 function openTraitPresetManager(){
   const overlay=$('traitPresetManagerOverlay');
-  if(!overlay || DPS_ROOT.hidden || !overlay.hidden) return;
+  if(window.NEXUS_WINDOW_MODE!=='main' || !overlay || DPS_ROOT.hidden || !overlay.hidden) return;
   renderTraitPresetUpdateStatus();
   overlay.hidden=false;
-  [document.getElementById('btnGlobalPreset'),DPS_BODY.querySelector('[data-trait-preset-manager-open]')].filter(Boolean).forEach(btn=>btn.setAttribute('aria-expanded','true'));
+  document.getElementById('btnGlobalPreset')?.setAttribute('aria-expanded','true');
   overlay.querySelector('.trait-preset-panel')?.focus({preventScroll:true});
 }
 function openTraitPresetManagerIfUnloaded(){
-  if(DPS_ROOT.hidden) return;
+  if(window.NEXUS_WINDOW_MODE!=='main' || DPS_ROOT.hidden) return;
   const store=loadTraitPresetStore();
   const id=loadTraitPresetStatusData().selectedTraitPresetId;
   if(!store.presets.some(preset=>preset.id===id)) openTraitPresetManager();
@@ -2295,10 +2296,10 @@ function closeTraitPresetManager(restoreFocus=false){
   if(overlay) overlay.hidden=true;
   closeTraitPresetCustomSelects();
   const trigger=document.getElementById('btnGlobalPreset');
-  [trigger,DPS_BODY.querySelector('[data-trait-preset-manager-open]')].filter(Boolean).forEach(btn=>btn.setAttribute('aria-expanded','false'));
+  trigger?.setAttribute('aria-expanded','false');
   clearTimeout(traitPresetResetButtonTimer);
   resetTraitPresetResetButton();
-  if(restoreFocus===true) (window.DPS_STANDALONE_VIEW?DPS_BODY.querySelector('[data-trait-preset-manager-open]'):trigger)?.focus({preventScroll:true});
+  if(restoreFocus===true && trigger && !trigger.hidden) trigger.focus({preventScroll:true});
   return true;
 }
 function handleTraitPresetChange(e){
@@ -2312,7 +2313,6 @@ function handleTraitPresetChange(e){
   }
 }
 function handleTraitPresetClick(e){
-  if(e.target.closest('[data-trait-preset-manager-open]')){toggleTraitPresetManager();return;}
   if(e.target.id==='traitPresetManagerOverlay' || e.target.closest('[data-trait-preset-manager-close]')){closeTraitPresetManager(true);return;}
   if(e.target.closest('[data-trait-preset-error-copy]')){
     const issue=window.DPS_LAST_ISSUE;
@@ -2322,22 +2322,6 @@ function handleTraitPresetClick(e){
     return;
   }
   if(e.target.closest('[data-trait-preset-support]')){document.getElementById('creatorInfoDialog')?.showModal();return;}
-  if(e.target.closest('[data-clear-record-open]')){
-    e.preventDefault();
-    openTraitClearRecord();
-    return;
-  }
-  const copyButton=e.target.closest('[data-clear-record-copy]');
-  if(copyButton){
-    e.preventDefault();
-    copyTraitClearRecord(copyButton);
-    return;
-  }
-  if(e.target.closest('[data-clear-record-close]') || e.target.id==='traitClearRecordOverlay'){
-    e.preventDefault();
-    closeTraitClearRecord();
-    return;
-  }
   const deleteButton=e.target.closest('[data-trait-preset-custom-delete]');
   if(deleteButton){
     e.preventDefault();
@@ -2398,28 +2382,6 @@ function handleTraitPresetClick(e){
 }
 function handleTraitPresetKeydown(e){
   if(document.getElementById('creatorInfoDialog')?.open) return;
-  const clearPanel=$('traitClearRecordPanel');
-  if(clearPanel && !$('traitClearRecordOverlay')?.hidden){
-    if(e.key==='Escape'){
-      e.preventDefault();
-      closeTraitClearRecord();
-      return;
-    }
-    if(e.key==='Tab'){
-      const controls=[...clearPanel.querySelectorAll('button:not(:disabled),[tabindex="0"]')];
-      const first=controls[0],last=controls[controls.length-1];
-      if(first && last){
-        if(e.shiftKey && (document.activeElement===first || document.activeElement===clearPanel)){
-          e.preventDefault();last.focus();
-        }else if(!e.shiftKey && document.activeElement===last){
-          e.preventDefault();first.focus();
-        }else if(!clearPanel.contains(document.activeElement)){
-          e.preventDefault();first.focus();
-        }
-      }
-    }
-    return;
-  }
   const backupPanel=$('traitPresetBackupPanel');
   if(backupPanel?.classList.contains('is-open')){
     if(e.key==='Escape'){
@@ -2491,12 +2453,6 @@ window.DpsPreset=Object.freeze({
     refreshTraitPresetControls();
     restoreTraitPresetStatus();
     openTraitPresetManagerIfUnloaded();
-    const standalone=DPS_BODY.querySelector('[data-trait-preset-manager-open]');
-    if(standalone) standalone.hidden=!(window.DPS_STANDALONE_VIEW || window.NEXUS_WINDOW_MODE==='combined');
-    if(window.DPS_STANDALONE_VIEW){
-      const creator=document.getElementById('creatorInfoDialog');
-      creator?.addEventListener('click',event=>{if(event.target===creator || event.target.closest('[data-action="closeCreatorInfo"]')) creator.close();});
-    }
   },
   bindEvents:bindTraitPresetEvents,
   saveCurrent:saveTraitPreset,

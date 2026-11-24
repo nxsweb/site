@@ -683,7 +683,7 @@ div:where(#buildDirectBody) :is(.buff-config-heading strong,
   margin:0; font-family:var(--font-main); font-size:var(--studio-subheader-font); font-weight:600;
   line-height:1.4; letter-spacing:0; color:var(--ui-integrated-head-text);
 }
-div:where(#buildDirectBody) :is(.unit-slot-card-head,.unit-sanctuary-card-head,.trait-preset-backup-card-head,.dps-jewel-card-head) {
+div:where(#buildDirectBody) :is(.unit-slot-card-head,.unit-sanctuary-card-head,.dps-jewel-card-head) {
   min-height:36px; padding:8px 12px; gap:8px; box-shadow:none; border-bottom:1px solid var(--ui-line-strong);
 }
 div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-header,div:where(#buildDirectBody) .trait-preset-backup-panel .trait-preset-modal-head { padding:12px var(--studio-header-pad); min-height:var(--studio-header-height); }
@@ -802,63 +802,6 @@ div:where(#buildDirectBody) #dpsBaseUnitSlotStack .has-expanded-units .unit-basi
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .has-expanded-units .unit-basic-limit-break{width:15%;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .has-expanded-units .unit-basic-jewel{width:31%;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .has-expanded-units .unit-basic-member{color:#a8c5e2;}
-/* 클리어 리포트: 핵심 수치, 여덟 섹션과 개별 유닛 표. 복사 원문 형식 유지. */
-div:where(#buildDirectBody) #traitClearRecordPanel {
-  width:min(660px,100%); max-height:calc(calc(var(--dps-vh,1dvh) * 100) - 48px); border-radius:12px;
-  background:var(--ui-panel-body-bg); box-shadow:none;
-}
-div:where(#buildDirectBody) #traitClearRecordPanel .trait-clear-record-head {
-  min-height:var(--studio-header-height) !important; padding:7px var(--studio-header-pad) !important; flex-wrap:nowrap; gap:12px;
-}
-div:where(#buildDirectBody) #traitClearRecordTitle { display:flex; align-items:center; min-height:30px; font-size:var(--studio-header-font) !important; font-weight:600; line-height:1.4; }
-div:where(#buildDirectBody) #traitClearRecordPanel .trait-clear-record-controls { gap:8px; }
-div:where(#buildDirectBody) #traitClearRecordPanel .trait-preset-modal-close { width:28px; height:28px; min-width:28px; min-height:28px; }
-div:where(#buildDirectBody) #traitClearRecordPanel .trait-clear-record-copy {
-  display:inline-flex; align-items:center; gap:6px; min-height:28px; padding:4px 10px; border-radius:6px; background:transparent;
-  color:var(--ui-text); border-color:var(--ui-button-border); font:500 calc(11px * var(--app-font-scale))/1.4 var(--font-main);
-}
-div:where(#buildDirectBody) #traitClearRecordPanel .trait-clear-record-help { padding:16px 20px 0; font-size:calc(12px * var(--app-font-scale)); line-height:1.6; }
-div:where(#buildDirectBody) #traitClearRecordBody {
-  max-height:none; margin:0; padding:20px; border:0; border-radius:0; background:transparent;
-  font:400 calc(12px * var(--app-font-scale))/1.6 var(--font-main); white-space:normal;
-  scrollbar-width:thin; scrollbar-color:var(--ui-line-strong) transparent;
-}
-div:where(#buildDirectBody) #traitClearRecordBody::-webkit-scrollbar { display:block; width:6px; }
-div:where(#buildDirectBody) #traitClearRecordBody::-webkit-scrollbar-thumb { background:var(--ui-line-strong); border-radius:3px; }
-div:where(#buildDirectBody) .trait-clear-record-section { margin:0; padding:0 0 20px; }
-div:where(#buildDirectBody) .trait-clear-record-section + .trait-clear-record-section { padding-top:20px; border-top:1px solid var(--ui-line); }
-div:where(#buildDirectBody) .trait-clear-record-section:last-child { padding-bottom:0; }
-div:where(#buildDirectBody) .trait-clear-record-section h3 { display:flex; align-items:baseline; gap:8px; margin:0 0 12px; color:var(--ui-text); font-size:calc(13px * var(--app-font-scale)); line-height:1.4; font-weight:600; }
-div:where(#buildDirectBody) .trait-clear-record-section dl { margin:0; }
-div:where(#buildDirectBody) .trait-clear-record-row { display:grid; grid-template-columns:minmax(100px,.8fr) minmax(0,1.5fr); gap:12px; padding:8px 0; border-bottom:1px solid var(--ui-line); }
-div:where(#buildDirectBody) .trait-clear-record-row dt { color:var(--ui-sub); }
-div:where(#buildDirectBody) .trait-clear-record-row dd { margin:0; text-align:right; color:var(--ui-text); overflow-wrap:break-word; }
-div:where(#buildDirectBody) .trait-clear-record-line { margin:0; padding:6px 0; white-space:pre-wrap; overflow-wrap:break-word; color:var(--ui-text); }
-div:where(#buildDirectBody) .trait-clear-record-number{color:#91bfd9;font-size:calc(11px * var(--app-font-scale));font-variant-numeric:tabular-nums;flex:none;}
-div:where(#buildDirectBody) .trait-clear-record-hero{display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 0 20px;margin-bottom:20px;border-bottom:1px solid var(--ui-line);}
-div:where(#buildDirectBody) .trait-clear-record-hero-label{color:var(--ui-sub);}
-div:where(#buildDirectBody) .trait-clear-record-achievement{font-size:calc(32px * var(--app-font-scale));font-weight:650;line-height:1.25;color:#b2e7ee;overflow-wrap:anywhere;}
-div:where(#buildDirectBody) .trait-clear-record-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;width:100%;margin:0;}
-div:where(#buildDirectBody) .trait-clear-record-metrics .trait-clear-record-row{display:flex;flex-direction:column;gap:3px;border:0;padding:6px 0;min-width:0;}
-div:where(#buildDirectBody) .trait-clear-record-metrics dd{font-size:calc(17px * var(--app-font-scale));font-weight:600;text-align:left;overflow-wrap:anywhere;}
-div:where(#buildDirectBody) .trait-clear-record-metrics.is-clear .trait-clear-record-row{align-items:center;text-align:center;}
-div:where(#buildDirectBody) .trait-clear-record-metrics.is-clear .trait-clear-record-row+ .trait-clear-record-row{border-left:1px solid var(--ui-line);}
-div:where(#buildDirectBody) .trait-clear-record-metrics.is-clear .trait-clear-record-row:last-child dd{color:#b2e7ee;}
-div:where(#buildDirectBody) .trait-clear-record-enchants{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;color:var(--ui-sub);flex-wrap:wrap;}
-div:where(#buildDirectBody) .trait-clear-record-enchants>div{display:flex;flex-wrap:wrap;gap:4px;}
-div:where(#buildDirectBody) .trait-clear-record-enchants b{display:inline-flex;align-items:center;justify-content:center;min-width:24px;min-height:24px;padding:2px 4px;border:1px solid var(--ui-line);border-radius:4px;color:var(--ui-text);font-weight:500;}
-div:where(#buildDirectBody) .trait-clear-record-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:inherit;}
-div:where(#buildDirectBody) .trait-clear-record-table :is(th,td){padding:8px 4px;text-align:center;vertical-align:middle;overflow-wrap:anywhere;border-bottom:1px solid var(--ui-line);}
-div:where(#buildDirectBody) .trait-clear-record-table th{color:var(--ui-sub);font-weight:500;}
-div:where(#buildDirectBody) .trait-clear-record-table td:first-child{color:#a8c5e2;}
-div:where(#buildDirectBody) .trait-clear-record-unit{border:1px solid var(--ui-line);border-radius:8px;overflow:hidden;margin:8px 0;}
-div:where(#buildDirectBody) .trait-clear-record-unit h4{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:9px 10px;background:#12171d;margin:0;font-size:inherit;font-weight:500;}
-div:where(#buildDirectBody) .trait-clear-record-slot{color:#a8c5e2;border:1px solid var(--ui-line);border-radius:4px;padding:2px 5px;}
-div:where(#buildDirectBody) .trait-clear-record-unit h4 small{margin-left:auto;color:var(--ui-sub);font-size:inherit;}
-div:where(#buildDirectBody) .trait-clear-record-unit .trait-clear-record-table th:last-child{width:52%;}
-div:where(#buildDirectBody) .trait-clear-record-unit .trait-clear-record-table tr:last-child td{border-bottom:0;}
-div:where(#buildDirectBody) .trait-clear-record-line.is-effect::before{content:'✓';color:#91bfd9;margin-right:8px;}
-div:where(#buildDirectBody) .trait-clear-record-empty { margin:0; padding:28px 0; text-align:center; color:var(--ui-sub); }
 /* 두 종류의 슬롯 번호에 같은 고정 규격을 적용해 늘어남·어긋남 방지. */
 div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) :is(.unit-slot-card-head,.unit-sanctuary-card-head) .unit-slot-number {
   display:inline-flex; align-items:center; justify-content:center; align-self:center;
@@ -871,14 +814,6 @@ div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack
 }
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-heading { align-items:center; gap:8px; min-width:0; }
 div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-card-head { align-items:center; gap:8px; }
-@media(max-width:600px) {
-  div:where(#buildDirectBody) #traitClearRecordPanel { max-height:calc(calc(var(--dps-vh,1dvh) * 100) - 16px); }
-  div:where(#buildDirectBody) #traitClearRecordPanel .trait-clear-record-head { padding-inline:12px !important; }
-  div:where(#buildDirectBody) #traitClearRecordPanel .trait-clear-record-help { padding:12px 12px 0; }
-  div:where(#buildDirectBody) #traitClearRecordBody { padding:16px 12px; }
-  div:where(#buildDirectBody) .trait-clear-record-row { grid-template-columns:minmax(80px,.8fr) minmax(0,1.5fr); gap:8px; }
-}
-
 /* ── 04 · 탭 배치·반응형 화면 ── */
 div:where(#buildDirectBody).is-tabbed .mobile-section-tabs {
   position:fixed !important; top:var(--app-header-h,var(--mobile-header-h,44px)) !important;
@@ -903,19 +838,9 @@ div:where(#buildDirectBody).is-tabbed .mobile-section-tabs .mobile-section-tab[a
 div:where(#buildDirectBody).is-tabbed .mobile-section-tabs .mobile-section-tab:hover { background:transparent; color:var(--ui-text); }
 div:where(#buildDirectBody).is-tabbed .mobile-section-tabs .mobile-section-tab:active { transform:none; }
 div:where(#buildDirectBody).is-tabbed .mobile-page { scroll-padding-top:calc(var(--app-header-h,44px) + var(--mobile-tabs-h,44px) + 8px); }
-/* 클리어 리포트는 일정한 창 크기를 유지하고 본문만 스크롤한다. */
-div:where(#buildDirectBody) #traitClearRecordPanel {
-  height:min(540px,calc(calc(var(--dps-vh,1dvh) * 100) - 32px));
-  max-height:min(540px,calc(calc(var(--dps-vh,1dvh) * 100) - 32px));
-}
-div:where(#buildDirectBody) #traitClearRecordBody { flex:1 1 0; min-height:0; overflow-y:auto; overflow-x:hidden; }
-@media(max-width:600px) {
-  div:where(#buildDirectBody) #traitClearRecordPanel { height:min(540px,calc(calc(var(--dps-vh,1dvh) * 100) - 16px)); max-height:min(540px,calc(calc(var(--dps-vh,1dvh) * 100) - 16px)); }
-}
 /* 스크롤 동작은 유지하고 스크롤바 표시만 모든 영역에서 숨긴다. */
 section:where(#buildDirectPane),div:where(#buildDirectBody),div:where(#buildDirectBody) * { scrollbar-width:none !important; -ms-overflow-style:none !important; }
 section:where(#buildDirectPane)::-webkit-scrollbar,div:where(#buildDirectBody)::-webkit-scrollbar,div:where(#buildDirectBody) *::-webkit-scrollbar { display:none !important; width:0 !important; height:0 !important; }
-div:where(#buildDirectBody) #traitClearRecordPanel { width:min(520px,100%); }
 
 /* 슬롯 자체는 분명한 카드로, 요약표·분석 결과의 바깥 프레임과 구분한다. */
 div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) :is(.unit-slot-overview-card,.unit-sanctuary-card) {
@@ -1035,7 +960,7 @@ div:where(#buildDirectBody) :is(.rune-card-heading,.buff-config-heading,
   background:var(--builder-header-bg); border-bottom-color:#252c35;
 }
 div:where(#buildDirectBody) .workspace-section-title { color:#b5c6db; }
-div:where(#buildDirectBody) :is(.unit-slot-card-head,.unit-sanctuary-card-head,.trait-preset-backup-card-head) {
+div:where(#buildDirectBody) :is(.unit-slot-card-head,.unit-sanctuary-card-head) {
   background:#101318 !important; border-bottom-color:var(--studio-head-line) !important;
 }
 /* 탐색 기능: 헤더 탭의 공통 밑줄형 디자인. 기존 높이·분할·스크롤 유지. */

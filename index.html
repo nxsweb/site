@@ -409,7 +409,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                 <div class="gh-title-wrap">
                     <div class="gh-title" id="ghTitleText">
                         <span class="gh-title-mainline">개복디 넥서스</span>
-                        <span class="gh-title-subline"><button type="button" class="gh-creator-trigger" data-action="openCreatorInfo" aria-haspopup="dialog" aria-controls="creatorInfoDialog" title="제작자 정보">by VAERON</button><span id="ghTitleVersion"></span></span>
+                        <span class="gh-title-subline"><span>by VAERON</span><span id="ghTitleVersion"></span></span>
                     </div>
                 </div>
             </div>
@@ -491,7 +491,6 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 
 <svg class="ui-header-glyph-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="dpsUiSparklesGlyph" viewBox="0 0 24 24"><path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></symbol><symbol id="dpsUiResetGlyph" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 2.6 6.4M3 5v7h7"/></symbol><symbol id="dpsUiRunGlyph" viewBox="0 0 24 24"><path d="m8 5 12 7-12 7Z"/></symbol><symbol id="dpsUiInfoGlyph" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol><symbol id="dpsUiBackGlyph" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></symbol><symbol id="dpsUiWarningGlyph" viewBox="0 0 24 24"><path d="m10.29 3.86-8.18 14.1A2 2 0 0 0 3.84 21h16.32a2 2 0 0 0 1.73-3.04l-8.18-14.1a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></symbol><symbol id="traitPresetGlyph-gear" viewBox="0 0 24 24"><path d="M8.00 5.07L9.53 4.39L9.64 1.77L14.36 1.77L14.47 4.39L16.00 5.07L17.35 6.05L19.68 4.84L22.04 8.93L19.83 10.34L20.00 12.00L19.83 13.66L22.04 15.07L19.68 19.16L17.35 17.95L16.00 18.93L14.47 19.61L14.36 22.23L9.64 22.23L9.53 19.61L8.00 18.93L6.65 17.95L4.32 19.16L1.96 15.07L4.17 13.66L4.00 12.00L4.17 10.34L1.96 8.93L4.32 4.84L6.65 6.05Z"/><circle cx="12" cy="12" r="3.4"/></symbol><symbol id="traitPresetGlyph-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-3.8-.8L3 21l1.8-5.7A8.5 8.5 0 1 1 21 11.5Z"/></symbol><symbol id="traitPresetGlyph-empty" viewBox="0 0 24 24"><path d="M3 7V5h7l2 3h9v3M3 7h7l2 4h10l-2 9H3Z M9 15h6"/></symbol><symbol id="traitPresetGlyph-unloaded" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol><symbol id="traitPresetGlyph-normal" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z M8 12l3 3 5-6"/></symbol><symbol id="traitPresetGlyph-changed" viewBox="0 0 24 24"><path d="M20 4v6h-6M4 20v-6h6M4 10a8 8 0 0 1 13-4l3 4M4 14l3 4a8 8 0 0 0 13-4"/></symbol><symbol id="traitPresetGlyph-backup" viewBox="0 0 24 24"><path d="M4 16v4h16v-4M12 3v13m-5-5 5 5 5-5"/></symbol><symbol id="traitPresetGlyph-migration" viewBox="0 0 24 24"><path d="M12 3 2 21h20ZM12 9v5M12 17h.01"/></symbol><symbol id="traitPresetGlyph-error" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6ZM9 9l6 6m0-6-6 6"/></symbol></svg>
 
-<button type="button" class="trait-preset-standalone-trigger" data-trait-preset-manager-open aria-label="프리셋" aria-expanded="false" aria-controls="traitPresetManagerOverlay" hidden><svg class="trait-preset-trigger-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-gear"/></svg><span>프리셋</span><i aria-hidden="true"></i></button>
 <div id="dpsBootScreen" aria-live="polite"><div class="boot-card"><div class="boot-title">개복디 빌더 적용 중</div><div class="boot-desc">최신 빌드와 스타일을 불러오는 중입니다.</div></div></div>
 <div class="wrap">
 <div class="col-work">
@@ -1179,7 +1178,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 <div class="col-right">
 <!-- 스펙·유닛 보드: 전환 버튼·결과 -->
 <div class="data-card stat-dps-card right-analytics-workspace analytics-polish">
-<div class="right-workspace-navigation"><header class="right-workspace-head"><span class="right-workspace-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><span class="right-workspace-copy"><strong>분석 보드</strong></span><button class="ui-action-btn right-workspace-clear-record" data-clear-record-open type="button" aria-haspopup="dialog" aria-controls="traitClearRecordPanel"><svg aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewBox="0 0 24 24"><path d="M8 4h9a2 2 0 0 1 2 2v14H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M6 8H4v12a2 2 0 0 0 2 2h9"/><path d="M10 10h6M10 14h6"/></svg><span>클리어 리포트</span></button></header>
+<div class="right-workspace-navigation"><header class="right-workspace-head"><span class="right-workspace-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><span class="right-workspace-copy"><strong>분석 보드</strong></span><button class="ui-action-btn right-workspace-clear-record" data-action="copyDpsClearRecord" type="button"><span>기록 복사</span></button></header>
 <section class="damage-board-analysis-view" id="damageBoardAnalysisPanel" aria-label="분석 보드 내용">
 <div class="damage-board-subtabs integrated-tabs" role="tablist" aria-label="분석 보드 세부 선택" data-damage-board-subtabs>
 <button class="integrated-tab is-active" id="damageBoardSpecTab" type="button" role="tab" aria-selected="true" aria-controls="damageBoardSpecPanel" data-damage-board-subtab="spec" tabindex="0">스펙 보드</button>
@@ -1265,7 +1264,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
       <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">01</span><span>성소 슬롯 추가</span></h3><p>성소 슬롯 추가 버튼을 눌러 기록할 슬롯을 생성합니다. 최대 10개까지 추가할 수 있습니다.</p></li>
       <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">02</span><span>사용 구간 설정</span></h3><p>스킬을 사용한 시작·종료 라운드 또는 층을 입력합니다. 종료 구간은 시작 구간 이상이어야 합니다.</p></li>
       <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">03</span><span>스킬 및 사용 횟수 설정</span></h3><p>1번·2번 스킬과 각각의 사용 횟수를 설정합니다.</p><p class="guide-emphasis">선택한 스킬은 최소 1회, 두 스킬의 사용 횟수 합계는 최대 4회입니다.</p></li>
-      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">04</span><span>프리셋 저장 및 리포트 공유</span></h3><p>프리셋을 저장하면 설정을 보관할 수 있습니다. 유효한 구간과 스킬이 입력된 슬롯은 클리어 리포트 복사에 포함됩니다.</p></li>
+      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">04</span><span>프리셋 저장 및 기록 공유</span></h3><p>프리셋을 저장하면 설정을 보관할 수 있습니다. 유효한 구간과 스킬이 입력된 슬롯은 클리어 기록 복사에 포함됩니다.</p></li>
     </ol>
     <table class="sanctuary-guide-ranges">
       <caption>입력 가능 구간</caption>
@@ -1276,7 +1275,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
         <tr><th scope="row">행성탐사</th><td>1~100층</td></tr>
       </tbody>
     </table>
-    <aside class="guide-step guide-note"><h3>ⓘ 입력 시 유의사항</h3><p>라운드·층의 0과 스킬의 ‘선택 안함’은 미입력 상태입니다.</p><p>입력이 완료되지 않은 슬롯은 요약에 표시되더라도 클리어 리포트 복사에서 제외될 수 있습니다.</p></aside>
+    <aside class="guide-step guide-note"><h3>ⓘ 입력 시 유의사항</h3><p>라운드·층의 0과 스킬의 ‘선택 안함’은 미입력 상태입니다.</p><p>입력이 완료되지 않은 슬롯은 요약에 표시되더라도 클리어 기록 복사에서 제외될 수 있습니다.</p></aside>
   </div>
   </section>
 </section>
@@ -1394,20 +1393,6 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
   </div>
 </dialog>
 
-<!-- 프리셋 클리어 리포트: 로컬 미리보기·클립보드 복사만 지원 -->
-<div id="traitClearRecordOverlay" class="trait-clear-record-overlay" hidden>
-  <section id="traitClearRecordPanel" class="trait-clear-record-panel" role="dialog" aria-modal="true" aria-labelledby="traitClearRecordTitle" tabindex="-1">
-    <header class="trait-preset-modal-head trait-clear-record-head">
-      <h2 id="traitClearRecordTitle">클리어 리포트</h2>
-      <div class="trait-clear-record-controls">
-        <button type="button" class="trait-clear-record-copy" data-clear-record-copy><svg class="ui-command-glyph" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span>리포트 복사</span></button>
-        <button type="button" class="trait-preset-modal-close" data-clear-record-close aria-label="클리어 리포트 닫기">×</button>
-      </div>
-    </header>
-    <p class="trait-clear-record-help">리포트를 복사하여 다른 유저들과 공유해 보세요.</p>
-    <div id="traitClearRecordBody" class="trait-clear-record-body" tabindex="0"></div>
-  </section>
-</div>
 <div id="traitPresetManagerOverlay" class="trait-preset-manager-overlay" hidden><div class="trait-preset-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetManagerTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><h2 id="traitPresetManagerTitle">프리셋 관리</h2></div><div class="trait-preset-header-controls"><button class="trait-preset-header-reset ui-reset-btn" data-action="resetAllTraitPresetState" disabled="" id="traitPresetResetAllBtn" aria-label="프리셋 초기화" type="button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>초기화</span></button><button type="button" class="trait-preset-modal-close" data-trait-preset-manager-close aria-label="프리셋 닫기">×</button></div></header>
 <div class="trait-preset-body trait-subgroup-body">
 
@@ -1440,7 +1425,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 </div>
 </div>
 <button type="button" class="trait-preset-support" data-trait-preset-support><svg class="trait-preset-support-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-chat"/></svg><span class="trait-preset-support-copy"><strong>제작자 문의</strong><small>오류 제보 및 사용 관련 문의</small></span><span class="trait-preset-support-by">by VAERON <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></span></button></div></div>
-<div id="traitPresetBackupOverlay" class="trait-preset-backup-overlay" hidden><section id="traitPresetBackupPanel" class="trait-preset-backup-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetBackupTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><span class="trait-preset-modal-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><h2 id="traitPresetBackupTitle">프리셋 최신화</h2></div><button type="button" class="ui-icon-btn trait-preset-modal-close" data-trait-preset-backup-close="1" aria-label="프리셋 최신화 닫기">×</button></header><div class="trait-preset-modal-body trait-preset-backup-body" id="traitPresetBackupBody"></div></section></div>
+<div id="traitPresetBackupOverlay" class="trait-preset-backup-overlay" hidden><section id="traitPresetBackupPanel" class="trait-preset-backup-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetBackupTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><h2 id="traitPresetBackupTitle">프리셋 최신화</h2></div><button type="button" class="ui-icon-btn trait-preset-modal-close" data-trait-preset-backup-close="1" aria-label="프리셋 최신화 닫기">×</button></header><div class="trait-preset-modal-body trait-preset-backup-body" id="traitPresetBackupBody"></div></section></div>
 
     
     </div>
@@ -1662,7 +1647,7 @@ function loadScriptSequence(files, onComplete){
                     document.head.appendChild(link);
                 });
             })).then(function(){
-                loadScriptSequence(['build/data.js','build/calc.js','build/app.js','build/unit.js','build/preset_io.js','build/report.js','build/preset.js','build/responsive.js'],function(){
+                loadScriptSequence(['build/data.js','build/calc.js','build/app.js','build/unit.js','build/preset_io.js','build/preset.js','build/responsive.js'],function(){
                     if(typeof window.dpsStartApp==='function')window.dpsStartApp();
                     else window.dpsShowBootError('B1003',new Error('app start function missing'));
                 });
