@@ -1331,9 +1331,6 @@ function setDamageBoardTab(active){
   activeDamageBoardMode=next;
   qsa('[data-damage-board-subtab]').forEach(tab=>{
     const isActive=tab.dataset.damageBoardSubtab===next;
-    const isDisabled=tab.dataset.damageBoardSubtab==='jewel' && next==='spec';
-    tab.disabled=isDisabled;
-    tab.setAttribute('aria-disabled',String(isDisabled));
     tab.classList.toggle('is-active',isActive);
     tab.setAttribute('aria-selected',String(isActive));
     tab.tabIndex=isActive?0:-1;

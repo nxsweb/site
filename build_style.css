@@ -854,6 +854,10 @@ div:where(#buildDirectBody).is-pc-portrait.is-tabbed .mobile-page-trait .trait-g
 div:where(#buildDirectBody).is-tabbed .col-work > .col-mid,div:where(#buildDirectBody).is-tabbed .col-work > .col-right{display:none;}
 /* 접힌 특성 목록의 끝이나 제스처 관성 스크롤 중에도 검은 루트 배경이 드러나지 않도록 영역 전체를 채운다. */
 div:where(#buildDirectBody).is-tabbed .mobile-page-trait{background:var(--ui-panel-body-bg);overscroll-behavior-y:contain;}
+/* 일반 빌더 탭의 터치 스크롤만 문서로 전달하고 독립창·PC의 경계 보호는 유지한다. */
+@media (any-pointer:coarse){
+  html.nexus-builder-active:not(.nexus-builder-standalone) div:where(#buildDirectBody).is-tabbed:is(.is-mobile,.is-tablet) .mobile-page-trait{overscroll-behavior-y:auto;}
+}
 div:where(#buildDirectBody).is-tabbed .mobile-page.active{display:block;}
 div:where(#buildDirectBody).is-tabbed .mobile-page > .sg,div:where(#buildDirectBody).is-tabbed .mobile-page > .data-card{height:auto;min-height:0;max-height:none;}
 div:where(#buildDirectBody).is-tabbed .mobile-page > .sg:last-child,div:where(#buildDirectBody).is-tabbed .mobile-page > .data-card:last-child:last-child{margin-bottom:0;}
