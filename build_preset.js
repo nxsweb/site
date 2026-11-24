@@ -2242,9 +2242,7 @@ function requestTraitPresetFullReset(trigger){
 function makeTraitPresetFileName(customName=''){
   const cleaned=cleanTraitPresetFileBaseName(customName);
   if(cleaned) return `${cleaned}.txt`;
-  const now=new Date();
-  const date=String(now.getFullYear()).slice(2)+padTraitPresetDatePart(now.getMonth()+1)+padTraitPresetDatePart(now.getDate());
-  return `특성프리셋-${date}.txt`;
+  return `${traitPresetBackupDefaultFileName()}.txt`;
 }
 // 백업·최신화 화면의 이름만 한글로 표시한다. 파일 저장 키/스키마는 변경하지 않는다.
 const TRAIT_PRESET_RETIRED_VALUE_NAMES=Object.freeze({
@@ -2605,7 +2603,7 @@ function setTraitPresetBackupSavingState(active){
   qsa('[data-trait-preset-backup-close]').forEach(btn=>{ btn.disabled=!!active; });
 }
 function traitPresetBackupDefaultFileName(){
-  return `통합프리셋_${formatTraitPresetExportedAt().slice(0,11)}`;
+  return `NXS_${formatTraitPresetExportedAt().slice(0,11)}`;
 }
 function traitPresetBackupFileNameControlHtml(plan){
   return `<section class="trait-preset-backup-file-box">

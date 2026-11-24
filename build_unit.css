@@ -81,15 +81,13 @@ body .unit-achievement-help-panel li::before{content:"✓";color:#8fcaff;flex:no
 body .unit-slot-empty-guidance{grid-column:1/-1;margin:0;padding:12px;border:1px dashed #505c64;border-radius:9px;background:#0f1013;color:#c3dcf0;font-size:calc(12px * var(--app-font-scale));text-align:center;}
 body .dps-jewel-settings-body{min-height:0;padding:12px;overflow:auto;box-sizing:border-box;}
 body .dps-jewel-config-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;width:100%;padding:2px;box-sizing:border-box;}
-body .dps-jewel-card{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:0;min-width:0;padding:3px;border:1px solid #456c98;border-radius:10px;background:#0e1118;box-shadow:none;box-sizing:border-box;}
-body .dps-jewel-card.is-unconfigured{border-color:#27313d;background:#050609;box-shadow:none;}
-body .dps-jewel-card.is-mythic{border-color:#f7c94f;background:radial-gradient(circle at 14% 4%,rgba(34,35,38,.36) 0%,rgba(28,29,32,.12) 38%,transparent 67%),linear-gradient(157deg,#101114 0%,#0e0f12 32%,#0e0f12 76%,#0c0d10 100%);box-shadow:0 0 0 1px rgba(255,229,140,.43),0 0 26px rgba(255,193,55,.49),inset 0 1px rgba(255,246,188,.23);}
-body .dps-jewel-card-head{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;align-items:center;gap:6px;min-width:0;width:100%;padding:8px 6px;border:0;border-radius:9px;background:#11151b;color:#dceefb;text-align:left;font:inherit;box-shadow:none;cursor:pointer;}
-body .dps-jewel-card.is-unconfigured .dps-jewel-card-head{background:#080a0e;}
+body .dps-jewel-card{--jewel-head-bg:linear-gradient(115deg,#203b55 0%,#192e43 55%,#142536 100%);--jewel-head-hover-bg:linear-gradient(115deg,#294864,#20364d);display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:0;min-width:0;padding:3px;border:1px solid #456c98;border-radius:10px;background:#172c40;box-shadow:0 0 8px rgba(100,166,230,.22),inset 0 0 9px rgba(100,166,230,.13);box-sizing:border-box;}
+body .dps-jewel-card.is-unconfigured{--jewel-head-bg:#080a0c;--jewel-head-hover-bg:#10141a;border-color:#27313d;background:#050609;box-shadow:none;}
+body .dps-jewel-card.is-mythic:not(.is-unconfigured){--jewel-head-bg:linear-gradient(115deg,#443718 0%,#342a15 55%,#282110 100%);--jewel-head-hover-bg:linear-gradient(115deg,#51421e,#3d3118);border-color:#f7c94f;background:#29230e;box-shadow:0 0 10px rgba(247,201,79,.27),inset 0 0 10px rgba(247,201,79,.17);}
+body .dps-jewel-card-head{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;align-items:center;gap:6px;min-width:0;width:100%;padding:8px 6px;border:0;border-bottom:1px solid var(--studio-head-line);border-radius:9px;background:var(--jewel-head-bg);color:#dceefb;text-align:left;font:inherit;box-shadow:none;cursor:pointer;}
 body .dps-jewel-card .jewel-card-visual{flex-basis:30px;width:30px;height:30px;border-color:#3c648e;border-radius:9px;}
 body .dps-jewel-card.is-unconfigured .jewel-card-visual{border-color:#293747;}
-body .dps-jewel-card.is-mythic .dps-jewel-card-head{background:linear-gradient(115deg,#151619 0%,#111215 51%,#0f1013 100%);border-bottom-color:rgba(246,204,95,.55);}
-body .dps-jewel-card.is-mythic .jewel-card-visual{border-color:#c9a34e;box-shadow:inset 0 1px rgba(255,247,201,.14),0 0 11px rgba(240,184,67,.19);}
+body .dps-jewel-card.is-mythic:not(.is-unconfigured) .jewel-card-visual{border-color:#c9a34e;box-shadow:inset 0 1px rgba(255,247,201,.14),0 0 11px rgba(240,184,67,.19);}
 body .dps-jewel-title-block{display:grid;grid-template-columns:minmax(0,1fr);justify-items:start;gap:3px;min-width:0;}
 body .dps-jewel-title-block b{min-width:0;max-width:100%;color:#eaf2ff;font-size:calc(11.5px * var(--app-font-scale));font-weight:var(--ui-sub-title-weight);line-height:1.3;text-align:left;overflow-wrap:anywhere;}
 body .dps-jewel-title-block b.is-legendary{color:#93c5fd;}
@@ -100,8 +98,7 @@ body .dps-jewel-card.is-expanded{grid-column:1/-1;}
 body .dps-jewel-card-detail{display:grid;gap:11px;min-width:0;padding:12px;border-top:1px solid var(--ui-integrated-head-line);}
 body .dps-jewel-card-detail[hidden]{display:none!important;}
 body .dps-jewel-card-head:focus-visible{outline:2px solid #83b5ff;outline-offset:-2px;}
-body .dps-jewel-card-head:hover{background:#17253a;}
-body .dps-jewel-card.is-unconfigured .dps-jewel-card-head:hover{background:#10151d;}
+body .dps-jewel-card-head:hover{background:var(--jewel-head-hover-bg);}
 body .dps-jewel-expand-mark{display:flex;align-items:center;justify-content:center;color:#9bbde5;font-size:23px;transform:rotate(0);transition:transform .15s ease;}
 body .dps-jewel-card.is-expanded .dps-jewel-expand-mark{transform:rotate(180deg);}
 @media(prefers-reduced-motion:reduce){
@@ -590,7 +587,6 @@ body .analytics-polish #dpsBaseUnitSlotStack :is(.ub-setting,.ub-extra-jewel)>b{
 body .analytics-polish #dpsBaseUnitSlotStack :is(.ub-setting,.ub-metric)>span{white-space:normal;overflow-wrap:anywhere;}
 body .analytics-polish :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-slot-add-card{border-color:#304158;background:transparent;box-shadow:none;}
 body .analytics-polish :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-slot-add-card:hover{background:rgba(34,50,70,.2);border-color:#4d6384;}
-body .analytics-polish #dpsJewelConfigGrid .dps-jewel-card{box-shadow:none;}
 body .analytics-polish #dpsJewelConfigGrid .dps-jewel-card-head{padding:10px;gap:9px;box-sizing:border-box;}
 body .analytics-polish #dpsJewelConfigGrid :is(.dps-jewel-title-block,.jewel-ability){min-width:0;}
 body .analytics-polish #dpsJewelConfigGrid .dps-jewel-title-block :is(b,small){max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.45;}
@@ -1090,7 +1086,7 @@ body :is(.rune-card-heading,.buff-config-heading,
   background:#0c0f13; border-bottom-color:#252c35;
 }
 body .workspace-section-title { color:#b5c6db; }
-body :is(.unit-slot-card-head,.unit-sanctuary-card-head,.trait-preset-backup-card-head,.dps-jewel-card-head) {
+body :is(.unit-slot-card-head,.unit-sanctuary-card-head,.trait-preset-backup-card-head) {
   background:#101318 !important; border-bottom-color:var(--studio-head-line) !important;
 }
 /* 탐색 기능: 정렬·높이는 그대로 두고 선택 면과 밑줄만 통일한다. */

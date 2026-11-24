@@ -370,23 +370,42 @@ function renderDpsBaseUnitSummary(s,hidden=false){
 
 /* ── 04 · 쥬얼 표시·설정·배정 ── */
 /* 08-A · 쥬얼 이미지·효과·적용 관리 */
-function getJewelImageSources(name){
+const JEWEL_IMAGE_NAMES=Object.freeze({
+  '가넷':'garnet',
+  '다이아몬드':'diamond',
+  '라피스':'lapis',
+  '루벨라이트':'rubellite',
+  '루비':'ruby',
+  '블러드스톤':'bloodstone',
+  '사파이어':'sapphire',
+  '스피넬':'spinel',
+  '아게이트':'agate',
+  '아메시스트':'amethyst',
+  '아쿠아마린':'aquamarine',
+  '에메랄드':'emerald',
+  '오팔':'opal',
+  '올리빈':'olivine',
+  '제트':'jet',
+  '크리소베릴':'chrysoberyl',
+  '탄자나이트':'tanzanite',
+  '터쿼이즈':'turquoise',
+  '토파즈':'topaz',
+  '파파라챠':'padparadscha',
+  '펄':'pearl',
+  '페리도트':'peridot',
+  '플로라이트':'fluorite',
+  '헬리오도르':'heliodor',
+  '히아신스':'hyacinth',
+});
+function getJewelImageSource(name){
   const jewelName=String(name||'').trim();
-  const localUrl=`./asset/jw/${encodeURIComponent(jewelName)}.png`;
-  return {
-    src:window.dpsAssetUrl(localUrl),
-    fallback:''
-  };
+  const fileName=Object.hasOwn(JEWEL_IMAGE_NAMES,jewelName) ? JEWEL_IMAGE_NAMES[jewelName] : '';
+  const localUrl=fileName ? `./asset/jw/${fileName}.png` : '';
+  return localUrl ? window.dpsAssetUrl(localUrl) : '';
 }
 
 function handleJewelImageError(img){
   if(!img) return;
-  const fallbackSrc=img.dataset?.fallbackSrc || '';
-  if(fallbackSrc){
-    img.dataset.fallbackSrc='';
-    img.src=fallbackSrc;
-    return;
-  }
   const visual=img.closest('.jewel-card-visual');
   if(visual) visual.classList.add('is-missing');
   img.remove();
@@ -449,13 +468,12 @@ function dpsJewelConfigCardHtml(name,settings){
   const gradeClass=mythic?'is-mythic':'is-legendary';
   const gradeText=mythic?'신화':'전설';
   const initial=name ? name.charAt(0) : '?';
-  const imageSources=getJewelImageSources(name);
-  const fallbackAttr=imageSources.fallback && imageSources.fallback!==imageSources.src ? ` data-fallback-src="${escapeHtml(imageSources.fallback)}"` : '';
+  const imageSrc=getJewelImageSource(name);
   const ability=dpsJewelAbilityTexts(name);
   return `<article class="dps-jewel-card${mythic?' is-mythic':''}${dpsJewelSettingIsActive(input,name)?'':' is-unconfigured'}" data-dps-jewel-card="${escapeHtml(name)}">
     <button type="button" class="dps-jewel-card-head" data-dps-jewel-toggle aria-expanded="false" aria-label="${escapeHtml(name)} 능력치 설정 펼치기">
       <div class="jewel-card-visual" aria-hidden="true">
-        <img src="${escapeHtml(imageSources.src)}"${fallbackAttr} data-jewel-image="1" alt="" loading="lazy">
+        <img src="${escapeHtml(imageSrc)}" data-jewel-image="1" alt="" loading="lazy">
         <span>${escapeHtml(initial)}</span>
       </div>
       <div class="dps-jewel-title-block"><b class="${gradeClass}">${escapeHtml(gradeText)} ${escapeHtml(name)}</b></div>

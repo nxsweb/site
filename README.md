@@ -1,16 +1,16 @@
 <p align="center">
-  <img src="./asset/logo-horizontal-1600.png" alt="NEXUS 공식 로고" width="680">
+  <img src="./src/asset/logo-horizontal-1600.png" alt="NEXUS 공식 로고" width="680">
 </p>
 
 <h1 align="center">NEXUS</h1>
 <p align="center"><strong>개복디 넥서스 · 유닛도감 / 체크리스트 / 빌더</strong></p>
-<p align="center"><sub>by VAERON · 현재 버전 NXSBuild-V3</sub></p>
+<p align="center"><sub>by VAERON · 현재 버전 NXSBuild-V4</sub></p>
 
 ---
 
 ## 프로젝트 소개
 
-![VAERON SLD PROJECT 공식 프로젝트 소개 이미지](./asset/og-image.jpg)
+![VAERON SLD PROJECT 공식 프로젝트 소개 이미지](./src/asset/og-image.jpg)
 
 <sub>출처: VAERON SLD PROJECT 공식 에셋</sub>
 
@@ -44,7 +44,7 @@
 
 ### 독립창 사용
 
-상단 독립창 메뉴에서 **넥서스 · 필요 재료**, **빌더 - 분석 보드**, **빌더 - 특성 유틸 목록**, **빌더 - 분석 보드 + 특성 유틸**, **넥서스 + 빌더 전체 실행**을 선택할 수 있습니다. 브라우저의 팝업 차단 정책에 따라 여러 창을 한 번에 열 수 없는 경우에는 각 독립창을 개별 실행해 주세요.
+상단 독립창 메뉴에서 **넥서스 · 필요 재료**, **빌더 - 분석 보드**, **빌더 - 특성 유틸 목록**, **빌더 - 분석 보드 + 특성 유틸**, **넥서스 + 빌더 전체 실행**을 선택할 수 있습니다. **넥서스 + 빌더 전체 실행**은 필요 재료·특성 유틸 관리·분석 보드를 하나의 독립창에 세로로 표시하며, 개별 독립창은 기존과 동일하게 실행할 수 있습니다.
 
 ## 기술 및 파일 구성
 
@@ -55,44 +55,52 @@
 
 ```text
 /
-├── index.html                  # 통합 진입점 · APP_VERSION
-├── nexus_app.js                # 넥서스 화면·이벤트·상태
-├── nexus_data.js               # 넥서스 유닛 및 조합 데이터
-├── nexus_checklist.js          # 체크리스트 기능
-├── nexus_responsive.js         # 넥서스 반응형 처리
-├── nexus_style.css
-├── nexus_checklist.css
-├── build_app.js                # 빌더 앱
-├── build_calc.js               # 계산 로직
-├── build_data.js               # 빌더 데이터
-├── build_unit.js               # 유닛/쥬얼 처리
-├── build_preset.js             # 프리셋 관리
-├── build_responsive.js         # 빌더 반응형 처리
-├── build_style.css
-├── build_unit.css
-├── build_preset.css
-├── asset/                      # 아이콘·로고·파비콘·공유 이미지
-│   ├── jw/                     # 쥬얼 이미지 25개
-│   ├── og-image.jpg            # VAERON SLD PROJECT 소개 이미지
-│   └── vaeron.png              # VAERON 제작자 심볼
-└── README.md
+├── src/
+│   ├── index.html                  # 통합 진입점 · APP_VERSION
+│   ├── nexus_app.js                # 넥서스 화면·이벤트·상태
+│   ├── nexus_data.js               # 넥서스 유닛 및 조합 데이터
+│   ├── nexus_checklist.js          # 체크리스트 기능
+│   ├── nexus_responsive.js         # 넥서스 반응형 처리
+│   ├── nexus_style.css
+│   ├── nexus_checklist.css
+│   ├── build_app.js                # 빌더 앱
+│   ├── build_calc.js               # 계산 로직
+│   ├── build_data.js               # 빌더 데이터
+│   ├── build_unit.js               # 유닛/쥬얼 처리
+│   ├── build_preset.js             # 프리셋 관리
+│   ├── build_responsive.js         # 빌더 반응형 처리
+│   ├── build_style.css
+│   ├── build_unit.css
+│   ├── build_preset.css
+│   ├── asset/                      # 아이콘·로고·파비콘·공유 이미지
+│   │   ├── jw/                     # 쥬얼 이미지 25개
+│   │   ├── og-image.jpg            # VAERON SLD PROJECT 소개 이미지
+│   │   └── vaeron.png              # VAERON 제작자 심볼
+│   └── googlec03dd31e5a5edd69.html
+├── deploy/                     # 현재 버전 누적 변경 파일
+├── README.md
+└── RELEASE_NOTES.md
 ```
 
-빌더는 `index.html` 내부 템플릿을 독립된 프레임에 구성해 실행합니다. 파일명은 `nexus_`/`build_` 접두어로 구분합니다. 쥬얼 이미지는 `asset/jw/`에 있으며 빌더에서 `./asset/jw/파일명.png` 경로로 불러옵니다. `asset/`에는 VAERON SLD PROJECT의 공식 이미지 에셋도 포함되어 있습니다.
+로컬 실행 진입점은 `src/index.html`입니다. 배포 시 deploy/의 코드 파일은 src/ 기준 상대 경로로 기존 사이트에 반영합니다. README.md와 RELEASE_NOTES.md는 관리 문서입니다.
+
+빌더는 `index.html` 내부 템플릿을 독립된 프레임에 구성해 실행합니다. 파일명은 `nexus_`/`build_` 접두어로 구분합니다. 쥬얼 이미지는 `asset/jw/`에 있으며 빌더에서 `./asset/jw/영문파일명.png` 경로로 불러옵니다. `asset/`에는 VAERON SLD PROJECT의 공식 이미지 에셋도 포함되어 있습니다.
 
 ## GitHub Pages 배포
 
-1. GitHub의 공개 리포지토리 최상위에 **이 폴더의 내부 파일 전체**를 업로드합니다. (ZIP 안의 버전 폴더 자체를 추가로 중첩하지 않습니다.)
+1. GitHub의 공개 리포지토리 최상위에 **src/ 폴더의 내부 웹 실행 파일 전체**를 업로드합니다. (ZIP 안의 버전 폴더 자체를 추가로 중첩하지 않습니다.)
 2. **Settings → Pages**에서 소스를 **Deploy from a branch**, 브랜치는 `main`, 폴더는 `/(root)`로 지정합니다.
 3. GitHub Pages에서 제공한 주소로 접속합니다.
 4. 배포 시 `index.html`의 Open Graph URL과 공유 이미지 URL이 실제 배포 환경에 맞는지 확인합니다.
 
+쥬얼 이미지 영문화 배포 시 `deploy/asset/jw/`의 영문 PNG 25개와 `build_unit.js`를 함께 반영한 뒤 기존 한글명 PNG 25개를 서버에서 삭제합니다.
+
 ## 버전 및 캐시
 
-최초 공개 버전은 **`NXSBuild-V1`**, 현재 버전은 **`NXSBuild-V3`**입니다. 버전 상수는 `index.html` 상단에 있습니다.
+최초 공개 버전은 **`NXSBuild-V1`**, 현재 버전은 **`NXSBuild-V4`**입니다. 버전 상수는 `index.html` 상단에 있습니다.
 
 ```js
-window.APP_VERSION = "NXSBuild-V3";
+window.APP_VERSION = "NXSBuild-V4";
 ```
 
 공통 버전이 연결된 JS·CSS, 사이트 파비콘, 매니페스트 요청, 쥬얼 이미지는 URL 버전 매개변수를 통해 새 파일을 요청합니다. 매니페스트 **내부** 아이콘과 Google·메신저가 수집하는 Open Graph 이미지는 브라우저의 일반 캐시와 독립된 업데이트 정책이 적용될 수 있으므로, 실제 배포 후 별도 확인해야 합니다.
@@ -107,7 +115,7 @@ window.APP_VERSION = "NXSBuild-V3";
 ## 제작
 
 <p align="center">
-  <img src="./asset/vaeron.png" alt="VAERON 공식 제작자 심볼" width="200">
+  <img src="./src/asset/vaeron.png" alt="VAERON 공식 제작자 심볼" width="200">
 </p>
 
 **VAERON** · NEXUS / SLD PROJECT
