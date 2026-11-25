@@ -2735,13 +2735,13 @@ function optimizeSP(){
       if(guard.aborted) break;
       traitV1RunResource(kind,guard);
     }
-    if(guard.aborted) showToast('최적화 계산을 안전하게 중단했습니다. 투자 범위를 줄여 다시 시도해 주세요.','warn');
+    if(guard.aborted) showToast('투자 범위를 줄여 다시 시도해 주세요.','warn',5000,'최적화 중단');
     commitAppUpdate({recalculate:'now'});
     return !guard.aborted;
   }catch(error){
     Object.keys(INV).forEach(row=>{INV[row]=before[row] ?? 0;});
     rememberAppIssue('error','특성 최적화 계산',error);
-    showToast('특성 최적화 계산 중 오류가 발생해 변경사항을 되돌렸습니다.','err');
+    showToast('계산 중 오류가 발생해 변경사항을 되돌렸습니다.','err',5600,'특성 최적화 실패');
     commitAppUpdate({recalculate:'now'});
     return false;
   }

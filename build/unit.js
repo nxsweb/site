@@ -946,7 +946,7 @@ function dpsUnitExpandedSettingsHtml(unit){
   return `<div class="unit-slot-expansion"><button type="button" class="unit-slot-expansion-toggle" data-unit-slot-expansion-toggle="${escapeHtml(unit.id)}" aria-expanded="${opened}" aria-controls="${listId}" aria-label="${escapeHtml(dpsBaseUnitLabel(unit))} 2~${lastUnit}기 설정 ${opened?'접기':'펼치기'}"><span class="ub-extra-heading">추가 유닛 <b>${extras.length}</b></span><span class="ub-extra-chevron" aria-hidden="true">${opened?'⌃':'⌄'}</span></button><div class="unit-slot-expansion-rows" id="${listId}" role="list" aria-label="추가 유닛별 설정"${opened?'':' hidden'}>${rows}</div></div>`;
 }
 
-// 요약표와 클리어 리포트가 동일한 대표·확장 유닛 설정을 읽는다.
+// 요약표와 클리어 기록가 동일한 대표·확장 유닛 설정을 읽는다.
 function dpsUnitSummaryEntry(unit,index,jewelSettings){
   const advanced=dpsBaseUnitSupportsAdvancedOptions(unit);
   const jewelText=name=>name ? `${dpsJewelFinalStats(name,jewelSettings).mythic==='Y'?'신화':'전설'} ${name}` : '없음';
@@ -1044,7 +1044,7 @@ function renderDpsSanctuarySummary(info=currentDpsSanctuaryInfo()){
   const summary=$('unitSanctuarySummary');
   if(!summary) return;
   const [startLabel,endLabel]=dpsSanctuaryRangeLabels();
-  // 슬롯의 입력 상태를 그대로 보여준다. 기록 복사에 적용되는 유효성 판정과는 별개다.
+  // 슬롯의 입력 상태를 그대로 보여준다. 클리어 기록 복사에 적용되는 유효성 판정과는 별개다.
   const rows=info.slots.flatMap((slot,index)=>{
     if(!(slot.start || slot.end || slot.skill1 || slot.skill2 || slot.count1 || slot.count2)) return [];
     return [`<tr><th scope="row">${String(index+1).padStart(2,'0')}</th>`+
@@ -1291,11 +1291,11 @@ function updateDpsUnitFromLinkedBuff(checkbox){
   if(checkbox.checked && existing<0){
     const unit=dpsBaseUnitById(unitId);
     if(!unit || checkbox.disabled || (id==='prodArtifact' && planetExplorationRestrictionsActive()) || !dpsBaseUnitAllowedForCurrentPlanet(unit)){
-      showToast('현재 모드에서는 해당 유닛을 선택할 수 없습니다.','warn');
+      showInlineFeedback(checkbox.closest('.buff-config-group'),'현재 모드에서는 해당 유닛을 선택할 수 없습니다.');
     }else{
       const index=slots.indexOf('');
       if(index<0){
-        showToast('유닛 보드의 슬롯 10개가 모두 사용 중입니다.','warn');
+        showInlineFeedback(checkbox.closest('.buff-config-group'),'유닛 보드의 슬롯 10개가 모두 사용 중입니다.');
       }else{
         changeDpsBaseUnitSlot(index,unitId,{notify:false});
         return;

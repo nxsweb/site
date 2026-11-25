@@ -71,61 +71,85 @@ function rememberAppIssue(kind,label,error){
 function alertApp(message){
   showToast(String(message ?? ''),'err',5600);
 }
-function alertAppError(prefix, error){
-  alertApp(prefix+(error?.message || error));
-}
-function showToast(message, type='ok', durationMs){
+function showToast(message, type='ok', durationMs, title){
   try{
-    let root=$('toastRoot');
-    if(!root){
-      root=document.createElement('div');
-      root.id='toastRoot';
-      root.className='toast-root';
-      root.setAttribute('aria-live','polite');
-      DPS_BODY.appendChild(root);
-    }
+    const root=$('toastRoot');
+    if(!root) return;
     const text=String(message ?? '').trim();
     if(!text) return;
-    const toastKey=`${type}:${text}`;
-    for(const item of root.children){
-      if(item.dataset.toastKey===toastKey) return;
-    }
+    const heading=title || ({ok:'작업 완료',warn:'확인 필요',err:'작업 실패'}[type] || '안내');
+    const toastKey=JSON.stringify([type,heading,text]);
+    if([...root.children].some(item=>item.dataset.toastKey===toastKey)) return;
     while(root.children.length>=4) root.firstElementChild?.remove();
     const el=document.createElement('div');
     el.className='toast '+type;
     el.dataset.toastKey=toastKey;
-    el.textContent=text;
+    const glyph=({ok:'normal',warn:'migration',err:'error'}[type] || 'unloaded');
+    el.innerHTML=`<svg class="toast-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-${glyph}"/></svg><div class="toast-copy" role="status"><strong></strong><span></span></div><button type="button" class="toast-close" aria-label="알림 닫기">×</button>`;
+    el.querySelector('strong').textContent=heading;
+    el.querySelector('.toast-copy span').textContent=text;
     root.appendChild(el);
     requestAnimationFrame(()=>el.classList.add('show'));
     const requestedMs=Number(durationMs);
-    const visibleMs=Number.isFinite(requestedMs) && requestedMs>0 ? requestedMs : (text.includes('\n') ? 5200 : 2200);
-    setTimeout(()=>{
+    const visibleMs=Number.isFinite(requestedMs) && requestedMs>0 ? requestedMs : (type==='err'||text.includes('\n') ? 5600 : type==='warn'?4000:3000);
+    const timer=setTimeout(dismiss,visibleMs);
+    function dismiss(){
+      clearTimeout(timer);
+      if(!el.isConnected || el.dataset.dismissed) return;
+      el.dataset.dismissed='1';
       el.classList.remove('show');
-      setTimeout(()=>el.remove(), 220);
-    }, visibleMs);
+      setTimeout(()=>el.remove(),220);
+    }
+    el.querySelector('button').addEventListener('click',dismiss,{once:true});
   }catch(error){
     rememberAppIssue('warn','showToast',error);
   }
 }
+const inlineFeedbackTimers=new WeakMap();
+function showInlineFeedback(host,message,type='warn'){
+  if(!host) return;
+  let note=host.querySelector(':scope > .ui-inline-feedback');
+  if(!note){
+    note=document.createElement('div');
+    note.className='ui-inline-feedback';
+    note.setAttribute('role','status');
+    host.appendChild(note);
+  }
+  const old=inlineFeedbackTimers.get(host);
+  if(old) clearTimeout(old);
+  note.dataset.type=type;
+  if(note.textContent!==message) note.textContent=message;
+  inlineFeedbackTimers.set(host,setTimeout(()=>{note.remove();inlineFeedbackTimers.delete(host);},4000));
+}
 let pendingConfirmAction=null;
-function requestConfirmAction(key,message,run){
+function clearConfirmAction(){
+  if(!pendingConfirmAction) return;
+  const {timer,trigger,label,original,description}=pendingConfirmAction;
+  clearTimeout(timer);
+  if(trigger){
+    trigger.classList.remove('is-confirming');
+    if(label) label.textContent=original;
+    if(description===null) trigger.removeAttribute('aria-description');
+    else trigger.setAttribute('aria-description',description);
+  }
+  pendingConfirmAction=null;
+}
+function requestConfirmAction(key,message,run,trigger=null){
   const now=Date.now();
   const delay=DPS_CONFIG.ui.confirmDelayMs || 1600;
-  if(pendingConfirmAction && pendingConfirmAction.key===key && now<pendingConfirmAction.until){
-    const timer=pendingConfirmAction.timer;
-    pendingConfirmAction=null;
-    if(timer) clearTimeout(timer);
+  if(pendingConfirmAction && pendingConfirmAction.key===key && pendingConfirmAction.trigger===trigger && now<pendingConfirmAction.until){
+    clearConfirmAction();
     return run();
   }
-  if(pendingConfirmAction && pendingConfirmAction.timer) clearTimeout(pendingConfirmAction.timer);
-  showToast(message,'warn');
-  pendingConfirmAction={
-    key,
-    until:now+delay,
-    timer:setTimeout(()=>{
-      if(pendingConfirmAction && pendingConfirmAction.key===key) pendingConfirmAction=null;
-    }, delay)
-  };
+  clearConfirmAction();
+  const label=trigger?.matches('.ui-reset-btn') ? trigger.querySelector(':scope > span') : null;
+  pendingConfirmAction={key,trigger,label,original:label?.textContent,description:trigger?.getAttribute('aria-description'),until:now+delay,timer:setTimeout(clearConfirmAction,delay)};
+  if(trigger){
+    trigger.classList.add('is-confirming');
+    trigger.setAttribute('aria-description',message);
+    if(label) label.textContent=trigger.id==='traitPresetResetAllBtn'?'재확인':'다시 누르세요';
+  }
+  if(trigger?.closest('#traitPresetManagerOverlay')||key.startsWith('restoreTraitPreset:')||key.startsWith('deleteTraitPreset:')||key==='resetAllTraitPresetState') showTraitPresetFeedback('프리셋 확인',message,'warn',{durationMs:delay});
   return false;
 }
 
@@ -307,7 +331,7 @@ function additionalRuneCardHtml(rune,index){
   const kinds=[['none','선택 안함'],['ap','마법공격력'],['ua','유닛 가속'],['td','총 데미지'],['harmony','총 데미지 + 유닛 가속']];
   const awakening=['없음','a','b','c','d','e','f','g'];
   return `<article class="additional-rune-card" data-additional-rune-card="${index}" data-rune-grade="${grade}">
-    <header class="additional-rune-card-title"><strong>룬 ${index+1}</strong><span data-additional-rune-grade>${RUNE_GRADE_NAMES[grade]}</span><button type="button" class="additional-rune-reset ui-reset-btn" data-additional-rune-reset="${index}" ${(readonly || !rune.registered)?'disabled':''}><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>초기화</span></button></header>
+    <header class="additional-rune-card-title"><strong>룬 ${index+1}</strong><span data-additional-rune-grade>${RUNE_GRADE_NAMES[grade]}</span><button type="button" class="additional-rune-reset ui-reset-btn" data-additional-rune-reset="${index}" aria-label="룬 ${index+1} 초기화" title="룬 ${index+1} 초기화" ${(readonly || !rune.registered)?'disabled':''}><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg></button></header>
     <div class="additional-rune-stat-heading"><span aria-hidden="true"></span><span>기본 스텟</span><span>개조 스텟</span></div>
     ${statLine('공격력','ad','modAD')}
     <div class="additional-rune-stat-line"><select data-additional-rune-index="${index}" data-additional-rune-field="specialType" aria-label="룬 ${index+1} 특수 스탯" ${readonly?'disabled':''}>${kinds.map(([key,label])=>option(key,label,rune.specialType)).join('')}</select><span class="additional-rune-special-value">${input('specialValue')}</span><i aria-hidden="true"></i></div>
@@ -340,6 +364,7 @@ function syncAdditionalRuneCard(index,rune){
 }
 function closeAdditionalRuneModal(){
   const modal=$('additionalRuneModal');
+  if(pendingConfirmAction?.key==='resetAllAdditionalRunes') clearConfirmAction();
   if(modal) modal.hidden=true;
   DPS_BODY.classList.remove('additional-rune-open');
   $('additionalRuneOpen')?.focus();
@@ -355,10 +380,25 @@ function bindAdditionalRuneEvents(){
   DPS_BODY.addEventListener('click',event=>{
     if(event.target.closest?.('#additionalRuneOpen')){openAdditionalRuneModal();return;}
     if(event.target.closest?.('[data-additional-close]')){closeAdditionalRuneModal();return;}
+    const resetAll=event.target.closest?.('[data-additional-reset-all]');
+    if(resetAll){
+      if(resetAll.disabled || isStorageLocked()) return;
+      requestConfirmAction('resetAllAdditionalRunes','한 번 더 누르면 메인 룬 포함 10칸 전체 초기화',()=>{
+        if(isStorageLocked()) return;
+        for(const id of ['rAD','rAS','rCD','rCRI','rModAD','rModAS','rModCD','rModCRI','runeChoiceValue','rReinf']) setValue(id,0);
+        setValue('runeChoiceType','none');
+        setValue('rAsc','없음');
+        $('additionalRuneSlots').value=JSON.stringify(parseAdditionalRuneSlots([]));
+        syncRuneChoice();
+        renderAdditionalRuneGrid();
+        commitAppUpdate({recalculate:'now'});
+      },resetAll);
+      return;
+    }
     const reset=event.target.closest?.('[data-additional-rune-reset]');
     if(reset){
       const index=Number(reset.dataset.additionalRuneReset);
-      if(index===0) return;
+      if(reset.disabled || isStorageLocked() || !Number.isInteger(index) || index<1 || index>=10) return;
       const slots=parseAdditionalRuneSlots($('additionalRuneSlots')?.value);
       slots[index]=emptyAdditionalRune();
       $('additionalRuneSlots').value=JSON.stringify(slots);
@@ -1160,7 +1200,7 @@ function bindDpsCompareEvents(){
 function formatDpsClearReport(report){
   const {context,stageMain,stageRound,achievement,specDps,dpsLabel,required,expected,resourceRows,buildRows,effects,units,sanctuaryRows=[]}=report;
   const lines=[
-    '클리어 리포트',
+    '클리어 기록',
     `- 모드 난이도: ${context}`,
     `- 고행: ${stageMain}`,
     `- 라운드: ${stageRound}`,
@@ -1263,7 +1303,7 @@ function createDpsClearReport(){
   const overEnhance=activeNumber('overEnhance','오버핸스');
   const repairEnhance=['ON','ON+'].includes(repairValue) ? (repairValue==='ON+'?'리페핸스+':'리페핸스') : null;
   const masterEnhance=['ON','ON+'].includes(masterValue) ? (masterValue==='ON+'?'선택 강화':'전체활성화') : null;
-  // 방어력 관통은 스펙 보드 정보이므로 클리어 리포트에는 중복 출력하지 않는다.
+  // 방어력 관통은 스펙 보드 정보이므로 클리어 기록에는 중복 출력하지 않는다.
   const enhanceRows=[
     {label:'오버핸스',value:overEnhance?.slice('오버핸스 '.length)},
     {label:'리페핸스',value:repairEnhance},
@@ -1290,9 +1330,10 @@ async function copyDpsClearRecord(){
   const report=createDpsClearReport();
   const text=(report.plainText || '').replace(/^(\s*)- /gm,'$1');
   if(!text){
-    showToast(report.error || '현재 복사할 클리어 기록이 없습니다.','warn');
+    showTraitPresetFeedback('클리어 기록 없음',report.error || '현재 복사할 클리어 기록이 없습니다.','warn',{localOnly:true});
     return;
   }
+  const context=traitPresetClearRecordContext();
   let copied=false;
   try{
     if(navigator.clipboard?.writeText){
@@ -1310,7 +1351,7 @@ async function copyDpsClearRecord(){
     try{input.select();copied=document.execCommand('copy');}catch(error){copied=false;}
     finally{input.remove();if(selection?.isConnected) selection.focus({preventScroll:true});}
   }
-  showToast(copied ? '클리어 기록이 복사되었습니다.' : '기록을 복사할 수 없습니다.',copied ? 'ok' : 'warn');
+  showTraitPresetFeedback(copied?'클리어 기록 복사 완료':'클리어 기록 복사 실패',copied?context:'클리어 기록을 복사할 수 없습니다.',copied?'ok':'err',{localOnly:true,durationMs:5000,glyph:copied?'copy':'',share:copied?'나만의 클리어 기록을 다른 유저들과 공유해 보세요!':''});
 }
 /* ── 06 · 저장 필드 레지스트리 ── */
 const FIELD_REGISTRY={
@@ -1789,6 +1830,12 @@ function bindTraitInputEvents(){
     field.select();
   }, true);
 }
+function showTraitInvestmentFeedback(row,message){
+  showInlineFeedback(qs(`.trait-invest-card[data-trait-id="${row}"]`),message);
+}
+function showTraitScopeFeedback(action,message){
+  showInlineFeedback(qs(`[data-action="${action}"]`)?.closest('.trait-optimizer-row'),message);
+}
 function adjustTraitBy(row,d,step=1){
   row=+row;
   d=+d;
@@ -1798,7 +1845,7 @@ function adjustTraitBy(row,d,step=1){
   let applied=0;
   if(d>0){
     applied=setRowToAffordableValue(row,before+step)-before;
-    if(applied===0) showToast('보유 재화가 부족합니다','warn');
+    if(applied===0) showTraitInvestmentFeedback(row,'보유 재화가 부족합니다');
   }else{
     const next=Math.max(0,before-step);
     applied=before-next;
@@ -1859,7 +1906,7 @@ function setInv(row,val){
   if(isNaN(val)||val<0) val=0;
   const wanted=Math.round(val);
   const applied=setRowToAffordableValue(row,wanted);
-  if(applied<wanted) showToast('보유 재화 한도까지만 입력되었습니다','warn');
+  if(applied<wanted) showTraitInvestmentFeedback(row,'보유 재화 한도까지만 입력되었습니다');
   commitTraitInvestmentChange();
 }
 function adjMax(row){
@@ -1868,7 +1915,7 @@ function adjMax(row){
     const before=INV[row]||0;
     fillRowToBudget(row);
     commitTraitInvestmentChange();
-    if((INV[row]||0)<=before) showToast('보유 재화가 부족합니다','warn');
+    if((INV[row]||0)<=before) showTraitInvestmentFeedback(row,'보유 재화가 부족합니다');
     return (INV[row]||0)>before;
   }catch(e){
     rememberAppIssue('error','[adjMax failed]', e);
@@ -1911,7 +1958,7 @@ function utilityRowsOrNotify(){
   const maxTierIndex=idx>=0 ? idx : UTILITY_OPT_TIERS.indexOf('더원2');
   const rows=TRAITS.filter(t=>isUtilityOptimizationTrait(t, maxTierIndex)).map(t=>t[0]);
   if(rows.length) return rows;
-  showToast('선택 범위에 유틸 특성이 없습니다','warn');
+  showTraitScopeFeedback('optimizeUtility','선택 범위에 유틸 특성이 없습니다');
   return null;
 }
 function optimizeUtility(){
@@ -1924,7 +1971,7 @@ function optimizeUtility(){
     if((INV[row]||0)!==before) changed++;
   });
   commitTraitInvestmentChange();
-  if(!changed) showToast('보유 재화가 부족하거나 이미 최대입니다','warn');
+  if(!changed) showTraitScopeFeedback('optimizeUtility','보유 재화가 부족하거나 이미 최대입니다');
   return changed>0;
 }
 function isUtilityClearTrait(t){
@@ -1950,13 +1997,13 @@ function clearTraitInvestmentsBy(predicate){
 }
 function clearUtility(){
   const changed=clearTraitInvestmentsBy(isUtilityClearTrait);
-  if(!changed) showToast('초기화할 유틸 특성이 없습니다','warn');
+  if(!changed) showTraitScopeFeedback('clearUtility','초기화할 유틸 특성이 없습니다');
   return changed>0;
 }
 function clearAll(){
   try{
     const changed=clearTraitInvestmentsBy(isAttackClearTrait);
-    if(!changed) showToast('초기화할 공격 특성이 없습니다','warn');
+    if(!changed) showTraitScopeFeedback('clearAll','초기화할 공격 특성이 없습니다');
     return changed>0;
   }catch(e){
     rememberAppIssue('error','[clearAll failed]', e);
@@ -2365,8 +2412,8 @@ const ACTION_HANDLERS={
   copyDpsClearRecord,
   optimizeSP,
   optimizeUtility,
-  clearUtility:()=>requestConfirmAction('clearUtility','한 번 더 누르면 유틸 초기화', clearUtility),
-  clearAll:()=>requestConfirmAction('clearAll','한 번 더 누르면 편의/보조 제외 공격 특성 초기화', clearAll),
+  clearUtility:trigger=>requestConfirmAction('clearUtility','한 번 더 누르면 유틸 초기화',clearUtility,trigger),
+  clearAll:trigger=>requestConfirmAction('clearAll','한 번 더 누르면 편의/보조 제외 공격 특성 초기화',clearAll,trigger),
   saveTraitPreset:(...args)=>window.DpsPreset.saveCurrent(...args),
   loadTraitPreset:(...args)=>window.DpsPreset.loadSelected(...args),
   updateTraitPreset:(...args)=>window.DpsPreset.updateCurrent(...args),
@@ -2385,7 +2432,7 @@ const ACTION_HANDLERS={
   traitQuickAdjust:(trigger)=>adjustTraitBy(+trigger.dataset.row,1,+trigger.dataset.step),
   toggleTraitTier:(trigger)=>{ const tier=trigger.dataset.tier||''; setTraitTierExpanded(tier,!expandedTraitTiers.has(tier)); },
   masterTier:(trigger)=>masterTier(trigger.dataset.tier||''),
-  resetTier:(trigger)=>{ const tier=trigger.dataset.tier||''; return requestConfirmAction(`resetTier:${tier}`, `한 번 더 누르면 ${tier} 초기화`, ()=>resetTier(tier)); }
+  resetTier:(trigger)=>{ const tier=trigger.dataset.tier||''; return requestConfirmAction(`resetTier:${tier}`, `한 번 더 누르면 ${tier} 초기화`, ()=>resetTier(tier),trigger); }
 };
 /* 12-A · 사용자 조작 이벤트 */
 function bindActionEvents(){

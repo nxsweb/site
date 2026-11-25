@@ -995,7 +995,7 @@ div:where(#buildDirectBody) :is(.trait-preset-modal-close,.unit-slot-modal-close
   border-radius:6px; box-shadow:none; font-weight:400;
 }
 div:where(#buildDirectBody) :is(.trait-preset-modal-close,.unit-slot-modal-close,.dps-compare-close,
-  .right-workspace-clear-record,.inline-guide-trigger):focus-visible {
+  .inline-guide-trigger):focus-visible {
   outline:2px solid #84a8d5; outline-offset:-3px;
 }
 

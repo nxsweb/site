@@ -436,7 +436,7 @@ function renderTraitPresetBackupError(error=''){
 }
 function notifyTraitPresetBackupFileComplete(fileName){
   const normalized=String(fileName || '').trim() || makeTraitPresetFileName('');
-  showToast(`${normalized} 다운로드를 요청했습니다.`,'ok');
+  showTraitPresetFeedback('프리셋 백업 완료',`${normalized} 다운로드를 요청했습니다.`,'ok');
 }
 function showTraitPresetUnifiedPanel(plan){
   plan.reviewedStore=localStorage.getItem(TRAIT_PRESET_STORAGE_KEY);
@@ -1052,10 +1052,9 @@ function runTraitPresetImport(plan,customName,createBackup=true){
   clearTraitPresetDrafts();
   if(createBackup){
     notifyTraitPresetBackupComplete();
-    notifyTraitPresetBackupFileComplete(fileName);
   }
   hideTraitPresetBackupPanel();
-  showToast(createBackup ? `프리셋 ${result.count}개 최신화·가져오기 완료` : `프리셋 ${result.count}개 가져오기 완료`,'ok');
+  showToast(createBackup ? `프리셋 ${result.count}개 적용 · ${fileName} 다운로드 요청` : `프리셋 ${result.count}개를 가져와 적용했습니다.`,'ok',5000,createBackup?'프리셋 최신화·가져오기 완료':'프리셋 가져오기 완료');
   return true;
 }
 async function importTraitPresetFile(file){

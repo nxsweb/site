@@ -864,11 +864,41 @@ function markTraitPresetJewelSettingsPending(){
   const store=loadTraitPresetStore();
   updateTraitPresetStatus({pendingJewelSettings:traitPresetJewelSettingsChanged(store),lastAction:'edit'},{persist:true});
 }
+let traitPresetFeedback=null,traitPresetFeedbackTimer=0;
+function clearTraitPresetFeedback(){
+  clearTimeout(traitPresetFeedbackTimer);
+  traitPresetFeedback=null;
+  traitPresetFeedbackTimer=0;
+}
+function showTraitPresetFeedback(title,message,type='ok',options={}){
+  if($('traitPresetManagerOverlay')?.hidden!==false){
+    if(!options.localOnly) showToast(message,type,options.durationMs,title);
+    return;
+  }
+  clearTraitPresetFeedback();
+  traitPresetFeedback={title,message:String(message),type,share:options.share||'',glyph:options.glyph||''};
+  renderTraitPresetUpdateStatus();
+  traitPresetFeedbackTimer=setTimeout(()=>{clearTraitPresetFeedback();renderTraitPresetUpdateStatus();},options.durationMs || 4000);
+}
+function traitPresetClearRecordContext(){
+  try{
+    const store=loadTraitPresetStore();
+    const id=loadTraitPresetStatusData().selectedTraitPresetId;
+    if(selectedTraitPresetId()!==id) return '현재 빌드 설정의 클리어 기록이 복사되었습니다.';
+    const {preset,hasChanges}=traitPresetUpdateStatus(store);
+    if(!preset) return '현재 빌드 설정의 클리어 기록이 복사되었습니다.';
+    return hasChanges
+      ? `${preset.name} 프리셋의 미저장 변경사항을 포함하여 복사되었습니다.`
+      : `${preset.name} 프리셋의 클리어 기록이 복사되었습니다.`;
+  }catch(error){return '현재 빌드 설정의 클리어 기록이 복사되었습니다.';}
+}
 function notifyStorageAction(message, type='ok', options={}){
   if(type==='ok'&&options.statusAction&&!options.skipHeaderStatus){
     updateTraitPresetStatus({lastAction:options.statusAction},{persist:true});
   }
-  if(type!=='ok'||options.toast===true) showToast(message,type,options.durationMs);
+  if($('traitPresetManagerOverlay')?.hidden===false){
+    showTraitPresetFeedback(({ok:'프리셋 작업 완료',warn:'프리셋 확인',err:'프리셋 작업 실패'})[type],message,type,options);
+  }else if(type!=='ok'||options.toast===true) showToast(message,type,options.durationMs);
 }
 let autoSaveTimer=0;
 function cancelScheduledAutoSave(){
@@ -897,14 +927,13 @@ function saveState(options={}){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     storageState.hasSavedState=true;
     storageState.saveFailCount=0;
-    if(!silent) notifyStorageAction('입력값 저장 완료','ok',{statusAction:'save'});
+    if(!silent) updateTraitPresetStatus({lastAction:'save'},{persist:true});
     return true;
   }catch(e){
     rememberAppIssue('error','saveState',e);
     storageState.saveFailCount++;
     const msg='저장 실패 · 브라우저 저장공간/권한 확인';
-    if(!silent || storageState.saveFailCount===1) notifyStorageAction(msg,'err');
-    if(!silent) alertAppError('저장 실패: ', e);
+    if(!silent || storageState.saveFailCount===1) showToast(silent?msg:`${msg}\n${e?.message||e}`,'err',5600,'저장 실패');
     return false;
   }
 }
@@ -1533,10 +1562,10 @@ function loadTraitPresetById(id,options={}){
     return false;
   }
 }
-function loadTraitPreset(){
+function loadTraitPreset(trigger){
   const id=selectedTraitPresetId();
   if(id && loadTraitPresetStatusData().selectedTraitPresetId===id && traitPresetUpdateStatus().hasChanges){
-    return requestConfirmAction(`restoreTraitPreset:${id}`,'현재 수치 변경을 버리고 저장된 프리셋으로 복원하려면 한 번 더 누르세요.',()=>loadTraitPresetById(id,{preserveSharedValues:false,useDraft:false,discardDraft:true}));
+    return requestConfirmAction(`restoreTraitPreset:${id}`,'현재 수치 변경을 버리고 저장된 프리셋으로 복원하려면 한 번 더 누르세요.',()=>loadTraitPresetById(id,{preserveSharedValues:false,useDraft:false,discardDraft:true}),trigger);
   }
   return loadTraitPresetById(id,{preserveSharedValues:false,useDraft:false,discardDraft:true});
 }
@@ -1975,11 +2004,21 @@ function renderTraitPresetUpdateStatus(store=loadTraitPresetStore(),status=loadT
     error:['프리셋 데이터 오류','제작자 문의를 통해 확인해 주세요.']
   }[displayType];
   const statusView=$('traitPresetFirstUse');
-  if(statusView && statusView.dataset.status!==displayType){
-    statusView.dataset.status=displayType;
-    statusView.querySelector('use')?.setAttribute('href',`#traitPresetGlyph-${displayType}`);
-    statusView.querySelector('strong').textContent=statusCopy[0];
-    statusView.querySelector('small').textContent=statusCopy[1];
+  if(statusView){
+    const feedback=traitPresetFeedback;
+    const visualType=feedback?`feedback-${feedback.type}`:displayType;
+    const glyph=feedback?(feedback.glyph||({ok:'normal',warn:'migration',err:'error'}[feedback.type])):displayType;
+    const title=feedback?feedback.title:statusCopy[0];
+    const detail=feedback?feedback.message:statusCopy[1];
+    const share=feedback?.share||'';
+    if(statusView.dataset.status!==visualType) statusView.dataset.status=visualType;
+    const use=statusView.querySelector('use');
+    if(use?.getAttribute('href')!==`#traitPresetGlyph-${glyph}`) use?.setAttribute('href',`#traitPresetGlyph-${glyph}`);
+    const heading=statusView.querySelector('strong'), description=statusView.querySelector('small'), shareView=statusView.querySelector('.trait-preset-status-share');
+    if(heading.textContent!==title) heading.textContent=title;
+    if(description.textContent!==detail) description.textContent=detail;
+    if(shareView.textContent!==share) shareView.textContent=share;
+    shareView.hidden=!share;
   }
   const message=compatibility.error || statusCopy[0];
   const detected=hasChanges?traitPresetDisplayTime(traitPresetDetectedAt):'';
@@ -2021,7 +2060,8 @@ function requestTraitPresetUpdate(){
   if(compatibility.error){renderTraitPresetOperationError('업데이트',compatibility.error);return false;}
   if(compatibility.requiresUpdate) return openTraitPresetBackupPanel();
   const store=loadTraitPresetStore();
-  if(!selectedTraitPresetId() || loadTraitPresetStatusData().selectedTraitPresetId!==selectedTraitPresetId()) return false;
+  const selectedId=selectedTraitPresetId();
+  if(!selectedId || loadTraitPresetStatusData().selectedTraitPresetId!==selectedId) return false;
   const current=traitPresetUpdateStatus(store);
   if(!current.hasChanges || !current.sharedCount){
     const ok=updateTraitPreset();
@@ -2171,7 +2211,7 @@ function updateTraitPresetBeforeSelectionChange(nextId){
   rememberTraitPresetDraft(previousId);
   return true;
 }
-function deleteTraitPreset(targetId=''){
+function deleteTraitPreset(targetId='',trigger=null){
   const id=String(typeof targetId==='string' ? targetId : '').trim() || selectedTraitPresetId();
   const currentStore=loadTraitPresetStore();
   const preset=currentStore.presets.find(item=>item.id===id);
@@ -2213,7 +2253,7 @@ function deleteTraitPreset(targetId=''){
       notifyStorageAction(e?.message || '프리셋 삭제 실패','err');
       return false;
     }
-  });
+  },trigger);
 }
 function resetToFirstVisitState(){
   try{
@@ -2240,32 +2280,9 @@ function resetToFirstVisitState(){
     return false;
   }
 }
-let traitPresetResetButtonTimer=0;
-function resetTraitPresetResetButton(trigger){
-  const btn=trigger || $('traitPresetResetAllBtn');
-  if(!btn) return;
-  btn.dataset.confirming='0';
-  btn.classList.remove('is-confirming');
-  btn.removeAttribute('aria-description');
-}
 function requestTraitPresetFullReset(trigger){
   if(!loadTraitPresetStore().presets.length) return false;
-  const btn=trigger || $('traitPresetResetAllBtn');
-  const delay=DPS_CONFIG.ui.confirmDelayMs || 1600;
-  if(btn?.dataset.confirming==='1'){
-    clearTimeout(traitPresetResetButtonTimer);
-    resetTraitPresetResetButton(btn);
-    return resetToFirstVisitState();
-  }
-  if(btn){
-    btn.dataset.confirming='1';
-    btn.classList.add('is-confirming');
-    btn.setAttribute('aria-description','초기화하려면 제한 시간 안에 같은 버튼을 한 번 더 누르세요.');
-    clearTimeout(traitPresetResetButtonTimer);
-    traitPresetResetButtonTimer=setTimeout(()=>resetTraitPresetResetButton(btn), delay);
-  }
-  notifyStorageAction('한 번 더 누르면 프리셋 초기화','warn');
-  return false;
+  return requestConfirmAction('resetAllTraitPresetState','한 번 더 누르면 프리셋 초기화',resetToFirstVisitState,trigger || $('traitPresetResetAllBtn'));
 }
 /* ── 09 · UI 이벤트 ── */
 /* 프리셋 UI 이벤트 바인딩 */
@@ -2294,11 +2311,11 @@ function closeTraitPresetManager(restoreFocus=false){
   if($('traitPresetBackupPanel')?.classList.contains('is-open')) closeTraitPresetBackupPanel();
   const overlay=$('traitPresetManagerOverlay');
   if(overlay) overlay.hidden=true;
+  clearTraitPresetFeedback();
+  if(pendingConfirmAction?.trigger?.closest('#traitPresetManagerOverlay')||pendingConfirmAction?.key.startsWith('restoreTraitPreset:')||pendingConfirmAction?.key.startsWith('deleteTraitPreset:')||pendingConfirmAction?.key==='resetAllTraitPresetState') clearConfirmAction();
   closeTraitPresetCustomSelects();
   const trigger=document.getElementById('btnGlobalPreset');
   trigger?.setAttribute('aria-expanded','false');
-  clearTimeout(traitPresetResetButtonTimer);
-  resetTraitPresetResetButton();
   if(restoreFocus===true && trigger && !trigger.hidden) trigger.focus({preventScroll:true});
   return true;
 }
@@ -2317,8 +2334,9 @@ function handleTraitPresetClick(e){
   if(e.target.closest('[data-trait-preset-error-copy]')){
     const issue=window.DPS_LAST_ISSUE;
     const text=`${currentWebDpsVersion()} | ${$('traitPresetBackupTitle')?.textContent} | ${traitPresetDisplayTime(issue?.time || Date.now())} | ${issue?.label || '프리셋 작업 실패'}`;
-    if(navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(()=>showToast('오류 정보 복사 완료','ok')).catch(()=>showToast('복사할 수 없습니다.','warn'));
-    else showToast('클립보드를 사용할 수 없습니다.','warn');
+    const host=e.target.closest('.trait-preset-backup-error');
+    if(navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(()=>showInlineFeedback(host,'오류 정보 복사 완료','ok')).catch(()=>showInlineFeedback(host,'복사할 수 없습니다.','err'));
+    else showInlineFeedback(host,'클립보드를 사용할 수 없습니다.');
     return;
   }
   if(e.target.closest('[data-trait-preset-support]')){document.getElementById('creatorInfoDialog')?.showModal();return;}
@@ -2328,17 +2346,7 @@ function handleTraitPresetClick(e){
     e.stopPropagation();
     const id=deleteButton.dataset.traitPresetCustomDelete;
     // 삭제 버튼은 선택 동작과 독립적이며 삭제 확인은 기존 2회 클릭 규칙을 따릅니다.
-    const done=deleteTraitPreset(id);
-    if(done) closeTraitPresetCustomSelects();
-    else{
-      deleteButton.classList.add('is-confirming');
-      deleteButton.setAttribute('aria-label','삭제 확인 · 다시 누르면 해당 프리셋이 삭제됩니다');
-      setTimeout(()=>{
-        if(!deleteButton.isConnected) return;
-        deleteButton.classList.remove('is-confirming');
-        deleteButton.setAttribute('aria-label','이 프리셋 삭제 (두 번 누르면 삭제)');
-      },DPS_CONFIG.ui.confirmDelayMs || 1600);
-    }
+    if(deleteTraitPreset(id,deleteButton)) closeTraitPresetCustomSelects();
     return;
   }
   const customButton=e.target.closest('[data-trait-preset-custom-button]');
