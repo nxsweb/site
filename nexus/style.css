@@ -11,6 +11,7 @@
 }
 
 /* 전역 / 입력 */
+html.nexus-tab-focus { --nexus-focus-outline:none; --nexus-focus-shadow:0 0 0 0 transparent; }
 *:not(:where(#buildDirectBody, #buildDirectBody *)),*:not(:where(#buildDirectBody, #buildDirectBody *))::before,*:not(:where(#buildDirectBody, #buildDirectBody *))::after { box-sizing:border-box; margin:0; padding:0; font-weight:400; }
 html:not(:where(#buildDirectBody, #buildDirectBody *)) { height:100%; font-size:15px; overflow:hidden; background:var(--bg); caret-color:transparent; }
 /* 공통 캐럿: 비입력 영역에서는 숨기고 실제 편집 영역만 표시한다. */
@@ -20,7 +21,7 @@ button:not(:where(#buildDirectBody, #buildDirectBody *)),input:not(:where(#build
 button:not(:where(#buildDirectBody, #buildDirectBody *)),a:not(:where(#buildDirectBody, #buildDirectBody *)) { -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 button:not(:where(#buildDirectBody, #buildDirectBody *)) { cursor:pointer; color:inherit; }
 button:disabled:not(:where(#buildDirectBody, #buildDirectBody *)) { cursor:default; opacity:.38; }
-button:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)),a:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)),[tabindex]:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:2px solid var(--g); outline-offset:3px; }
+button:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)),a:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)),[tabindex]:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)),html.nexus-tab-focus :is(input,select,textarea,summary):focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:var(--nexus-focus-outline,2px solid var(--g)); outline-offset:3px; }
 svg:not(:where(#buildDirectBody, #buildDirectBody *)) { display:block; width:20px; height:20px; flex-shrink:0; }
 :not(:where(#buildDirectBody, #buildDirectBody *))::selection { background:#b28b3a70; }
 *:not(:where(#buildDirectBody, #buildDirectBody *)) { scrollbar-width:none; -ms-overflow-style:none; }
@@ -154,7 +155,7 @@ html.nexus-builder-active .global-header:not(:where(#buildDirectBody, #buildDire
 .nexus-independent-menu:not(:where(#buildDirectBody, #buildDirectBody *)){position:fixed;top:48px;right:26px;z-index:9500;display:grid;gap:3px;width:min(282px,calc(100vw - 16px));padding:6px;border:1px solid #8d7755;border-radius:10px;background:#18191e;box-shadow:0 16px 40px #000a;}
 .nexus-independent-menu button:not(:where(#buildDirectBody, #buildDirectBody *)){width:100%;min-height:38px;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:#eee3c7;text-align:left;font-size:12px;}
 .nexus-independent-menu button:hover:not(:where(#buildDirectBody, #buildDirectBody *)){background:#373127;outline:2px solid #e3c28c;outline-offset:-2px;}
-.nexus-independent-menu button:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)){outline:2px solid #e3c28c;outline-offset:-2px;}
+.nexus-independent-menu button:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)){outline:var(--nexus-focus-outline,2px solid #e3c28c);outline-offset:-2px;}
 html.nexus-builder-standalone:not(:where(#buildDirectBody, #buildDirectBody *)),html.nexus-builder-standalone body:not(:where(#buildDirectBody, #buildDirectBody *)){height:100%;min-height:100%;overflow:hidden;}
 .nexus-builder-standalone #globalHeader:not(:where(#buildDirectBody, #buildDirectBody *)),.nexus-builder-standalone #mainLayout:not(:where(#buildDirectBody, #buildDirectBody *)),.nexus-builder-standalone #nexusBootScreen:not(:where(#buildDirectBody, #buildDirectBody *)),.nexus-builder-standalone #independentWindowMenu:not(:where(#buildDirectBody, #buildDirectBody *)){display:none!important;}
 .nexus-builder-standalone .builder-direct-pane:not(:where(#buildDirectBody, #buildDirectBody *)){contain:none;overflow-y:auto;}
@@ -200,7 +201,7 @@ html.nexus-combined-standalone:not(:where(#buildDirectBody, #buildDirectBody *))
 .build-material-actions:not(:where(#buildDirectBody, #buildDirectBody *)) { display:inline-flex; align-items:center; gap:8px; margin-left:auto; }
 .build-material-mode-btn:not(:where(#buildDirectBody, #buildDirectBody *)) { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:32px; padding:5px 2px; border:0; border-radius:3px; background:transparent; color:#e7d2b0; font-size:10px; font-weight:500; line-height:1.4; white-space:nowrap; cursor:pointer; transition:color .18s,background .18s; }
 .build-material-mode-btn:hover:not(:where(#buildDirectBody, #buildDirectBody *)) { color:var(--g); background:#efd3a409; }
-.build-material-mode-btn:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:2px solid var(--accent); outline-offset:2px; }
+.build-material-mode-btn:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:var(--nexus-focus-outline,2px solid var(--accent)); outline-offset:2px; }
 .build-material-mode-icon:not(:where(#buildDirectBody, #buildDirectBody *)) { display:inline-flex; align-items:center; justify-content:center; min-width:14px; font-size:13px; line-height:1; }
 @media (max-width:767px) { .build-material-mode-btn:not(:where(#buildDirectBody, #buildDirectBody *)) { min-height:44px; } }
 .costboard-grid.is-expanded:not(:where(#buildDirectBody, #buildDirectBody *)) { grid-template-rows:none; grid-auto-rows:minmax(43px,auto); align-content:start; }
@@ -255,7 +256,7 @@ html.nexus-combined-standalone:not(:where(#buildDirectBody, #buildDirectBody *))
 
 .preset-disclosure > summary:not(:where(#buildDirectBody, #buildDirectBody *))::after { content:""; width:6px; height:6px; flex:none; margin-left:1px; border:solid currentColor; border-width:0 1.5px 1.5px 0; transform:translateY(-2px) rotate(45deg); }
 .preset-disclosure > summary:hover:not(:where(#buildDirectBody, #buildDirectBody *)){ background:#282116; border-color:var(--g); color:#fff0d1; }
-.preset-disclosure > summary:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) {  border-color:var(--g);  outline:2px solid var(--g);outline-offset:2px;}
+.preset-disclosure > summary:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) {  border-color:var(--g);  outline:var(--nexus-focus-outline,2px solid var(--g));outline-offset:2px;}
 .preset-disclosure[open] > summary:not(:where(#buildDirectBody, #buildDirectBody *)) { background:#2a2218; border-color:#cbaa75; color:#ffedc8; }
 .preset-disclosure[open] > summary:not(:where(#buildDirectBody, #buildDirectBody *))::after { transform:translateY(2px) rotate(225deg); }
 .preset-inline-wrap:not(:where(#buildDirectBody, #buildDirectBody *)) { display:flex; flex-direction:column; align-items:stretch; gap:11px; }
@@ -279,7 +280,7 @@ html.nexus-combined-standalone:not(:where(#buildDirectBody, #buildDirectBody *))
 .preset-inline-btn-list .btn-gohaeng.preset-is-combined:not(:where(#buildDirectBody, #buildDirectBody *)) { grid-column:1 / -1; border-color:#9a794d; background:#282116; color:#f1d8ae; }
 .preset-inline-btn-list .btn-gohaeng.preset-is-combined:hover:not(:disabled):not(:where(#buildDirectBody, #buildDirectBody *)) { border-color:var(--g); background:#3b2e1d; }
 .preset-inline-btn-list .btn-gohaeng:disabled:not(:where(#buildDirectBody, #buildDirectBody *)) { opacity:1; border-color:#323137; background:#141417; color:#777981; cursor:default; }
-.preset-inline-btn-list .btn-gohaeng:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)),.preset-inline-tab-btn:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:2px solid var(--g); outline-offset:2px; }
+.preset-inline-btn-list .btn-gohaeng:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)),.preset-inline-tab-btn:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:var(--nexus-focus-outline,2px solid var(--g)); outline-offset:2px; }
 
 .search-field:not(:where(#buildDirectBody, #buildDirectBody *)) { display:flex; align-items:center; flex:1; min-width:0; gap:7px; padding:0 8px; border:1px solid #595044; border-radius:8px; }
 .search-field:focus-within:not(:where(#buildDirectBody, #buildDirectBody *)) { border-color:var(--g); }
@@ -300,7 +301,7 @@ html.nexus-combined-standalone:not(:where(#buildDirectBody, #buildDirectBody *))
     .archive-toolbar .left-tabs-wrap:not(:where(#buildDirectBody, #buildDirectBody *)) { margin-top:0; border-bottom:0; }
     .search-row:not(:where(#buildDirectBody, #buildDirectBody *)) { min-height:36px; gap:8px; }
     .search-row svg:not(:where(#buildDirectBody, #buildDirectBody *)) { flex-shrink:0; }
-    .archive-toolbar button:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:1px solid var(--g); outline-offset:1px; }
+    .archive-toolbar button:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:var(--nexus-focus-outline,1px solid var(--g)); outline-offset:1px; }
 }
 
 .unitboard-tabs:not(:where(#buildDirectBody, #buildDirectBody *)) { display:flex; align-items:center; justify-content:safe center; gap:14px; width:100%; min-height:36px; padding:0 4px; overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
@@ -396,7 +397,7 @@ html.nexus-combined-standalone:not(:where(#buildDirectBody, #buildDirectBody *))
 .uc-copy-btn svg:not(:where(#buildDirectBody, #buildDirectBody *)) { width:17px;height:17px; }
 .uc-copy-btn:hover:not(:where(#buildDirectBody, #buildDirectBody *)) { color:#f4ddba;background:#ffffff08; }
 .uc-copy-btn:active:not(:where(#buildDirectBody, #buildDirectBody *)) { background:#efd3a414; }
-.uc-copy-btn:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:2px solid var(--accent);outline-offset:1px; }
+.uc-copy-btn:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:var(--nexus-focus-outline,2px solid var(--accent));outline-offset:1px; }
 .uc-name-row:not(:where(#buildDirectBody, #buildDirectBody *)) { font-size:calc(17px * var(--fs-scale)); color:#f0f1f5; line-height:1.45; letter-spacing:-.65px; word-break:keep-all; overflow-wrap:anywhere; }
 .uc-notes:not(:where(#buildDirectBody, #buildDirectBody *)) { display:flex; flex-direction:column; gap:4px; margin-top:8px; }
 .uc-note:not(:where(#buildDirectBody, #buildDirectBody *)) { display:flex; align-items:flex-start; gap:6px; color:var(--text-sub); font-size:calc(10px * var(--fs-scale)); line-height:1.5; overflow-wrap:anywhere; word-break:keep-all; }
@@ -545,7 +546,7 @@ html.nexus-combined-standalone:not(:where(#buildDirectBody, #buildDirectBody *))
 .cart-tab-action-btn.is-danger:not(:where(#buildDirectBody, #buildDirectBody *)) { color:#e4a19b; }
 .cart-tab-action-btn.is-danger:hover:not(:disabled):not(:where(#buildDirectBody, #buildDirectBody *)) { color:#ffd0ca; }
 .cart-tab-action-btn:disabled:not(:where(#buildDirectBody, #buildDirectBody *)) { opacity:.38; cursor:default; }
-.cart-tab-action-btn:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:2px solid var(--accent); outline-offset:2px; }
+.cart-tab-action-btn:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:var(--nexus-focus-outline,2px solid var(--accent)); outline-offset:2px; }
 @media (max-width:767px) {
     .cart-tab-action-btn:not(:where(#buildDirectBody, #buildDirectBody *)) { min-height:44px; }
     .cart-list-heading:not(:where(#buildDirectBody, #buildDirectBody *)) { gap:5px; padding-inline:12px; }
@@ -574,7 +575,7 @@ html.nexus-combined-standalone:not(:where(#buildDirectBody, #buildDirectBody *))
 .cart-item-pause-btn:hover:not(:disabled):not(:where(#buildDirectBody, #buildDirectBody *)),.cart-done-restore-hint:hover:not(:disabled):not(:where(#buildDirectBody, #buildDirectBody *)) { background:#463521; border-color:#9a794b; }
 .cart-item-del:hover:not(:disabled):not(:where(#buildDirectBody, #buildDirectBody *)) { background:#502c34; border-color:#a76167; }
 .cart-item-stepper button:hover:not(:disabled):not(:where(#buildDirectBody, #buildDirectBody *)) { color:var(--g); background:#39313a; }
-.cart-section button:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:1px solid var(--g); outline-offset:2px; }
+.cart-section button:focus-visible:not(:where(#buildDirectBody, #buildDirectBody *)) { outline:var(--nexus-focus-outline,1px solid var(--g)); outline-offset:2px; }
 .cart-item-paused:not(:where(#buildDirectBody, #buildDirectBody *)) { background:#242127; }
 .cart-item-done:not(:where(#buildDirectBody, #buildDirectBody *)) { background:#141c23; }
 .done-name:not(:where(#buildDirectBody, #buildDirectBody *)) { text-decoration:line-through; opacity:.65; }

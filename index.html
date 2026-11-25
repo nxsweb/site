@@ -2,9 +2,16 @@
 <html lang="ko" class="nexus-booting">
 <head>
     <script>
-        window.APP_VERSION = "NXSBuild-V7";
+        window.APP_VERSION = "NXSBuild-V8";
         window.NEXUS_ANDROID_APP = false; // GitHub Pages 웹 배포에서는 기존 버전 확인을 유지한다.
         window.NEXUS_BUILD_VERSION = window.APP_VERSION;
+        // Tab 이동의 외곽 포커스 링만 숨기고 포인터 입력 시 기존 스타일로 복귀한다.
+        document.addEventListener('keydown', function(event){
+            if(event.key === 'Tab') document.documentElement.classList.add('nexus-tab-focus');
+        }, true);
+        document.addEventListener('pointerdown', function(){
+            document.documentElement.classList.remove('nexus-tab-focus');
+        }, true);
         // 독립창의 실행 모드는 메인 화면의 마지막 탭 설정과 분리한다.
         var nexusWindowParams = new URLSearchParams(window.location.search);
         var dpsWindowView = nexusWindowParams.get('dpsWindow');
@@ -833,42 +840,21 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                 <section class="zero-rank-panel zero-rank-calc-panel">
                   <div class="zero-score-calc">
                     <div class="zero-calc-summary">
-                      <div class="zero-calc-result-card zero-current-score-box">
-                        <span class="zero-score-label-row">현재 승단 점수</span
-                        ><b class="zero-current-score">0</b>
-                      </div>
-                      <div class="zero-calc-result-card">
-                        <span>목표 추가점수</span><b class="zero-total-add">+0</b>
-                      </div>
-                      <div class="zero-calc-result-card">
-                        <span>목표 완료</span><b class="zero-target-score">0</b>
-                      </div>
-                      <div class="zero-calc-result-card zero-rank-result-card">
-                        <span class="zero-rank-label-row">현재 / 목표 승단</span
-                        ><b
-                          ><em class="zero-current-rank">입문</em><i>→</i
-                          ><em class="zero-target-rank">입문</em></b
-                        >
-                      </div>
+                      <div class="zero-calc-result-card"><span>현재 승단 점수</span><b class="zero-current-score">0</b></div>
+                      <div class="zero-calc-result-card"><span>목표 추가점수</span><b class="zero-total-add">+0</b></div>
+                      <div class="zero-calc-result-card"><span>목표 완료</span><b class="zero-target-score">0</b></div>
+                      <div class="zero-calc-result-card zero-rank-result-card zero-rank-same"><span>현재 / 목표 승단</span><b><em class="zero-current-rank">입문</em><i>→</i><em class="zero-target-rank">입문</em></b></div>
                     </div>
-
-                    <div class="zero-rank-guide" id="zeroRankGuide">
-                      <button
-                        type="button"
-                        class="zero-guide-toggle"
-                        data-zero-guide-toggle
-                        aria-expanded="false"
-                        aria-controls="zeroGuideContent"
-                      >
-                        <span>승단 혜택 · 점수 기준</span
-                        ><span class="zero-guide-state" aria-hidden="true"></span>
-                      </button>
-                      <div class="zero-rank-guide-content" id="zeroGuideContent" hidden>
+                    <div class="integrated-tabs" role="tablist" aria-label="더제로 전당 설정">
+                      <button type="button" class="integrated-tab is-active" id="zeroSettingsTab" role="tab" aria-selected="true" aria-controls="zeroSettingsPanel" data-integrated-tab="zeroRank" data-integrated-index="0" tabindex="0">승단 설정</button>
+                      <button type="button" class="integrated-tab" id="zeroBenefitsTab" role="tab" aria-selected="false" aria-controls="zeroBenefitsPanel" data-integrated-tab="zeroRank" data-integrated-index="1" tabindex="-1">승단 혜택</button>
+                      <button type="button" class="integrated-tab" id="zeroCriteriaTab" role="tab" aria-selected="false" aria-controls="zeroCriteriaPanel" data-integrated-tab="zeroRank" data-integrated-index="2" tabindex="-1">승단 점수</button>
+                    </div>
                         <section
-                          class="zero-rank-info-section zero-rank-benefits-section"
+                          class="zero-rank-info-section integrated-content" id="zeroBenefitsPanel" role="tabpanel" aria-labelledby="zeroBenefitsTab" data-integrated-panel="zeroRank" data-integrated-index="1" hidden
                           aria-label="승단 혜택"
                         >
-                          <h4 class="reference-section-heading">승단 혜택</h4>
+
                           <section
                             id="zeroTitleBenefitsPopover"
                             class="zero-title-benefits-popover zero-inline-benefits"
@@ -911,10 +897,10 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                           </section>
                         </section>
                         <section
-                          class="zero-rank-info-section zero-rank-score-section"
+                          class="zero-rank-info-section integrated-content" id="zeroCriteriaPanel" role="tabpanel" aria-labelledby="zeroCriteriaTab" data-integrated-panel="zeroRank" data-integrated-index="2" hidden
                           aria-label="승단 점수 기준"
                         >
-                          <h4 class="reference-section-heading">점수 기준</h4>
+
                           <section
                             id="zeroRankScorePopover"
                             class="zero-rank-score-popover zero-inline-scores"
@@ -1038,22 +1024,8 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                             </section>
                           </section>
                         </section>
-                        <button type="button" class="zero-guide-close" data-zero-guide-close>
-                          접고 승단 입력하기 ↓
-                        </button>
-                      </div>
-                    </div>
-                    <div class="zero-calc-table-wrap">
-                      <h4 class="workspace-section-title">난이도별 승단 점수</h4>
+                    <div class="zero-calc-table-wrap integrated-content is-active" id="zeroSettingsPanel" role="tabpanel" aria-labelledby="zeroSettingsTab" data-integrated-panel="zeroRank" data-integrated-index="0">
                       <div class="zero-calc-table" aria-label="난이도별 승단 점수 입력">
-                        <div class="zero-calc-list-head">
-                          <span class="zero-calc-list-label">난이도</span
-                          ><span class="zero-calc-column-labels"
-                            ><span>구분</span><span>현재</span><span>목표</span
-                            ><span>목표 추가점수</span></span
-                          >
-                        </div>
-
                         <div id="zeroScoreRows" class="zero-calc-rows"></div>
                       </div>
                     </div>
@@ -1178,13 +1150,12 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 <div class="col-right">
 <!-- 스펙·유닛 보드: 전환 버튼·결과 -->
 <div class="data-card stat-dps-card right-analytics-workspace analytics-polish">
-<div class="right-workspace-navigation"><header class="right-workspace-head"><span class="right-workspace-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><span class="right-workspace-copy"><strong>분석 보드</strong></span></header>
+<div class="right-workspace-navigation"><header class="right-workspace-head"><span class="right-workspace-mark" aria-hidden="true"><svg class="ui-header-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiSparklesGlyph"/></svg></span><span class="right-workspace-copy"><strong>분석 보드</strong></span><button class="ui-toolbar-btn" id="dpsCompareOpen" type="button" aria-haspopup="dialog" aria-controls="dpsCompareModal">DPS표</button></header>
 <section class="damage-board-analysis-view" id="damageBoardAnalysisPanel" aria-label="분석 보드 내용">
 <div class="damage-board-subtabs integrated-tabs" role="tablist" aria-label="분석 보드 세부 선택" data-damage-board-subtabs>
 <button class="integrated-tab is-active" id="damageBoardSpecTab" type="button" role="tab" aria-selected="true" aria-controls="damageBoardSpecPanel" data-damage-board-subtab="spec" tabindex="0">스펙 보드</button>
 <button class="integrated-tab" id="damageBoardUnitTab" type="button" role="tab" aria-selected="false" aria-controls="damageBoardUnitPanel" data-damage-board-subtab="unit" tabindex="-1">유닛 보드</button>
 <button class="integrated-tab" id="damageBoardJewelTab" type="button" role="tab" aria-selected="false" aria-controls="unitDetailsPanel1" data-damage-board-subtab="jewel" tabindex="-1">쥬얼 설정</button>
-<button class="integrated-tab" id="dpsCompareOpen" type="button" role="tab" aria-selected="false" aria-haspopup="dialog" aria-controls="dpsCompareModal" data-damage-board-subtab="dps" tabindex="-1">DPS표</button>
 </div>
 <div class="damage-board-tab-shell">
 <section class="damage-board-panel is-active" id="damageBoardSpecPanel" role="tabpanel" aria-labelledby="damageBoardSpecTab" data-damage-board-panel="spec">
@@ -1242,29 +1213,33 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 
 
 </div>
-<section class="analytics-group analytics-unit-slots-group" aria-label="유닛 슬롯 관리" id="damageBoardUnitSlotsPanel" data-damage-board-panel="unit" data-dps-base-unit-control hidden>
+<div class="integrated-tabs" role="tablist" aria-label="유닛 보드 설정">
+  <button type="button" class="integrated-tab is-active" id="unitCompositionTab" role="tab" aria-selected="true" aria-controls="damageBoardUnitSlotsPanel" data-integrated-tab="unitBoard" data-integrated-index="0">유닛 편성 <span class="unit-board-slot-count" id="unitCompositionCount" hidden>0 / 10</span></button>
+  <button type="button" class="integrated-tab" id="unitSanctuaryTab" role="tab" aria-selected="false" aria-controls="unitSanctuaryPanel" data-integrated-tab="unitBoard" data-integrated-index="1" tabindex="-1">성소 타이밍 <span class="unit-board-slot-count" id="unitSanctuaryCount" hidden>0 / 10</span></button>
+</div>
+<section class="analytics-group analytics-unit-slots-group integrated-content is-active" aria-label="유닛 슬롯 관리" id="damageBoardUnitSlotsPanel" role="tabpanel" aria-labelledby="unitCompositionTab" data-integrated-panel="unitBoard" data-integrated-index="0" data-dps-base-unit-control>
 <div class="dps-base-unit-slot-stack" id="dpsBaseUnitSlotStack" aria-label="유닛 보드"></div>
 </section>
 
-<section id="unitSanctuaryPanel" class="unit-sanctuary-panel" aria-label="성소 정보">
+<section id="unitSanctuaryPanel" class="unit-sanctuary-panel integrated-content" role="tabpanel" aria-labelledby="unitSanctuaryTab" data-integrated-panel="unitBoard" data-integrated-index="1" hidden>
   <header class="unit-sanctuary-heading">
-    <h3><span class="unit-sanctuary-title" id="unitSanctuaryGuideTitle">성소 정보</span> <span id="unitSanctuaryCount">0 / 10</span></h3>
+    <h3 id="unitSanctuaryGuideTitle" hidden>사용 방법</h3>
     <button type="button" class="unit-sanctuary-guide-trigger inline-guide-trigger additional-settings-button" id="unitSanctuaryGuideOpen" aria-expanded="false" aria-controls="unitSanctuaryGuideDetails"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiInfoGlyph"/></svg><span>사용 방법</span></button>
     <button type="button" class="unit-sanctuary-reset ui-reset-btn" id="unitSanctuaryReset" aria-label="전체 초기화"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg></button>
   </header>
-  <div id="unitSanctuarySummary" class="unit-basic-summary unit-sanctuary-summary" aria-label="설정된 성소 정보 요약"></div>
-  <div id="unitSanctuaryRows" class="unit-sanctuary-slots" role="group" aria-label="성소 정보 슬롯 목록"></div>
+  <div id="unitSanctuarySummary" class="unit-basic-summary unit-sanctuary-summary" aria-label="설정된 성소 타이밍 요약"></div>
+  <div id="unitSanctuaryRows" class="unit-sanctuary-slots" role="group" aria-label="성소 타이밍 슬롯 목록"></div>
   <div class="unit-sanctuary-footer" id="unitSanctuaryFooter">
     <button type="button" class="unit-slot-add-card" id="unitSanctuaryAdd"><span class="unit-slot-add-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M12 5v14"/></svg></span><span class="unit-slot-add-copy"><strong>성소 슬롯 추가</strong><small>1번 슬롯 · 최대 10개</small></span></button>
   </div>
   <section id="unitSanctuaryGuideDetails" aria-labelledby="unitSanctuaryGuideTitle" hidden>
   <div class="sanctuary-guide-body">
-    <p class="sanctuary-guide-intro">클리어에 사용한 성소 스킬과 사용 구간을 기록하는 기능입니다. 버스 성소 설정과는 별도로 관리됩니다.</p>
+    <p class="sanctuary-guide-intro">클리어에 사용한 성소 스킬과 라운드별 사용 타이밍을 기록합니다. 버스 성소 설정과는 별도로 관리됩니다.</p>
     <ol class="sanctuary-guide-steps">
-      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">01</span><span>성소 슬롯 추가</span></h3><p>성소 슬롯 추가 버튼을 눌러 기록할 슬롯을 생성합니다. 최대 10개까지 추가할 수 있습니다.</p></li>
+      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">01</span><span>성소 슬롯 추가</span></h3><p>성소 슬롯 추가 버튼으로 상세 설정을 엽니다. 기존 성소 카드를 누르면 해당 슬롯을 수정할 수 있습니다. 최대 10개까지 추가할 수 있습니다.</p></li>
       <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">02</span><span>사용 구간 설정</span></h3><p>스킬을 사용한 시작·종료 라운드 또는 층을 입력합니다. 종료 구간은 시작 구간 이상이어야 합니다.</p></li>
-      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">03</span><span>스킬 및 사용 횟수 설정</span></h3><p>1번·2번 스킬과 각각의 사용 횟수를 설정합니다.</p><p class="guide-emphasis">선택한 스킬은 최소 1회, 두 스킬의 사용 횟수 합계는 최대 4회입니다.</p></li>
-      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">04</span><span>프리셋 저장 및 기록 공유</span></h3><p>프리셋을 저장하면 설정을 보관할 수 있습니다. 유효한 구간과 스킬이 입력된 슬롯은 클리어 기록 복사에 포함됩니다.</p></li>
+      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">03</span><span>스킬 및 사용 횟수 설정</span></h3><p>스킬을 하나 이상 선택하고 각각의 사용 횟수를 설정합니다. 사용하지 않는 스킬은 선택하지 않아도 됩니다.</p><p class="guide-emphasis">선택한 스킬은 최소 1회, 두 스킬의 사용 횟수 합계는 최대 4회입니다.</p></li>
+      <li class="guide-step"><h3 class="guide-step-heading"><span class="guide-step-number" aria-hidden="true">04</span><span>설정 완료 및 기록 공유</span></h3><p>설정 완료를 누르면 카드와 요약표에 반영됩니다. 프리셋을 저장하여 설정을 보관하고 클리어 기록 복사로 공유할 수 있습니다.</p></li>
     </ol>
     <table class="sanctuary-guide-ranges">
       <caption>입력 가능 구간</caption>
@@ -1275,7 +1250,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
         <tr><th scope="row">행성탐사</th><td>1~100층</td></tr>
       </tbody>
     </table>
-    <aside class="guide-step guide-note"><h3>ⓘ 입력 시 유의사항</h3><p>라운드·층의 0과 스킬의 ‘선택 안함’은 미입력 상태입니다.</p><p>입력이 완료되지 않은 슬롯은 요약에 표시되더라도 클리어 기록 복사에서 제외될 수 있습니다.</p></aside>
+    <aside class="guide-step guide-note"><h3>ⓘ 입력 시 유의사항</h3><p>라운드·층은 1 이상이어야 하며, 카드의 사용 스킬에는 선택한 스킬만 표시되며, 요약표의 미선택 스킬은 공백으로 표시됩니다.</p><p>취소하면 미확정 입력은 반영되지 않으며 기존 설정은 유지됩니다.</p></aside>
   </div>
   </section>
 </section>
@@ -1371,15 +1346,25 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
     </div>
 <div class="toast-root" id="toastRoot"></div>
 
-<!-- 슬롯 상세 설정은 우측 패널의 overflow에 잘리지 않도록 body 최상위 모달로 배치 -->
+<!-- 유닛 상세 설정은 우측 패널의 overflow에 잘리지 않도록 body 최상위 모달로 배치 -->
 <div id="dpsUnitSlotModal" class="unit-slot-modal-shell" data-dps-base-unit-control hidden>
   <div class="unit-slot-modal-backdrop" data-unit-detail-backdrop aria-hidden="true"></div>
   <section class="unit-slot-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="dpsUnitSlotDetailTitle">
     <header class="unit-slot-modal-header">
-      <span class="unit-slot-modal-heading" id="dpsUnitSlotDetailTitle"><span class="unit-slot-modal-icon" id="dpsUnitSlotDetailNumber">01</span><strong>슬롯 상세 설정</strong></span>
+      <span class="unit-slot-modal-heading" id="dpsUnitSlotDetailTitle"><span class="unit-slot-modal-icon" id="dpsUnitSlotDetailNumber">01</span><strong>유닛 상세 설정</strong></span>
     </header>
     <div class="unit-slot-modal-scroll"><div class="unit-detail-panel" id="dpsUnitSlotDetail"></div></div>
     <footer class="unit-slot-modal-footer"><button type="button" class="unit-slot-modal-cancel" id="unitSlotModalClose" data-unit-detail-close><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg><span>취소</span></button><button type="button" class="unit-slot-modal-done" data-unit-detail-confirm><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><span>설정 완료</span></button></footer>
+  </section>
+</div>
+<div id="dpsSanctuarySlotModal" class="unit-slot-modal-shell" hidden>
+  <div class="unit-slot-modal-backdrop" data-sanctuary-detail-backdrop aria-hidden="true"></div>
+  <section class="unit-slot-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="dpsSanctuarySlotDetailTitle">
+    <header class="unit-slot-modal-header">
+      <span class="unit-slot-modal-heading" id="dpsSanctuarySlotDetailTitle"><span class="unit-slot-modal-icon" id="dpsSanctuarySlotDetailNumber">01</span><strong>성소 상세 설정</strong></span>
+    </header>
+    <div class="unit-slot-modal-scroll"><div class="unit-detail-panel" id="dpsSanctuarySlotDetail"></div><p id="sanctuarySlotValidation" class="unit-slot-empty-guidance" role="alert" hidden></p></div>
+    <footer class="unit-slot-modal-footer"><button type="button" class="unit-slot-modal-cancel" id="sanctuarySlotModalClose" data-sanctuary-detail-close><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg><span>취소</span></button><button type="button" class="unit-slot-modal-done" data-sanctuary-detail-confirm><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><span>설정 완료</span></button></footer>
   </section>
 </div>
 <dialog id="dpsUnitSlotRemoveDialog" class="unit-slot-remove-dialog" aria-labelledby="dpsUnitSlotRemoveTitle" aria-describedby="dpsUnitSlotRemoveDescription">

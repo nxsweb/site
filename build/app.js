@@ -1478,6 +1478,7 @@ function activateIntegratedTab(group,index){
     panel.classList.toggle('is-active',active);
     panel.hidden=!active;
   });
+  if(group==='unitBoard' && index!==1) setUnitSanctuaryGuideVisible(false);
   if(group==='traitWorkspace'){
     const expansionToggle=$('traitExpansionToggle');
     if(expansionToggle) expansionToggle.hidden=index!==1;
@@ -1500,25 +1501,6 @@ function bindIntegratedTabEvents(){
     event.preventDefault();
     activateIntegratedTab(group,Number(tabs[next].dataset.integratedIndex));
     tabs[next].focus({preventScroll:true});
-  });
-  // Each jewel disclosure retains its controls and data when folded.
-  DPS_BODY.addEventListener('click',event=>{
-    const toggle=event.target.closest?.('[data-dps-jewel-toggle]');
-    if(!toggle) return;
-    const card=toggle.closest('[data-dps-jewel-card]');
-    const wasOpen=card?.classList.contains('is-expanded');
-    qsa('#dpsJewelConfigGrid [data-dps-jewel-card]').forEach(item=>{
-      item.classList.remove('is-expanded');
-      item.querySelector('[data-dps-jewel-toggle]')?.setAttribute('aria-expanded','false');
-      const content=item.querySelector('.dps-jewel-card-detail');
-      if(content) content.hidden=true;
-    });
-    if(card && !wasOpen){
-      card.classList.add('is-expanded');
-      toggle.setAttribute('aria-expanded','true');
-      const content=card.querySelector('.dps-jewel-card-detail');
-      if(content) content.hidden=false;
-    }
   });
 }
 
@@ -1550,7 +1532,7 @@ function setDamageBoardTab(active){
 function bindDamageBoardTabEvents(){
   DPS_BODY.addEventListener('click',event=>{
     const tab=event.target?.closest?.('[data-damage-board-subtab]');
-    if(!tab || tab.disabled || tab.dataset.damageBoardSubtab==='dps') return;
+    if(!tab || tab.disabled) return;
     event.preventDefault();
     setDamageBoardTab(tab.dataset.damageBoardSubtab);
   },true);
@@ -1562,11 +1544,8 @@ function bindDamageBoardTabEvents(){
     if(current<0 || !tabs.length) return;
     const next=nextHorizontalTabIndex(event.key,current,tabs.length);
     event.preventDefault();
-    if(tabs[next].dataset.damageBoardSubtab==='dps') openDpsCompareModal(tabs[next]);
-    else {
-      setDamageBoardTab(tabs[next].dataset.damageBoardSubtab);
-      tabs[next].focus({preventScroll:true});
-    }
+    setDamageBoardTab(tabs[next].dataset.damageBoardSubtab);
+    tabs[next].focus({preventScroll:true});
   });
 }
 function setBattleModeGuideVisible(visible){
@@ -2071,14 +2050,10 @@ function buildZeroScoreCalcRow(config){
   const field=(label,control)=>`<label class="zero-calc-field"><span>${label}</span>${control}</label>`;
   const generalLabel=penance?'일반 고행':'도전의 탑';
   const honorLabel=penance?'명예':'명예의탑';
-  const starControl=config.star===false
-    ? '<span class="zero-calc-unavailable" aria-label="24스타 해당 없음">해당 없음</span>'
-    : zeroScoreStarButtonHtml();
   return `<article class="zero-calc-row" data-row-type="${config.type}">
     <div class="zero-calc-row-bar">
       <button class="zero-calc-row-head" type="button" aria-expanded="false" aria-controls="zeroScoreDetails${config.number}" aria-describedby="zeroScoreSummary${config.number}" aria-label="${name} 승단 점수 입력 펼치기">
         <span class="zero-calc-name"><span class="zero-calc-row-symbol" aria-hidden="true">${String(config.number).padStart(2,'0')}</span><strong>${name}</strong></span>
-        <span class="zero-calc-inline-labels" aria-hidden="true"><span>구분</span><span>현재</span><span>목표</span><span>목표 추가점수</span></span>
         <span class="zero-calc-head-summary" id="zeroScoreSummary${config.number}" hidden></span>
       </button>
     </div>
@@ -2087,7 +2062,7 @@ function buildZeroScoreCalcRow(config){
         <div class="zero-calc-input-row"><span class="zero-calc-kind">${generalLabel}</span>${field('현재',generalCurrent)}${field('목표',generalTarget)}</div>
         <div class="zero-calc-input-row"><span class="zero-calc-kind">${honorLabel}</span>${field('현재',honorCurrent)}${field('목표',honorTarget)}</div>
         <div class="zero-calc-input-footer">
-        <div class="zero-calc-metric"><span>24스타</span>${starControl}</div>
+        ${penance?`<div class="zero-calc-metric"><span>24스타</span>${zeroScoreStarButtonHtml()}</div>`:''}
         <div class="zero-calc-metric zero-calc-score"><span>목표 추가점수</span><b class="zero-row-score">+0</b></div>
         </div>
       </div>
@@ -2098,7 +2073,7 @@ function buildZeroPenanceCalcRow(name,number){
   return buildZeroScoreCalcRow({type:'penance',name,number,currentHonorClass:'zero-current-honor zero-honor-input',targetHonorClass:'zero-target-honor zero-honor-input',honorOptions:{inputmode:'latin',maxlength:2,placeholder:'B'}});
 }
 function buildZeroTowerCalcRow(){
-  return buildZeroScoreCalcRow({type:'towerCombo',name:'도전의 탑',number:ZERO_PENANCE_ROWS.length+1,star:false,currentHonorClass:'zero-tower-honor-current',targetHonorClass:'zero-tower-honor-target'});
+  return buildZeroScoreCalcRow({type:'towerCombo',name:'도전의 탑',number:ZERO_PENANCE_ROWS.length+1,currentHonorClass:'zero-tower-honor-current',targetHonorClass:'zero-tower-honor-target'});
 }
 function renderZeroScoreCalculatorRows(){
   const rows=$('zeroScoreRows');
@@ -2118,17 +2093,6 @@ function zeroRankEntry(score){
 /* 11-D · 승단 이름·혜택 미리보기 */
 function zeroRankName(score){
   return zeroRankEntry(score)?.name || '입문';
-}
-function updateZeroRankHighlights(currentRank, targetRank){
-  const current=dataText(currentRank);
-  const target=dataText(targetRank);
-  const card=qs('.zero-rank-result-card');
-  if(card){
-    card.classList.toggle('zero-rank-same', !!current && current===target);
-    card.classList.toggle('zero-rank-upgrade', !!current && !!target && current!==target);
-    // 최종 승단에 현재·목표가 모두 도달한 경우 같은 이름을 두 번 표시하지 않습니다.
-    card.classList.toggle('zero-rank-final', current===getZeroRankTable().at(-1)?.name && target===current);
-  }
 }
 // 혜택 미리보기는 조회 상태만 별도로 보관합니다. 승단 점수와 프리셋은 변경하지 않습니다.
 let zeroBenefitActualIndex=0;
@@ -2156,16 +2120,9 @@ function renderZeroBenefitsPreview(){
     // Longer tiers distribute the overflow to avoid unnecessarily tall columns.
     const rows=benefits.length<=6 ? Math.ceil(benefits.length/2) : Math.max(6,Math.ceil(benefits.length/2));
     items.style.setProperty('--benefits-rows',String(Math.max(1,rows)));
-    items.replaceChildren(...benefits.map((text,index)=>{
+    items.replaceChildren(...benefits.map(text=>{
       const row=document.createElement('span');
-      const number=document.createElement('span');
-      number.className='zero-benefit-index';
-      number.textContent=String(index+1).padStart(2,'0');
-      number.setAttribute('aria-hidden','true');
-      const description=document.createElement('span');
-      description.className='zero-benefit-description';
-      description.textContent=text;
-      row.append(number,description);
+      row.textContent=text;
       return row;
     }));
   }
@@ -2177,10 +2134,11 @@ function stepZeroBenefitsPreview(direction){
   renderZeroBenefitsPreview();
 }
 /* 11-E · 승단 점수·접힌 행 요약 갱신 */
-function updateZeroScoreCalculator(){
+let zeroRenderedStateKey=null;
+function updateZeroScoreCalculator(state=collectZeroScoreState()){
   const calc=qs('.zero-score-calc');
-  const state=collectZeroScoreState();
   if(!calc || !state) return;
+  zeroRenderedStateKey=JSON.stringify(state);
   let currentTotal=0, total=0;
   calc.querySelectorAll('#zeroScoreRows > .zero-calc-row').forEach((row,index)=>{
     const result=zeroScoreRowCalculation(state.rows[index]);
@@ -2240,7 +2198,7 @@ function updateZeroScoreCalculator(){
     const element=calc.querySelector(selector);
     if(element && element.textContent!==String(value)) element.textContent=String(value);
   });
-  updateZeroRankHighlights(currentRank,targetRank);
+  calc.querySelector('.zero-rank-result-card')?.classList.toggle('zero-rank-same',currentRank===targetRank);
   zeroBenefitActualIndex=getZeroRankTable().indexOf(zeroRankEntry(currentTotal));
   renderZeroBenefitsPreview();
 }
@@ -2322,7 +2280,9 @@ function applyZeroScoreState(zeroScore){
   updateZeroScoreCalculator();
 }
 function commitZeroScoreChange(){
-  updateZeroScoreCalculator();
+  const state=collectZeroScoreState();
+  if(!state || JSON.stringify(state)===zeroRenderedStateKey) return;
+  updateZeroScoreCalculator(state);
   if(!isStorageLocked()) scheduleAutoSave();
 }
 function toggleZeroScoreStar(trigger){
@@ -2362,20 +2322,6 @@ function bindZeroScoreCalculator(){
     stepZeroBenefitsPreview(Number(control.dataset.zeroBenefitsStep));
   });
   card?.addEventListener('click',event=>{
-    const guideToggle=event.target.closest('[data-zero-guide-toggle]');
-    const guideClose=event.target.closest('[data-zero-guide-close]');
-    if(guideToggle || guideClose){
-      const guide=$('zeroRankGuide');
-      const toggle=guide?.querySelector('[data-zero-guide-toggle]');
-      const content=$('zeroGuideContent');
-      if(!guide || !toggle || !content) return;
-      const expanded=!!guideToggle && toggle.getAttribute('aria-expanded')!=='true';
-      guide.classList.toggle('is-expanded',expanded);
-      toggle.setAttribute('aria-expanded',String(expanded));
-      content.hidden=!expanded;
-      if(guideClose) toggle.focus({preventScroll:true});
-      return;
-    }
     const header=event.target.closest('.zero-calc-row-head');
     if(!header || !card.contains(header)) return;
     setZeroScoreRowExpanded(header,header.getAttribute('aria-expanded')!=='true');
@@ -2384,7 +2330,7 @@ function bindZeroScoreCalculator(){
     if(event.detail>0) header.blur();
   });
   const updateAndSave=(target,finalize=false)=>{
-    if(!(target && target.closest && target.closest('.zero-score-calc'))) return;
+    if(!target?.matches?.('.zero-calc-fields input,.zero-calc-fields select') || !card?.contains(target)) return;
     const penanceRow=target.closest('.zero-calc-row[data-row-type="penance"]');
     if(penanceRow && target.matches('.zero-calc-current,.zero-calc-target')){
       if(target.value===''){

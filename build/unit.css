@@ -1,9 +1,9 @@
 /* 유닛 보드·쥬얼·슬롯 전용 스타일: 기능별 CSS 순서 유지 */
 /* ── 01 · 유닛·쥬얼·성소 기본 화면 ── */
-div:where(#buildDirectBody) .settings-polish #basicSettingsPanel1 :is(.rune-stat-head,.dps-jewel-settings-title){border-color:var(--settings-hairline);}
+div:where(#buildDirectBody) .settings-polish #basicSettingsPanel1 .rune-stat-head{border-color:var(--settings-hairline);}
 div:where(#buildDirectBody) .right-analytics-workspace :is(.analytics-summary-group,.analytics-unit-summary-group){padding:10px 0 0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;}
 div:where(#buildDirectBody) .right-analytics-workspace .analytics-unit-summary-group{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-items:stretch;}
-div:where(#buildDirectBody).unit-slot-modal-open{overflow:hidden;}
+div:where(#buildDirectBody):is(.unit-slot-modal-open,.sanctuary-slot-modal-open){overflow:hidden;}
 div:where(#buildDirectBody) .unit-slot-modal-shell{position:fixed;inset:0;z-index:10040;display:none;place-items:center;padding:16px;box-sizing:border-box;isolation:isolate;}
 div:where(#buildDirectBody) .unit-slot-modal-shell.is-open:not([hidden]){display:grid;}
 div:where(#buildDirectBody) .unit-slot-modal-backdrop{position:absolute;inset:0;background:var(--ui-modal-backdrop-bg);backdrop-filter:var(--ui-modal-backdrop-blur);}
@@ -17,7 +17,6 @@ div:where(#buildDirectBody) .unit-slot-modal-scroll{min-height:0;max-height:100%
 div:where(#buildDirectBody) .unit-slot-modal-shell .unit-detail-panel{width:100%;min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-sizing:border-box;}
 div:where(#buildDirectBody) .unit-slot-modal-shell .right-unit-slot-card.dps-base-unit-card{margin:0;padding:0;border:0;box-shadow:none;background:transparent;}
 div:where(#buildDirectBody) .unit-slot-modal-shell .right-unit-slot-card .dps-base-unit-entry{grid-template-columns:minmax(0,1fr);gap:8px;}
-div:where(#buildDirectBody) .unit-slot-modal-shell .dps-base-unit-extra-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
 div:where(#buildDirectBody) .unit-slot-modal-footer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:10px;padding:12px 18px;border-top:1px solid var(--ui-modal-border);background:var(--ui-panel-body-bg);}
 div:where(#buildDirectBody) .unit-slot-modal-footer .unit-slot-modal-done{grid-column:1/-1;}
 div:where(#buildDirectBody) .unit-slot-modal-done{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-width:0;min-height:40px;padding:8px 19px;border:1px solid #8596a5;border-radius:9px;background:var(--ui-button-active-bg);color:var(--ui-button-active-text);cursor:pointer;border-color:var(--ui-button-active-border);box-shadow:var(--ui-button-active-shadow);}
@@ -31,7 +30,6 @@ div:where(#buildDirectBody) .unit-slot-modal-done:disabled{opacity:.45;cursor:no
   div:where(#buildDirectBody) .unit-slot-modal-scroll{padding:10px;}
   div:where(#buildDirectBody) .unit-slot-modal-shell .right-unit-slot-card .dps-base-unit-entry{grid-template-columns:minmax(0,1fr);gap:7px;}
   div:where(#buildDirectBody) .unit-slot-modal-shell .dps-base-unit-setting-select{padding-right:15px;}
-  div:where(#buildDirectBody) .unit-slot-modal-shell .dps-base-unit-extra-grid{grid-template-columns:minmax(0,1fr);}
   div:where(#buildDirectBody) .unit-slot-modal-footer{padding:9px 11px;}
   div:where(#buildDirectBody) .unit-slot-modal-done{padding:7px 11px;white-space:nowrap;}
 }
@@ -79,12 +77,21 @@ div:where(#buildDirectBody) .unit-achievement-help-panel ul{display:grid;gap:3px
 div:where(#buildDirectBody) .unit-achievement-help-panel li{display:flex;align-items:baseline;gap:7px;color:#dcecf8;}
 div:where(#buildDirectBody) .unit-achievement-help-panel li::before{content:"✓";color:#8fcaff;flex:none;}
 div:where(#buildDirectBody) .unit-slot-empty-guidance{grid-column:1/-1;margin:0;padding:12px;border:1px dashed #505c64;border-radius:9px;background:#0f1013;color:#c3dcf0;font-size:calc(12px * var(--app-font-scale));text-align:center;}
-div:where(#buildDirectBody) .dps-jewel-settings-body{min-height:0;padding:12px;overflow:auto;box-sizing:border-box;}
-div:where(#buildDirectBody) .dps-jewel-config-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;width:100%;padding:2px;box-sizing:border-box;}
-div:where(#buildDirectBody) .dps-jewel-card{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:0;min-width:0;padding:3px;border:1px solid #456c98;border-radius:10px;background:#000000;box-shadow:0 0 8px rgba(100,166,230,.22),inset 0 0 9px rgba(100,166,230,.13);box-sizing:border-box;}
-div:where(#buildDirectBody) .dps-jewel-card.is-unconfigured{border-color:#27313d;box-shadow:none;}
-div:where(#buildDirectBody) .dps-jewel-card.is-mythic:not(.is-unconfigured){border-color:#f7c94f;box-shadow:0 0 10px rgba(247,201,79,.27),inset 0 0 10px rgba(247,201,79,.17);}
-div:where(#buildDirectBody) .dps-jewel-card-head{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;align-items:center;gap:6px;min-width:0;width:100%;padding:8px 6px;border:0;border-bottom:1px solid var(--studio-head-line);border-radius:9px;background:#000000;color:#dceefb;text-align:left;font:inherit;box-shadow:none;cursor:pointer;}
+/* 쥬얼 설정: 활성화·비활성화 목록, 공통 구분선 및 결과 요약 */
+div:where(#buildDirectBody) #unitDetailsPanel1{margin-inline:calc(-1 * var(--dps-tab-edge,12px));min-width:0;}
+div:where(#buildDirectBody) .trait-preset-unit-jewel-settings-panel{overflow:visible;}
+div:where(#buildDirectBody) .dps-jewel-settings-body{height:auto;min-height:0;padding:0;overflow:visible;box-sizing:border-box;}
+div:where(#buildDirectBody) .dps-jewel-config-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0;width:100%;padding:0;background:#000;box-sizing:border-box;}
+div:where(#buildDirectBody) .dps-jewel-group{min-width:0;}
+div:where(#buildDirectBody) .dps-jewel-group-heading{display:flex;align-items:center;gap:8px;padding:12px var(--dps-tab-edge,12px) 6px;color:#d1deec;}
+div:where(#buildDirectBody) .dps-jewel-group-heading h3{margin:0;color:inherit;font-size:calc(12px * var(--app-font-scale));font-weight:var(--ui-sub-title-weight);white-space:nowrap;}
+div:where(#buildDirectBody) .dps-jewel-group-count{color:#8395a8;font-size:calc(11px * var(--app-font-scale));white-space:nowrap;}
+div:where(#buildDirectBody) .dps-jewel-group[data-dps-jewel-group="inactive"] .dps-jewel-group-heading{color:#96a9bd;}
+div:where(#buildDirectBody) .dps-jewel-group-guide{margin:0;padding:0 var(--dps-tab-edge,12px) 12px;color:#929ba7;font-size:calc(11px * var(--app-font-scale));line-height:1.5;word-break:keep-all;}
+div:where(#buildDirectBody) .dps-jewel-group-list{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;}
+div:where(#buildDirectBody) .dps-jewel-card{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:0;min-width:0;padding:0;border:0;border-bottom:1px solid #27313d;border-radius:0;background:#000;box-sizing:border-box;}
+div:where(#buildDirectBody) .dps-jewel-card-head{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;align-items:center;gap:9px;min-width:0;width:100%;min-height:36px;padding:12px var(--dps-tab-edge,12px);border:0;border-radius:0;background:#000;color:#dceefb;text-align:left;font:inherit;box-shadow:none;box-sizing:border-box;cursor:pointer;}
+div:where(#buildDirectBody) .dps-jewel-card.is-expanded .dps-jewel-card-head{border-bottom:1px solid #27313d;background:#000;}
 div:where(#buildDirectBody) .dps-jewel-card .jewel-card-visual{flex-basis:30px;width:30px;height:30px;border-color:#3c648e;border-radius:9px;}
 div:where(#buildDirectBody) .dps-jewel-card.is-unconfigured .jewel-card-visual{border-color:#293747;}
 div:where(#buildDirectBody) .dps-jewel-card.is-mythic:not(.is-unconfigured) .jewel-card-visual{border-color:#c9a34e;box-shadow:inset 0 1px rgba(255,247,201,.14),0 0 11px rgba(240,184,67,.19);}
@@ -95,36 +102,36 @@ div:where(#buildDirectBody) .dps-jewel-card:not(.is-unconfigured) .dps-jewel-tit
 div:where(#buildDirectBody) .dps-jewel-card:not(.is-unconfigured) .dps-jewel-title-block b.is-mythic{color:#fde047;}
 div:where(#buildDirectBody) .dps-jewel-card:not(.is-unconfigured) .dps-jewel-title-block b:is(.is-legendary,.is-mythic)::before{content:"◆";display:inline-block;margin-right:6px;font-size:12px;vertical-align:1px;color:#c0dfff;}
 div:where(#buildDirectBody) .dps-jewel-card:not(.is-unconfigured) .dps-jewel-title-block b.is-mythic::before{content:"✦";color:#fde047;}
-div:where(#buildDirectBody) .dps-jewel-card.is-expanded{grid-column:1/-1;}
-div:where(#buildDirectBody) .dps-jewel-card-detail{display:grid;gap:11px;min-width:0;padding:12px;border-top:1px solid var(--ui-integrated-head-line);}
+div:where(#buildDirectBody) .dps-jewel-card-detail{display:grid;gap:12px;min-width:0;padding:0 var(--dps-tab-edge,12px) 12px;}
 div:where(#buildDirectBody) .dps-jewel-card-detail[hidden]{display:none!important;}
-div:where(#buildDirectBody) .dps-jewel-card-head:focus-visible{outline:2px solid #83b5ff;outline-offset:-2px;}
+div:where(#buildDirectBody) .dps-jewel-card-head:focus-visible{outline:var(--nexus-focus-outline,2px solid #83b5ff);outline-offset:-2px;}
 div:where(#buildDirectBody) .dps-jewel-expand-mark{display:flex;align-items:center;justify-content:center;color:#9bbde5;font-size:23px;transform:rotate(0);transition:transform .15s ease;}
 div:where(#buildDirectBody) .dps-jewel-card.is-expanded .dps-jewel-expand-mark{transform:rotate(180deg);}
 @media(prefers-reduced-motion:reduce){
   div:where(#buildDirectBody) .dps-jewel-expand-mark{transition:none;}
 }
-div:where(#buildDirectBody) .dps-jewel-ability-list{padding:0;gap:7px;}
-div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability{grid-template-columns:max-content minmax(0,1fr);align-items:center;min-height:42px;padding:9px;border-color:#314964;border-radius:9px;background:#0c0d10;color:#d9e5f4;font-size:calc(12px * var(--app-font-scale));line-height:1.4;}
-div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability>b{display:inline-flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:4px;min-width:53px;min-height:25px;padding:2px 7px;box-sizing:border-box;white-space:nowrap;line-height:1.35;font-size:calc(10.75px * var(--app-font-scale));}
-div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability:first-child{border-color:#344d6d;}
-div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability:first-child>b{background:#0e0f12;color:#a8d7ff;}
-div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability:nth-child(2){border-color:#574761;background:#0c0d10;}
-div:where(#buildDirectBody) .dps-jewel-card:not(.is-mythic) .dps-jewel-ability-list .jewel-ability:first-child{border:1px solid #72aff1;background:linear-gradient(130deg,rgba(19,20,23,.50),rgba(14,15,18,.93));color:#e5f3ff;box-shadow:0 0 0 1px rgba(88,126,166,.23),0 0 15px rgba(38,94,158,.30),inset 0 0 14px rgba(47,101,161,.09);}
-div:where(#buildDirectBody) .dps-jewel-card.is-mythic .dps-jewel-ability-list .jewel-ability:nth-child(2){border:1px solid #f4c856;background:linear-gradient(130deg,rgba(20,21,24,.55),rgba(15,16,19,.92));color:#fff6cf;box-shadow:0 0 0 1px rgba(255,224,132,.28),0 0 18px rgba(255,198,57,.40),inset 0 0 14px rgba(245,188,60,.10);}
-div:where(#buildDirectBody) .dps-jewel-card:not(.is-mythic) .dps-jewel-ability-list .jewel-ability:first-child>b{color:#c9e8ff;}
-div:where(#buildDirectBody) .dps-jewel-card.is-mythic .dps-jewel-ability-list .jewel-ability:nth-child(2)>b{background:#0f1013;color:#ffe19a;}
-div:where(#buildDirectBody) .dps-jewel-settings-title{display:flex;align-items:center;gap:7px;padding-top:7px;border-top:1px solid #2d4765;color:#e1efff;font-size:var(--ui-sub-title-font);font-weight:var(--ui-sub-title-weight);line-height:1.5;}
+div:where(#buildDirectBody) .dps-jewel-ability-list{display:grid;gap:0;padding:0;min-width:0;margin-inline:calc(-1 * var(--dps-tab-edge,12px));}
+div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability{display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:8px;min-width:0;min-height:36px;padding:7px var(--dps-tab-edge,12px);border:0;border-bottom:1px solid #27313d;border-radius:0;background:transparent;color:#d9e5f4;font-size:calc(12px * var(--app-font-scale));line-height:1.4;}
+div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability>b{display:inline-flex;align-items:center;justify-content:flex-start;gap:4px;min-width:53px;min-height:25px;padding:2px 5px;box-sizing:border-box;white-space:nowrap;color:#a8d7ff;line-height:1.35;font-size:calc(10.75px * var(--app-font-scale));}
+div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability:nth-child(2)>b{color:#ffe19a;}
+div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability span{min-width:0;word-break:keep-all;overflow-wrap:anywhere;}
+div:where(#buildDirectBody) .dps-jewel-ability-list .jewel-ability.is-unreleased{color:#93a4b9;}
+div:where(#buildDirectBody) .dps-jewel-card:not(.is-mythic):not(.is-unconfigured) .jewel-ability:first-child{color:#e5f3ff;background:#14283c;}
+div:where(#buildDirectBody) .dps-jewel-card.is-mythic:not(.is-unconfigured) .jewel-ability:nth-child(2){color:#fff6cf;background:#302710;}
+div:where(#buildDirectBody) .jewel-ability-grade-icon{color:#93c5fd;font-size:12.5px;line-height:1;}
+div:where(#buildDirectBody) .jewel-ability:nth-child(2) .jewel-ability-grade-icon{color:#ffe080;}
 div:where(#buildDirectBody) .dps-jewel-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;min-width:0;}
 div:where(#buildDirectBody) .dps-jewel-field{display:grid;grid-template-columns:minmax(0,1fr);gap:5px;min-width:0;}
 div:where(#buildDirectBody) .dps-jewel-field span{display:flex;align-items:center;justify-content:center;gap:5px;color:#b8cee7;font-size:calc(10.75px * var(--app-font-scale));text-align:center;white-space:nowrap;}
-div:where(#buildDirectBody) .dps-jewel-field select{width:100%;min-width:0;height:31px;min-height:31px;padding:0 16px 0 5px;border:1px solid #486b93;border-radius:8px;background:var(--role-manual-select-bg);color:#fff;font-size:calc(12px * var(--app-font-scale));line-height:1;text-align:center;text-align-last:center;box-sizing:border-box;}
-div:where(#buildDirectBody) .dps-jewel-field select:focus-visible{outline:2px solid #8fbcff;outline-offset:2px;}
-div:where(#buildDirectBody) .dps-jewel-final{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:6px;min-width:0;margin:0;padding:7px 0 0;border:0;border-top:1px solid #2d4765;border-radius:0;background:transparent;text-align:center;}
-div:where(#buildDirectBody) .dps-jewel-final-label{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-start;color:#dbeafe;font-size:calc(12px * var(--app-font-scale));line-height:1.3;}
-div:where(#buildDirectBody) .dps-jewel-final-item{display:grid;grid-template-columns:minmax(0,1fr);gap:5px;min-width:0;padding:8px 3px;border:1px solid #304d70;border-radius:7px;background:#0c0d10;box-sizing:border-box;}
-div:where(#buildDirectBody) .dps-jewel-final-item em{color:#aabfda;font-size:calc(10px * var(--app-font-scale));font-style:normal;line-height:1.15;white-space:nowrap;}
-div:where(#buildDirectBody) .dps-jewel-final-item b{min-width:0;color:#eef6ff;font-family:Consolas,monospace;font-size:calc(12px * var(--app-font-scale));line-height:1.2;text-align:center;white-space:nowrap;}
+div:where(#buildDirectBody) .dps-jewel-field :is(select,button[data-dps-jewel-field="mythic"]){width:100%;min-width:0;height:31px;min-height:31px;padding:0 16px 0 5px;border:1px solid #486b93;border-radius:8px;background:var(--role-manual-select-bg);color:#fff;font-size:calc(12px * var(--app-font-scale));line-height:1;text-align:center;text-align-last:center;box-sizing:border-box;}
+div:where(#buildDirectBody) .dps-jewel-field button[data-dps-jewel-field="mythic"]{padding:0;background:var(--role-manual-select-bg);font-weight:600;cursor:pointer;box-shadow:none;}
+div:where(#buildDirectBody) .dps-jewel-card:not(.is-unconfigured) .dps-jewel-field button[value="N"]{background:#14283c;border-color:#528bc2;color:#9acbff;}
+div:where(#buildDirectBody) .dps-jewel-card:not(.is-unconfigured) .dps-jewel-field button[value="Y"]{background:#302710;border-color:#d4b638;color:#ffe08a;}
+div:where(#buildDirectBody) .dps-jewel-field :is(select,button[data-dps-jewel-field="mythic"]):focus-visible{outline:var(--nexus-focus-outline,2px solid #8fbcff);outline-offset:2px;}
+div:where(#buildDirectBody) .dps-jewel-final{margin:0;padding:7px 0 0;border-top:1px solid #2d4765;}
+div:where(#buildDirectBody) .dps-jewel-final-item{padding:8px 2px;gap:5px;}
+div:where(#buildDirectBody) .dps-jewel-final-item em{font-style:normal;font-size:calc(10.75px * var(--app-font-scale));}
+div:where(#buildDirectBody) .dps-jewel-final-item b{font-size:calc(18px * var(--app-font-scale));color:#eef6ff;}
 div:where(#buildDirectBody) .dps-base-unit-slot-stack{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0;width:100%;padding:0;}
 div:where(#buildDirectBody) .dps-base-unit-entry{display:grid;grid-template-columns:var(--dps-base-unit-columns);gap:7px;align-items:stretch;min-width:0;min-height:49px;border:0;border-radius:0;background:transparent;}
 div:where(#buildDirectBody) .dps-base-unit-card{--dps-base-unit-columns:minmax(0,2.35fr) minmax(0,.90fr) minmax(0,1.02fr) minmax(0,.82fr) minmax(0,1.08fr);display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0;padding:4px 0 14px;border:0;}
@@ -154,14 +161,11 @@ div:where(#buildDirectBody) .dps-base-unit-option-btn{width:100%;min-width:0;hei
 div:where(#buildDirectBody) .dps-base-unit-slot-expansion-btn{align-self:center;}
 div:where(#buildDirectBody) .dps-base-unit-slot-expansion-btn:disabled{border-color:var(--role-readonly-bd,#373c43);background:var(--role-readonly-bg,transparent);color:var(--ui-unified-muted);opacity:.56;cursor:not-allowed;}
 div:where(#buildDirectBody) .dps-base-unit-extra-settings{display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;gap:6px;min-width:0;margin:10px 0 5px;padding:7px 10px 4px;background:transparent;overflow:visible;}
-div:where(#buildDirectBody) .dps-base-unit-extra-settings h4{width:100%;margin:0;color:#dbeafe;font-size:calc(11.25px * var(--app-font-scale));line-height:1.1;text-align:center;}
-div:where(#buildDirectBody) .dps-base-unit-extra-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:min(100%,860px);margin:0 auto;padding:4px 0;}
-div:where(#buildDirectBody) .dps-base-unit-extra-slot{display:grid;grid-template-columns:minmax(0,1fr);gap:5px;align-items:start;min-width:0;padding:7px;border:1px solid var(--ui-button-border,#6c7f97);border-radius:var(--ui-control-radius);background:rgba(34,35,38,.025);text-align:center;box-sizing:border-box;}
+div:where(#buildDirectBody) .dps-base-unit-extra-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:min(100%,860px);margin:0 auto;padding:0;}
+div:where(#buildDirectBody) .dps-base-unit-extra-slot{min-width:0;text-align:center;box-sizing:border-box;}
 div:where(#buildDirectBody) .dps-base-unit-extra-slot-title{display:block;width:100%;color:#dbeafe;font-size:calc(10.25px * var(--app-font-scale));line-height:1;text-align:center;white-space:nowrap;}
 div:where(#buildDirectBody) .dps-base-unit-extra-slot label{display:grid;grid-template-columns:minmax(0,1fr);gap:3px;min-width:0;}
-div:where(#buildDirectBody) .dps-base-unit-extra-slot label>span{color:var(--ui-unified-muted);font-size:calc(8.75px * var(--app-font-scale));line-height:1;text-align:center;white-space:nowrap;}
 div:where(#buildDirectBody) .dps-base-unit-extra-slot select{width:100%;min-width:0;height:31px;min-height:31px;padding:0 18px 0 5px;border:1px solid var(--role-interactive-bd);border-radius:var(--ui-control-radius);background:var(--role-manual-select-bg,var(--role-interactive-bg));color:#fff;font-size:calc(10.5px * var(--app-font-scale));line-height:1;text-align:center;text-align-last:center;box-sizing:border-box;}
-div:where(#buildDirectBody).is-mobile .dps-jewel-card,div:where(#buildDirectBody).is-narrow-mobile .dps-jewel-card{gap:0;padding:3px;}
 div:where(#buildDirectBody).is-mobile .dps-base-unit-panel,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-panel{gap:6px;padding:0;margin-top:0;}
 div:where(#buildDirectBody).is-mobile .right-analytics-workspace .analytics-unit-summary-group,div:where(#buildDirectBody).is-narrow-mobile .right-analytics-workspace .analytics-unit-summary-group{gap:0;}
 div:where(#buildDirectBody).is-mobile .dps-base-unit-top{min-height:88px;}
@@ -176,8 +180,6 @@ div:where(#buildDirectBody).is-mobile .dps-base-unit-summary-item .dps-num-main{
 @media(max-width:340px){
   div:where(#buildDirectBody).is-mobile .dps-base-unit-summary-item .dps-num,div:where(#buildDirectBody).is-mobile .unit-achievement-value.dps-num{font-size:calc(13px * var(--app-font-scale));}
 }
-div:where(#buildDirectBody).is-mobile .dps-jewel-settings-body,div:where(#buildDirectBody).is-narrow-mobile .dps-jewel-settings-body{padding:8px;}
-div:where(#buildDirectBody).is-mobile .dps-jewel-config-grid,div:where(#buildDirectBody).is-narrow-mobile .dps-jewel-config-grid{grid-template-columns:minmax(0,1fr);}
 div:where(#buildDirectBody).is-mobile .dps-base-unit-slot-stack,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-slot-stack{gap:14px;padding:0 2px;}
 div:where(#buildDirectBody).is-mobile .dps-base-unit-card,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-card{gap:10px;padding:10px 8px 16px;border:1px solid rgba(74,82,93,.42);border-radius:10px;background:rgba(11,12,15,.38);}
 div:where(#buildDirectBody).is-mobile .dps-base-unit-card.is-empty,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-card.is-empty{gap:0;padding:10px 8px 14px;}
@@ -193,15 +195,12 @@ div:where(#buildDirectBody).is-mobile .dps-base-unit-fixed-qty,div:where(#buildD
 div:where(#buildDirectBody).is-mobile .dps-base-unit-qty-control,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-qty-control{grid-template-columns:38px minmax(38px,1fr) 38px;gap:4px;}
 div:where(#buildDirectBody).is-mobile .dps-base-unit-setting-input,div:where(#buildDirectBody).is-mobile .dps-base-unit-setting-select,div:where(#buildDirectBody).is-mobile .dps-base-unit-option-btn,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-setting-input,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-setting-select,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-option-btn{height:33px;min-height:33px;font-size:calc(11.25px * var(--app-font-scale));}
 div:where(#buildDirectBody).is-mobile .dps-base-unit-void-power-control,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-void-power-control{height:33px;}
-div:where(#buildDirectBody).is-mobile .dps-base-unit-extra-grid,div:where(#buildDirectBody).is-narrow-mobile .dps-base-unit-extra-grid{grid-template-columns:repeat(2,minmax(0,1fr));width:100%;}
-div:where(#buildDirectBody) .settings-polish #basicSettingsPanel3 :is(.zero-calc-row-head,.zero-calc-list-head,.unit-achievement-help-panel){box-shadow:none;}
 section:where(#buildDirectPane)[data-dps-standalone-view] .dps-base-unit-summary-row{min-width:0;}
 @container (max-width:520px){
   section:where(#buildDirectPane)[data-dps-standalone-view] .dps-base-unit-top{grid-template-columns:repeat(2,minmax(0,1fr));}
   section:where(#buildDirectPane)[data-dps-standalone-view] .dps-base-unit-top .dps-base-unit-context{grid-column:1/-1;min-height:82px;border-right:0;border-bottom:1px solid #304158;}
   section:where(#buildDirectPane)[data-dps-standalone-view] .dps-base-unit-top .unit-summary-stage{border-right:1px solid #304158;}
   section:where(#buildDirectPane)[data-dps-standalone-view] .dps-base-unit-results{grid-template-columns:repeat(3,minmax(0,1fr));}
-  section:where(#buildDirectPane)[data-dps-standalone-view] .dps-base-unit-extra-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
 @container (max-width:340px){
   section:where(#buildDirectPane)[data-dps-standalone-view] .dps-base-unit-results{grid-template-columns:repeat(3,minmax(0,1fr));}
@@ -233,7 +232,7 @@ div:where(#buildDirectBody) .unit-basic-summary .unit-basic-empty{padding:14px 8
   div:where(#buildDirectBody) .unit-basic-summary tbody th{font-size:inherit;}
 }
 div:where(#buildDirectBody) .unit-slot-cards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 0 0;min-width:0;align-items:stretch;}
-div:where(#buildDirectBody) .unit-slot-overview-card{display:flex;flex-direction:column;min-width:0;min-height:160px;border-radius:10px;background:var(--ui-panel-body-bg);border:1px solid #3c485b;overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.035),0 4px 12px rgba(0,0,0,.18);}
+div:where(#buildDirectBody) .unit-slot-overview-card{display:flex;flex-direction:column;min-width:0;min-height:0;border-radius:10px;background:var(--ui-panel-body-bg);border:1px solid #3c485b;overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.035),0 4px 12px rgba(0,0,0,.18);}
 div:where(#buildDirectBody) .unit-slot-overview-card.is-selected{border-color:#80a9e2;box-shadow:0 0 0 1px rgba(96,151,230,.22),inset 0 1px rgba(255,255,255,.06);}
 div:where(#buildDirectBody) .unit-slot-card-head{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:7px 8px;border-bottom:1px solid var(--ui-integrated-head-line);background:var(--ui-integrated-head-bg);box-sizing:border-box;min-height:42px;}
 div:where(#buildDirectBody) .unit-slot-card-head>strong{color:#e6f6ff;font-size:calc(12.5px * var(--app-font-scale));white-space:nowrap;}
@@ -243,7 +242,7 @@ div:where(#buildDirectBody) .unit-slot-card-main{display:flex;flex-direction:col
 div:where(#buildDirectBody) .unit-slot-card-main:hover{background:rgba(29,30,33,.07);outline-offset:-2px;}
 div:where(#buildDirectBody) .unit-slot-card-main:focus-visible{outline-offset:-2px;}
 div:where(#buildDirectBody) .unit-slot-add-card{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0;width:100%;min-height:76px;padding:12px;box-sizing:border-box;border:1px solid #47627f;border-radius:12px;background:#121a24;color:#d1e4f5;cursor:pointer;box-shadow:none;transition:none;}
-div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-slot-add-card:focus-visible{outline:1px solid #84a8d5;outline-offset:-3px;box-shadow:none;}
+div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-slot-add-card:focus-visible{outline:var(--nexus-focus-outline,1px solid #84a8d5);outline-offset:-3px;box-shadow:none;}
 div:where(#buildDirectBody) .unit-slot-add-card:disabled{opacity:.5;cursor:not-allowed;}
 div:where(#buildDirectBody) .unit-slot-add-symbol{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:1px solid #627b96;background:linear-gradient(180deg,#354b62,#1a2a3b);color:#b4dafa;}
 div:where(#buildDirectBody) .unit-slot-add-symbol svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;}
@@ -257,13 +256,12 @@ div:where(#buildDirectBody) .unit-slot-add-card small{color:#91a8c0;font-size:ca
   div:where(#buildDirectBody) .unit-slot-card-actions{gap:2px;min-height:30px;}
   div:where(#buildDirectBody) .unit-slot-card-actions .unit-list-remove{min-width:25px;height:27px;min-height:27px;padding:2px 4px;font-size:14.5px;}
   div:where(#buildDirectBody) .unit-slot-card-main{padding:6px;gap:7px;}
-  div:where(#buildDirectBody) .unit-slot-overview-card{min-height:164px;}
 }
 div:where(#buildDirectBody) .unit-slot-card-head .unit-list-remove{min-width:30px;height:30px;min-height:30px;padding:0 6px;}
 div:where(#buildDirectBody) .unit-slot-expansion{display:grid;gap:8px;padding:0 9px 9px;min-width:0;}
-div:where(#buildDirectBody) .unit-slot-expansion-toggle{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:27px;padding:3px 8px;border:0;border-top:1px solid rgba(130,143,151,.19);background:transparent;color:#c4e2f5;font-size:calc(10px * var(--app-font-scale));cursor:pointer;}
-div:where(#buildDirectBody) .unit-slot-expansion-toggle>span{font-size:16px;line-height:1;}
-div:where(#buildDirectBody) .unit-slot-expansion-toggle:focus-visible{outline:2px solid #8dbaf3;outline-offset:-2px;}
+div:where(#buildDirectBody) .unit-slot-expansion-toggle{position:relative;z-index:2;display:flex;align-items:center;justify-content:flex-start;gap:4px;min-width:0;min-height:24px;width:100%;margin:-2px 0;padding:2px 0;border:0;background:transparent;box-shadow:none;color:#bceef4;font:calc(12px * var(--app-font-scale))/1.4 var(--font-main);cursor:pointer;text-align:left;}
+div:where(#buildDirectBody) .unit-slot-expansion-toggle>svg{flex:none;width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+div:where(#buildDirectBody) .unit-slot-expansion-toggle:focus-visible{outline:var(--nexus-focus-outline,2px solid #8dbaf3);outline-offset:-2px;}
 div:where(#buildDirectBody) .unit-slot-expansion-rows{display:grid;gap:6px;min-width:0;}
 div:where(#buildDirectBody) .unit-slot-remove-dialog{box-sizing:border-box;width:min(380px,calc(calc(var(--dps-vw,1vw) * 100) - 34px));max-height:calc(calc(var(--dps-vh,1dvh) * 100) - 32px);margin:auto;padding:0;color:#e5f6ff;border:1px solid var(--ui-modal-border);border-radius:var(--ui-modal-radius);background:var(--ui-panel-body-bg);box-shadow:var(--ui-modal-shadow);overflow:auto;}
 div:where(#buildDirectBody) .unit-slot-remove-dialog::backdrop{background:var(--ui-modal-backdrop-bg);}
@@ -274,19 +272,19 @@ div:where(#buildDirectBody) .unit-slot-remove-dialog-actions{display:grid;grid-t
 div:where(#buildDirectBody) .unit-slot-remove-dialog-actions button{font-family:inherit;font-size:calc(12.5px * var(--app-font-scale));line-height:1.35;min-height:36px;border-radius:8px;cursor:pointer;}
 div:where(#buildDirectBody) .unit-slot-remove-cancel{background:var(--ui-button-bg);border:1px solid var(--ui-button-border);color:var(--ui-button-text);}
 div:where(#buildDirectBody) .unit-slot-remove-confirm{background:linear-gradient(135deg,#663445,#422330);border:1px solid #ad6e80;color:#fff1f4;}
-div:where(#buildDirectBody) .unit-slot-remove-dialog-actions button:focus-visible{outline:2px solid var(--role-manual-active-bd);outline-offset:2px;}
+div:where(#buildDirectBody) .unit-slot-remove-dialog-actions button:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:2px;}
 div:where(#buildDirectBody) .unit-slot-heading{display:flex;align-items:center;min-width:0;gap:8px;}
 div:where(#buildDirectBody) .unit-slot-number{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;box-sizing:border-box;border:1px solid #545e65;border-radius:7px;background:#111215;color:#cae9ff;font:calc(12px * var(--app-font-scale))/1 Consolas,monospace;font-variant-numeric:tabular-nums;letter-spacing:.2px;}
 @media(max-width:520px){
   div:where(#buildDirectBody) .unit-slot-heading{gap:5px;}
   div:where(#buildDirectBody) .unit-slot-number{flex-basis:26px;width:26px;height:26px;font-size:calc(11.25px * var(--app-font-scale));}
 }
-div:where(#buildDirectBody) .unit-sanctuary-panel{display:grid;min-width:0;gap:12px;margin:26px 0 0;padding:0;border:0;border-radius:0;background:transparent;}
+div:where(#buildDirectBody) .unit-sanctuary-panel{display:grid;min-width:0;gap:12px;margin:0;padding:0;border:0;border-radius:0;background:transparent;}
 div:where(#buildDirectBody) .unit-sanctuary-heading{display:flex;position:relative;align-items:center;justify-content:flex-start;gap:8px;margin:0;}
 div:where(#buildDirectBody) .unit-sanctuary-heading h3{display:flex;align-items:center;flex-wrap:wrap;min-width:0;gap:9px;margin:0;color:var(--ui-text);font-size:calc(15px * var(--app-font-scale));line-height:1.4;}
 div:where(#buildDirectBody) .unit-sanctuary-reset{flex:none;width:30px;height:30px;padding:5px;}
 div:where(#buildDirectBody) .unit-sanctuary-guide-trigger{margin-left:auto;}
-div:where(#buildDirectBody) #unitSanctuaryPanel :is(#unitSanctuaryCount,#unitSanctuarySummary,#unitSanctuaryRows,#unitSanctuaryFooter,#unitSanctuaryGuideDetails)[hidden]{display:none!important;}
+div:where(#buildDirectBody) #unitSanctuaryPanel :is(#unitSanctuaryGuideTitle,#unitSanctuarySummary,#unitSanctuaryRows,#unitSanctuaryFooter,#unitSanctuaryGuideDetails)[hidden]{display:none!important;}
 div:where(#buildDirectBody) .unit-sanctuary-slots{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;min-width:0;}
 div:where(#buildDirectBody) .unit-sanctuary-card{min-width:0;overflow:hidden;border:1px solid var(--ui-panel-border);border-radius:10px;background:var(--ui-panel-body-bg);}
 div:where(#buildDirectBody) .unit-sanctuary-card-head{display:flex;align-items:center;gap:7px;min-height:34px;padding:5px 10px;border-bottom:1px solid var(--ui-integrated-head-line);background:var(--ui-integrated-head-bg);}
@@ -294,21 +292,21 @@ div:where(#buildDirectBody) .unit-sanctuary-card-head .unit-slot-number{display:
 div:where(#buildDirectBody) .unit-sanctuary-card-head strong{font-size:calc(11px * var(--app-font-scale));font-weight:600;color:#dceafa;}
 div:where(#buildDirectBody) .unit-sanctuary-card-head .unit-list-remove{margin-left:auto;min-width:28px;width:28px;min-height:28px;height:28px;padding:0;background:transparent;border-color:transparent;color:#9daec5;}
 div:where(#buildDirectBody) .unit-sanctuary-card-head .unit-list-remove:hover:not(:disabled){border-color:#9b6571;color:#ffccd4;}
-div:where(#buildDirectBody) .unit-sanctuary-fields{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.62fr) minmax(0,.98fr);gap:8px 7px;min-width:0;padding:9px;}
-div:where(#buildDirectBody) .unit-sanctuary-field{display:grid;align-content:start;grid-template-rows:auto 30px;gap:4px;min-width:0;}
-div:where(#buildDirectBody) .unit-sanctuary-field>span{display:block;min-width:0;color:#aebdd0;font-size:calc(10px * var(--app-font-scale));line-height:1.2;text-align:center;white-space:nowrap;}
-div:where(#buildDirectBody) .unit-sanctuary-field :is(input,select){display:block;width:100%;min-width:0;height:30px;min-height:30px;padding:3px 4px;border:1px solid #425569;border-radius:6px;background:#111820;color:#e5edf7;text-align:center;text-align-last:center;box-sizing:border-box;font-size:calc(11px * var(--app-font-scale));}
-div:where(#buildDirectBody) .unit-sanctuary-field :is(input,select):disabled{opacity:.42;cursor:not-allowed;}
-div:where(#buildDirectBody) .unit-sanctuary-field input::-webkit-inner-spin-button,div:where(#buildDirectBody) .unit-sanctuary-field input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
-div:where(#buildDirectBody) .unit-sanctuary-field input[type=number]{appearance:textfield;-moz-appearance:textfield;}
-div:where(#buildDirectBody) .unit-sanctuary-card.is-invalid input{border-color:#d17979;}
+div:where(#buildDirectBody) .unit-sanctuary-card .unit-sanctuary-card-main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px;text-align:center;}
+div:where(#buildDirectBody) .unit-sanctuary-card-main>.unit-sanctuary-metric:only-child{grid-column:1/-1;}
+div:where(#buildDirectBody) .unit-sanctuary-skill-list{display:flex;justify-content:center;align-items:center;gap:6px;min-width:0;}
+div:where(#buildDirectBody) .unit-sanctuary-skill-list>b{flex:0 1 auto;min-width:0;color:#e1f0fb;font-size:calc(12px * var(--app-font-scale));font-weight:500;line-height:1.5;overflow-wrap:anywhere;word-break:keep-all;}
+div:where(#buildDirectBody) .unit-sanctuary-skill-list>b+b{padding-left:6px;border-left:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) .unit-sanctuary-metric{display:grid;align-content:start;gap:6px;min-width:0;}
+div:where(#buildDirectBody) .unit-sanctuary-metric>span{color:#9daec5;font-size:calc(10px * var(--app-font-scale));line-height:1.4;}
+div:where(#buildDirectBody) .unit-sanctuary-metric>b{color:#e1f0fb;font-size:calc(12px * var(--app-font-scale));font-weight:500;overflow-wrap:anywhere;line-height:1.5;}
+div:where(#buildDirectBody) .unit-sanctuary-card.is-invalid .unit-sanctuary-card-head strong{color:#d17979;}
+div:where(#buildDirectBody) #dpsSanctuarySlotModal input[type=number]{appearance:textfield;}
+div:where(#buildDirectBody) #dpsSanctuarySlotModal input::-webkit-inner-spin-button,div:where(#buildDirectBody) #dpsSanctuarySlotModal input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+div:where(#buildDirectBody) #sanctuarySlotValidation{color:#e3949b;}
 div:where(#buildDirectBody) .unit-sanctuary-footer{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;}
 @container (max-width:420px){
   div:where(#buildDirectBody) .unit-sanctuary-panel{gap:10px;}
-  div:where(#buildDirectBody) .unit-sanctuary-fields{gap:7px 4px;padding:8px 6px;}
-  div:where(#buildDirectBody) .unit-sanctuary-field>span{font-size:calc(9px * var(--app-font-scale));}
-  div:where(#buildDirectBody) .unit-sanctuary-field :is(input,select){height:32px;min-height:32px;padding:2px;font-size:calc(10px * var(--app-font-scale));}
-  div:where(#buildDirectBody) .unit-sanctuary-field{grid-template-rows:auto 32px;}
 }
 div:where(#buildDirectBody) #dpsBaseUnitSummary{overflow:visible;}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-summary-row{min-width:0;border-color:var(--ui-panel-border);border-radius:12px;}
@@ -324,10 +322,9 @@ div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-spec-dps .dps-num
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results>.unit-achievement{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;grid-column:1/-1;min-height:0;padding:14px 18px 16px;border:0;border-top:1px solid var(--ui-panel-border);}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .unit-achievement-label{justify-content:flex-start;text-align:left;font-size:calc(11px * var(--app-font-scale));}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .unit-achievement-value{font-size:calc(24px * var(--app-font-scale));text-align:right;}
-div:where(#buildDirectBody) .ub-collection-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 12px;}
-div:where(#buildDirectBody) .ub-collection-head h3{display:flex;align-items:center;gap:9px;margin:0;color:var(--ui-text);font-size:calc(15px * var(--app-font-scale));}
-:where(#buildDirectPane) .ub-collection-head h3>span,div:where(#buildDirectBody) .unit-sanctuary-heading h3>#unitSanctuaryCount{white-space:nowrap;padding:2px 7px;border:1px solid var(--ui-panel-border);border-radius:5px;color:#a9c8ff;font:calc(10px * var(--app-font-scale))/1.5 Consolas,monospace;}
-:where(#buildDirectPane) .ub-collection-head small{color:#9daec5;font-size:calc(10px * var(--app-font-scale));}
+div:where(#buildDirectBody) .integrated-tab[data-integrated-tab="unitBoard"]{gap:6px;}
+div:where(#buildDirectBody) .unit-board-slot-count{flex:none;white-space:nowrap;padding:2px 7px;border:1px solid var(--ui-panel-border);border-radius:5px;color:#8597ad;font:calc(10px * var(--app-font-scale))/1.5 Consolas,monospace;}
+div:where(#buildDirectBody) .integrated-tab[aria-selected=true] .unit-board-slot-count{color:#a9c8ff;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-cards-grid{padding:0;grid-template-columns:minmax(0,1fr);gap:12px;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-overview-card{border-color:var(--ui-panel-border);border-radius:12px;box-shadow:none;transition:border-color .15s;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-overview-card:hover{border-color:var(--ui-button-hover-border);}
@@ -339,11 +336,10 @@ div:where(#buildDirectBody) .ub-card-title .unit-slot-grade{color:#9ec4da;font-s
 :where(#buildDirectPane) .ub-card-title strong{color:#f1faff;font-size:calc(14px * var(--app-font-scale));line-height:1.4;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-actions .unit-list-remove{width:28px;min-width:28px;height:28px;min-height:28px;background:transparent;border-color:transparent;color:#9daec5;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-list-remove:hover{border-color:#9b6571;color:#ffccd4;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main{gap:10px;padding:12px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main:focus-visible{outline:2px solid var(--ui-field-focus-border);outline-offset:-3px;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main{position:relative;isolation:isolate;gap:0;padding:12px;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-edit-target{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;min-width:0;min-height:0;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;cursor:pointer;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-edit-target:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--ui-field-focus-border));outline-offset:-3px;}
 :where(#buildDirectPane) .ub-card-data{width:100%;min-width:0;}
-:where(#buildDirectPane) .ub-auto-label{display:flex;align-items:center;gap:6px;color:#9daec5;font-size:calc(10px * var(--app-font-scale));line-height:1.5;}
-:where(#buildDirectPane) .ub-status-dot{display:block;width:5px;height:5px;border-radius:50%;background:#bceef4;flex:none;}
 :where(#buildDirectPane) .ub-dps{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px;margin:8px 0 14px;}
 :where(#buildDirectPane) .ub-dps>span{color:#cfe2ff;font-size:calc(11px * var(--app-font-scale));}
 :where(#buildDirectPane) .ub-dps>b{color:#bceef4;font:calc(27px * var(--app-font-scale))/1.2 Consolas,monospace;letter-spacing:-.04em;overflow-wrap:anywhere;}
@@ -353,29 +349,23 @@ div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main:focus-vis
 :where(#buildDirectPane) .ub-metric>b{color:#eaf2ff;font:calc(12px * var(--app-font-scale))/1.4 Consolas,monospace;overflow-wrap:anywhere;}
 :where(#buildDirectPane) .ub-metric.is-max-speed>span,:where(#buildDirectPane) .ub-metric.is-max-speed>b{color:#f5cd65;}
 :where(#buildDirectPane) .ub-applied{padding-top:12px;border-top:1px solid var(--ui-panel-border);}
-:where(#buildDirectPane) .ub-section-label{display:block;color:#9daec5;font-size:calc(10px * var(--app-font-scale));margin-bottom:8px;}
 :where(#buildDirectPane) .ub-settings-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
 :where(#buildDirectPane) .ub-setting{display:grid;min-width:0;gap:3px;}
 :where(#buildDirectPane) .ub-setting>span{color:#9daec5;font-size:calc(10px * var(--app-font-scale));}
 :where(#buildDirectPane) .ub-setting>b{color:#e2e7f0;font-size:calc(12px * var(--app-font-scale));line-height:1.4;overflow-wrap:anywhere;}
-:where(#buildDirectPane) .ub-wide{grid-column:1/-1;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-dialog{width:min(780px,calc(calc(var(--dps-vw,1vw) * 100) - 32px));border-radius:18px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-header{padding:18px 22px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-heading{gap:8px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-heading strong{font-size:calc(17px * var(--app-font-scale));}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-heading small{display:block;color:#9daec5;font-size:calc(11px * var(--app-font-scale));line-height:1.5;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-scroll{padding:22px;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-dialog{width:min(780px,calc(calc(var(--dps-vw,1vw) * 100) - 32px));border-radius:18px;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-header{padding:18px 22px;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-heading{gap:8px;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-heading strong{font-size:calc(17px * var(--app-font-scale));}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-heading small{display:block;color:#9daec5;font-size:calc(11px * var(--app-font-scale));line-height:1.5;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-scroll{padding:22px;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker{align-items:end;padding:0 0 20px;margin:0;border-bottom:1px solid var(--ui-panel-border);display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding-bottom:20px;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker>.dps-base-unit-field{flex:1;max-width:480px;min-width:0;gap:8px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-field-label{height:auto;min-height:0;justify-content:center;text-align:center;font-size:calc(11px * var(--app-font-scale));color:#9daec5;white-space:normal;}
-:where(#buildDirectPane) .ub-editor-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:start;gap:22px;padding-top:20px;}
-:where(#buildDirectPane) .ub-editor-sections{display:grid;gap:22px;min-width:0;}
-:where(#buildDirectPane) .ub-edit-section{min-width:0;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-edit-section h3{display:flex;align-items:center;gap:7px;margin:0 0 14px;padding:0;color:#e2e7f0;font-size:calc(12px * var(--app-font-scale));}
-:where(#buildDirectPane) .ub-edit-section h3>span{color:#9ec4da;font:10px/1 Consolas,monospace;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .dps-base-unit-field-label{height:auto;min-height:0;justify-content:center;text-align:center;font-size:calc(11px * var(--app-font-scale));color:#9daec5;white-space:normal;}
+:where(#buildDirectPane) .ub-editor-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:stretch;gap:18px;padding-top:16px;}
 :where(#buildDirectPane) .ub-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-editor-field{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;gap:7px;align-content:start;min-width:0;padding:0;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-editor-field :is(input,select,.dps-base-unit-void-power-control){min-height:40px;height:40px;font-size:calc(12px * var(--app-font-scale));}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .ub-editor-field{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;gap:7px;align-content:start;min-width:0;padding:0;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .ub-editor-field :is(input,select,.dps-base-unit-void-power-control,.dps-base-unit-slot-expansion-btn){min-height:40px;height:40px;font-size:calc(12px * var(--app-font-scale));}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker :is(select){min-height:44px;height:44px;font-size:calc(14px * var(--app-font-scale));}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-qty-control{display:grid;grid-template-columns:32px minmax(0,1fr) 32px;gap:3px;min-width:0;width:100%;height:40px;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-qty-btn{width:100%;height:40px;min-height:40px;}
@@ -383,104 +373,60 @@ div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-board-qu
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-fixed-qty{display:flex;align-items:center;justify-content:center;min-height:40px;border:1px solid var(--role-readonly-bd);border-radius:var(--ui-control-radius);font-size:12px;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-void-power-control{display:flex;justify-content:space-between;align-items:center;gap:5px;padding:0 8px;width:100%;}
 :where(#buildDirectPane) .ub-fields .dps-base-unit-void-power-control small{font-size:calc(9px * var(--app-font-scale));white-space:nowrap;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-editor-field :is(input,select,button):disabled{opacity:.45;cursor:not-allowed;}
-:where(#buildDirectPane) .ub-live-result{padding:16px;border:1px solid #34475c;border-radius:12px;background:#10161e;min-width:0;}
-:where(#buildDirectPane) .ub-live-result .ub-dps{display:grid;gap:10px;margin:18px 0 22px;}
-:where(#buildDirectPane) .ub-live-result .ub-dps>b{font-size:calc(32px * var(--app-font-scale));}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .ub-editor-field :is(input,select,button):disabled{opacity:.45;cursor:not-allowed;}
+:where(#buildDirectPane) .ub-live-result{display:flex;flex-direction:column;justify-content:space-between;padding:16px;border:1px solid #34475c;border-radius:12px;background:#10161e;min-width:0;}
 :where(#buildDirectPane) .ub-live-result .ub-metrics{grid-template-columns:minmax(0,1fr);padding:0;gap:0;}
-:where(#buildDirectPane) .ub-live-result .ub-metric{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--ui-panel-border);}
-:where(#buildDirectPane) .ub-live-result p{margin:14px 0 0;color:#9daec5;font-size:calc(10px * var(--app-font-scale));line-height:1.6;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-empty-guidance{margin-top:14px;color:#9daec5;font-size:11px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-footer{padding:16px 22px;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-footer .unit-slot-modal-done{grid-column:2;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-settings{margin-top:20px;padding-top:18px;border-top:1px solid var(--ui-panel-border);}
-div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-settings h4{margin-bottom:12px;color:#e2e7f0;font-size:12px;text-align:left;margin:0 0 14px;padding:0;}
+:where(#buildDirectPane) .ub-live-result .ub-metric{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-empty-guidance{margin-top:14px;color:#9daec5;font-size:11px;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-footer{padding:16px 22px;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-footer .unit-slot-modal-done{grid-column:2;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-settings{margin:0;padding:0;border:0;}
 @container(max-width:460px){
   div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-cards-grid{grid-template-columns:minmax(0,1fr);}
   :where(#buildDirectPane) .ub-settings-list{grid-template-columns:repeat(4,minmax(0,1fr));}
-  :where(#buildDirectPane) .ub-setting.ub-wide{grid-column:1/-1;}
   :where(#buildDirectPane) .ub-dps>b{font-size:calc(29px * var(--app-font-scale));}
 }
 @media(max-width:600px){
-  div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-dialog{width:100%;max-height:calc(calc(var(--dps-vh,1dvh) * 100) - 14px);border-radius:14px;}
-  div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-header{padding:14px;gap:8px;}
-  div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-heading strong{font-size:15px;}
-  div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-scroll{padding:16px;}
+  div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-dialog{width:100%;max-height:calc(calc(var(--dps-vh,1dvh) * 100) - 14px);border-radius:14px;}
+  div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-header{padding:14px;gap:8px;}
+  div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-heading strong{font-size:15px;}
+  div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-scroll{padding:16px;}
   :where(#buildDirectPane) .ub-editor-layout{grid-template-columns:minmax(0,1fr);gap:20px;padding-top:16px;}
-  :where(#buildDirectPane) .ub-editor-sections{gap:20px;}
-  :where(#buildDirectPane) .ub-live-result .ub-dps{display:flex;margin:12px 0 16px;}
   :where(#buildDirectPane) .ub-live-result .ub-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
   :where(#buildDirectPane) .ub-live-result .ub-metric{display:grid;gap:6px;padding:10px 0 0;}
-  :where(#buildDirectPane) .ub-live-result p{margin-top:12px;}
-  div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-footer{padding:12px 16px;}
+  div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-footer{padding:12px 16px;}
   div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-top>div{padding:10px 5px;min-height:90px;}
   div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-spec-dps .dps-num{font-size:calc(19px * var(--app-font-scale));}
   div:where(#buildDirectBody) #dpsBaseUnitSummary .unit-summary-stage strong{font-size:calc(18px * var(--app-font-scale));}
 }
 @media(max-width:360px){
   :where(#buildDirectPane) .ub-settings-list{grid-template-columns:repeat(2,minmax(0,1fr));}
-  :where(#buildDirectPane) .ub-collection-head small{display:none;}
   div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-top{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);}
   div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-spec-dps{grid-column:1/-1;border-top:1px solid var(--ui-panel-border);min-height:65px!important;}
 }
-div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot{display:grid;grid-template-columns:38px minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:12px;padding:12px;border:1px solid var(--ui-panel-border);border-radius:10px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot-title{width:34px;min-width:0;min-height:36px;display:grid;place-items:center;border:1px solid #455b73;border-radius:6px;background:#1b2735;font-size:calc(11px * var(--app-font-scale));color:#a9c8ff;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot>label{display:grid;gap:6px;min-width:0;text-align:center;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot>label>span{color:#9daec5;font-size:calc(11px * var(--app-font-scale));display:block;text-align:center;}
+div:where(#buildDirectBody) #dpsUnitSlotModal :is(.dps-base-unit-extra-slot,.dps-base-unit-extra-head){display:grid;grid-template-columns:38px minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:12px;padding:0;border:0;border-radius:0;background:transparent;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-head>span{color:#9daec5;font-size:calc(11px * var(--app-font-scale));line-height:1.4;text-align:center;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot-title{width:34px;min-width:0;min-height:40px;display:grid;place-items:center;border:1px solid #455b73;border-radius:6px;background:#1b2735;font-size:calc(11px * var(--app-font-scale));color:#a9c8ff;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot>label{display:grid;min-width:0;text-align:center;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot :is(select){height:40px;min-height:40px;font-size:12px;}
 @media(max-width:420px){
-  div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot{grid-template-columns:28px minmax(0,1fr);gap:10px;}
-  div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot>label:last-child{grid-column:2;}
-  div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot-title{width:28px;}
+  div:where(#buildDirectBody) #dpsUnitSlotModal :is(.dps-base-unit-extra-slot,.dps-base-unit-extra-head){grid-template-columns:34px minmax(0,.8fr) minmax(0,1.2fr);gap:8px;}
 }
-div:where(#buildDirectBody) #dpsUnitSlotModal :is(.ub-unit-picker,.ub-editor-field,.dps-base-unit-extra-slot) .app-select-trigger{min-height:40px;font-size:calc(12px * var(--app-font-scale));}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) :is(.ub-unit-picker,.ub-editor-field,.dps-base-unit-extra-slot) .app-select-trigger{min-height:40px;font-size:calc(12px * var(--app-font-scale));}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker .app-select-trigger{min-height:44px;font-size:calc(14px * var(--app-font-scale));}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-section{margin-top:22px;padding-top:20px;border-top:1px solid var(--ui-panel-border);}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head{display:flex;justify-content:space-between;align-items:center;gap:16px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head>div{min-width:0;flex:1 1 auto;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head h4{display:flex;align-items:center;gap:7px;margin:0 0 5px;padding:0;color:#e2e7f0;font-size:calc(12px * var(--app-font-scale));text-align:left;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head .ub-section-index{color:#9ec4da;font:calc(10px * var(--app-font-scale))/1 Consolas,monospace;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head p{margin:0;color:#9daec5;font-size:calc(11px * var(--app-font-scale));line-height:1.5;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head .dps-base-unit-slot-expansion-btn{display:flex;justify-content:center;align-items:center;gap:9px;flex:0 0 auto;min-width:125px;min-height:40px;padding:8px 12px;font-size:calc(12px * var(--app-font-scale));width:auto;max-width:100%;height:40px;margin:0;align-self:center;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head .dps-base-unit-slot-expansion-btn>span{font:calc(10px * var(--app-font-scale))/1.2 Consolas,monospace;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-section .dps-base-unit-extra-settings{margin-top:16px;padding:0;border:0;}
-@media(max-width:420px){
-  div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head{align-items:flex-start;gap:10px;}
-  div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head .dps-base-unit-slot-expansion-btn{min-width:112px;padding:8px;}
-}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-cancel{display:flex;align-items:center;justify-content:center;gap:6px;grid-column:1;min-width:0;min-height:40px;padding:8px 19px;border:1px solid var(--ui-button-border);border-radius:9px;background:var(--ui-button-bg);color:var(--ui-button-text);font:inherit;cursor:pointer;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-cancel:focus-visible,div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-done:focus-visible{outline:1px solid #84a8d5;outline-offset:-3px;box-shadow:none;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-section[hidden]{display:none;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-slot-expansion-btn{display:flex;justify-content:center;align-items:center;gap:7px;width:100%;min-width:0;height:40px;min-height:40px;margin:0;padding:0 5px;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-slot-expansion-btn>span{font:calc(12px * var(--app-font-scale))/1.2 Consolas,monospace;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-cancel{display:flex;align-items:center;justify-content:center;gap:6px;grid-column:1;min-width:0;min-height:40px;padding:8px 19px;border:1px solid var(--ui-button-border);border-radius:9px;background:var(--ui-button-bg);color:var(--ui-button-text);font:inherit;cursor:pointer;}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-cancel:focus-visible,div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-done:focus-visible{outline:var(--nexus-focus-outline,1px solid #84a8d5);outline-offset:-3px;box-shadow:none;}
 div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary{margin:0 0 14px;border:1px solid var(--ui-panel-border);border-radius:10px;}
 div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary table{min-width:0;font-size:calc(11px * var(--app-font-scale));}
 div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary :is(th,td){height:36px;padding:9px 6px;white-space:normal;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary thead th{background:#111417;color:#c6d1dc;border-bottom:1px solid #2a3037;font-size:calc(10px * var(--app-font-scale));}
 div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary tbody tr+tr{border-top:1px solid var(--ui-panel-border);}
 div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary{margin:0;overflow-x:auto;overflow-y:hidden;}
-div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary table{min-width:520px;}
-div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary th:nth-child(1){width:12%;}
-div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary th:nth-child(2),div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary th:nth-child(3){width:17%;}
-div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary th:nth-child(4),div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary th:nth-child(5){width:27%;}
 div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody td{font-family:var(--font-main);font-variant-numeric:tabular-nums;}
-@media(max-width:600px){
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary{overflow-x:hidden;overflow-y:visible;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary table{display:block;width:100%;min-width:0;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody{display:grid;gap:7px;padding:7px;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));min-width:0;border:1px solid #35485c;border-radius:7px;overflow:hidden;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>:is(th,td){display:flex;align-items:center;justify-content:center;gap:3px;min-width:0;width:auto;height:auto;min-height:34px;padding:7px 4px;border-bottom:1px solid #293b4d;white-space:normal;overflow-wrap:anywhere;line-height:1.35;text-align:center;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>th:first-child{width:100%;white-space:nowrap;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>th:before{content:"슬롯 ";color:#92a8c0;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td:nth-child(2):before{content:"시작 ";color:#92a8c0;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td:nth-child(3):before{content:"종료 ";color:#92a8c0;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td:nth-child(4),div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td:nth-child(5){grid-column:1/-1;justify-content:space-between;gap:8px;padding:8px 10px;text-align:right;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td:nth-child(4):before{content:"1번 스킬 / 사용 횟수";flex:0 0 auto;color:#92a8c0;font-size:calc(10px * var(--app-font-scale));}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td:nth-child(5):before{content:"2번 스킬 / 사용 횟수";flex:0 0 auto;color:#92a8c0;font-size:calc(10px * var(--app-font-scale));}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td:last-child{border-bottom:0;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td[colspan]{grid-column:1/-1;justify-content:center;text-align:center;}
-  div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-summary tbody tr>td[colspan]:before{content:none;}
-  div:where(#buildDirectBody) .unit-sanctuary-field>span{white-space:normal;overflow-wrap:anywhere;}
-}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-basic-number{width:12%;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-basic-name{width:28%;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-basic-quantity{width:12%;}
@@ -522,37 +468,29 @@ div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results .dps-num{
 @media(max-width:360px){
   div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results .dps-num{font-size:calc(18px * var(--app-font-scale));}
 }
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion{gap:10px;padding:0 12px 12px;background:var(--role-readonly-bg);border-top:1px solid var(--ui-panel-border);}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:42px;padding:10px 0 0;border:0;color:#c4e2f5;text-align:left;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-heading{display:flex;align-items:center;gap:7px;font-size:calc(11px * var(--app-font-scale));line-height:1.4;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-heading>b{display:grid;place-items:center;min-width:20px;min-height:20px;padding:1px 5px;border:1px solid var(--ui-panel-border);border-radius:5px;color:#a9c8ff;font:calc(10px * var(--app-font-scale))/1.4 Consolas,monospace;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-chevron{color:#9daec5;font-size:16px;line-height:1;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion{padding:12px;background:var(--role-readonly-bg);border-top:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion[hidden]{display:none;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion-rows{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion-rows[hidden]{display:none;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-card{display:grid;min-width:0;border:1px solid var(--ui-panel-border);border-radius:8px;background:var(--ui-panel-body-bg);grid-template-columns:minmax(0,1fr) auto;gap:8px 4px;padding:9px;align-items:start;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-number{display:grid;place-items:center;border:1px solid var(--ui-panel-border);border-radius:6px;background:var(--role-readonly-bg);color:#a9c8ff;line-height:1.3;grid-column:1;grid-row:1;justify-self:start;width:auto;min-height:22px;padding:2px 5px;font-size:calc(10px * var(--app-font-scale));}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack :is(.ub-extra-jewel,.ub-extra-break){display:grid;align-content:center;min-width:0;gap:4px;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-card{display:grid;min-width:0;border:1px solid var(--ui-panel-border);border-radius:8px;background:var(--ui-panel-body-bg);grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;gap:3px 6px;padding:7px;align-items:center;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-number{display:grid;place-items:center;border:1px solid var(--ui-panel-border);border-radius:6px;background:var(--role-readonly-bg);color:#a9c8ff;line-height:1.3;grid-column:1;grid-row:1/3;min-width:28px;min-height:36px;align-self:stretch;padding:2px 4px;font-size:calc(13px * var(--app-font-scale));font-weight:600;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack :is(.ub-extra-jewel,.ub-extra-break){display:flex;align-items:center;justify-content:space-between;min-width:0;gap:3px;grid-column:2;text-align:right;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-card small{color:#9daec5;font-size:calc(9px * var(--app-font-scale));line-height:1.4;white-space:nowrap;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-card b{color:#e1f0fb;font-size:calc(11px * var(--app-font-scale));line-height:1.4;overflow-wrap:anywhere;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-break{justify-items:end;text-align:right;grid-column:2;grid-row:1;display:flex;align-items:center;justify-content:flex-end;gap:5px;min-height:22px;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-break{grid-row:1;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-jewel{grid-row:2;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-break>b{font-family:Consolas,monospace;font-variant-numeric:tabular-nums;}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results>div:last-child{border-right:0;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-card-title{display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;gap:4px 9px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-card-data{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-rows:auto auto 1fr;column-gap:16px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-auto-label{grid-column:1;grid-row:1;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-dps{grid-column:1;grid-row:2;margin:6px 0 10px;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-card-data{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-rows:auto 1fr;column-gap:16px;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-dps{grid-column:1;grid-row:1;align-items:center;margin:0 0 9px;padding:0 0 9px;border-bottom:1px solid var(--ui-panel-border);}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-dps>b{font-size:calc(25px * var(--app-font-scale));}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-metrics{grid-column:1;grid-row:3;align-self:start;padding:0;gap:8px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-applied{grid-column:2;grid-row:1/4;padding:0 0 0 16px;border-top:0;border-left:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-metrics{grid-column:1;grid-row:2;align-self:end;padding:0;gap:8px;}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-applied{grid-column:2;grid-row:1/3;display:grid;align-content:center;padding:0 0 0 16px;border-top:0;border-left:1px solid var(--ui-panel-border);}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-settings-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-setting.ub-wide{grid-column:2/4;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-jewel{grid-column:1/-1;grid-row:2;gap:3px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-break small{font-size:calc(8px * var(--app-font-scale));}
 @container(max-width:420px){
   div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-card-data{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);column-gap:10px;}
   div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-applied{padding-left:10px;}
-  div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-settings-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
-  div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-setting.ub-wide{grid-column:1/-1;}
+  div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-settings-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
   div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-metric>span{font-size:calc(9px * var(--app-font-scale));}
   div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-metric>b{font-size:calc(10px * var(--app-font-scale));}
   div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-dps>b{font-size:calc(22px * var(--app-font-scale));}
@@ -561,12 +499,13 @@ div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-break small{font-siz
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-picker-heading{display:flex;align-items:center;gap:9px;min-width:0;color:#9daec5;font-size:calc(12px * var(--app-font-scale));line-height:1.4;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-picker-heading strong{color:#e2e7f0;font-size:calc(13px * var(--app-font-scale));font-weight:500;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker .dps-base-unit-select-wrap{min-width:0;width:100%;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-live-result .ub-dps.ub-result-summary{display:grid;grid-template-columns:minmax(0,1fr);justify-content:stretch;justify-items:stretch;align-items:start;gap:16px;width:100%;margin:18px 0 22px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric{display:grid;grid-template-rows:auto auto;align-items:center;justify-items:center;gap:8px;min-width:0;margin:0;padding:0;text-align:center;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-live-result .ub-dps.ub-result-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:0;width:100%;margin:0 0 12px;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric{display:grid;grid-template-rows:auto 1fr;align-items:center;justify-items:center;gap:8px;min-width:0;margin:0;padding:0;text-align:center;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric>span{width:100%;margin:0;padding:0;color:#9daec5;font-size:calc(11px * var(--app-font-scale));font-weight:400;line-height:1.4;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric>b{width:100%;min-width:0;margin:0;padding:0;color:#e6f3ff;font-family:inherit;font-size:calc(30px * var(--app-font-scale));font-weight:500;line-height:1.2;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric:first-child>b{color:#bceef4;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric:last-child>b{font-size:calc(15px * var(--app-font-scale));}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric:last-child{border-left:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric:last-child>b{font-size:calc(15px * var(--app-font-scale));align-self:center;}
 div:where(#buildDirectBody) .analytics-polish :is(#statDpsSummary,.dps-base-unit-summary-row){border-color:#304158;box-shadow:none;background:linear-gradient(180deg,rgba(23,35,47,.15),transparent);}
 div:where(#buildDirectBody) .analytics-polish :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header)>div{grid-template-rows:minmax(var(--context-caption-row),auto) minmax(var(--context-value-row),auto) minmax(var(--context-detail-row),auto);box-sizing:border-box;}
 div:where(#buildDirectBody) .analytics-polish :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header) :is(#dpsVal,.dps-base-unit-spec-dps>.dps-num){text-shadow:none;white-space:normal;overflow-wrap:anywhere;font-weight:500;}
@@ -587,18 +526,14 @@ div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .ub-dps>b{mi
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack :is(.ub-setting,.ub-metric,.ub-extra-jewel,.ub-extra-break){min-width:0;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack :is(.ub-setting,.ub-extra-jewel)>b{max-width:100%;white-space:normal;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack :is(.ub-setting,.ub-metric)>span{white-space:normal;overflow-wrap:anywhere;}
-div:where(#buildDirectBody) .analytics-polish #dpsJewelConfigGrid .dps-jewel-card-head{padding:10px;gap:9px;box-sizing:border-box;}
-div:where(#buildDirectBody) .analytics-polish #dpsJewelConfigGrid :is(.dps-jewel-title-block,.jewel-ability){min-width:0;}
-div:where(#buildDirectBody) .analytics-polish #dpsJewelConfigGrid .dps-jewel-title-block :is(b,small){max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.45;}
-div:where(#buildDirectBody) .analytics-polish #dpsJewelConfigGrid .jewel-ability{box-shadow:none;}
 @media(max-width:560px){
   div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .ub-card-title strong{font-size:calc(13px * var(--app-font-scale));}
 }
 
 /* ── 02 · 공통 조작·헤더·테마 보정 ── */
 section:where(#buildDirectPane),div:where(#buildDirectBody) { overflow-x: clip; }
-div:where(#buildDirectBody) :is(button,a,[role=button],input,select,textarea,[tabindex]):focus-visible {
-  outline: 2px solid var(--btn-action-border-hover); outline-offset: -2px; transition: none !important;
+div:where(#buildDirectBody) :is(button,a,[role=button],input,select,textarea,summary,[tabindex]):focus-visible {
+  outline:var(--nexus-focus-outline,2px solid var(--btn-action-border-hover)); outline-offset: -2px; transition: none !important;
 }
 div:where(#buildDirectBody) .nexus-labelled-control { transition: background-color .12s ease-out !important; }
 div:where(#buildDirectBody) .trait-preset-form-card { box-shadow:none; }
@@ -606,11 +541,11 @@ div:where(#buildDirectBody) :is(.basic-goal-brand-copy,.right-workspace-copy) { 
 /* Keep the V34 palette. Improve the shape and rhythm of the existing controls only. */
 div:where(#buildDirectBody) .settings-polish :is(.ir,.mini-ir) { align-items:center; row-gap:8px; }
 div:where(#buildDirectBody) .settings-polish :is(.ir,.mini-ir) > label { line-height:1.45; }
-div:where(#buildDirectBody) .settings-polish :is(.ir,.mini-ir) :is(input:not([type=checkbox]):not([type=radio]),select),div:where(#buildDirectBody) .unit-sanctuary-field :is(input,select) {
+div:where(#buildDirectBody) .settings-polish :is(.ir,.mini-ir) :is(input:not([type=checkbox]):not([type=radio]),select) {
   min-height:32px; border-radius:6px; padding-inline:8px;
   font-variant-numeric:tabular-nums;
 }
-div:where(#buildDirectBody) .settings-polish .app-select-trigger,div:where(#buildDirectBody) .unit-sanctuary-field .app-select-trigger { min-height:32px; border-radius:6px; }
+div:where(#buildDirectBody) .settings-polish .app-select-trigger { min-height:32px; border-radius:6px; }
 div:where(#buildDirectBody) .settings-polish .basic-settings-tabs .integrated-tab,div:where(#buildDirectBody) .analytics-polish .damage-board-subtabs .integrated-tab {
   min-height:40px; padding-block:8px; line-height:1.4;
 }
@@ -618,9 +553,6 @@ div:where(#buildDirectBody) .settings-polish .trait-preset-actions { gap:8px; }
 div:where(#buildDirectBody) .settings-polish .trait-preset-actions .preset-command { min-height:52px; }
 div:where(#buildDirectBody) .settings-polish .trait-preset-form-grid { row-gap:12px; }
 div:where(#buildDirectBody) .build-polish .trait-tier-panel .trait-tools { gap:8px; }
-div:where(#buildDirectBody) .unit-sanctuary-fields { gap:12px 8px; align-items:end; }
-div:where(#buildDirectBody) .unit-sanctuary-field { gap:8px; }
-div:where(#buildDirectBody) .unit-sanctuary-field > span { line-height:1.4; }
 div:where(#buildDirectBody) .unit-sanctuary-card { margin-block:12px; }
 div:where(#buildDirectBody) .analytics-polish #statCompareGrid .stat-row { min-height:34px; }
 div:where(#buildDirectBody) .analytics-polish #statCompareGrid .stat-row > .sc-val { font-variant-numeric:tabular-nums; }
@@ -672,22 +604,22 @@ div:where(#buildDirectBody) .trait-build-merged-panel > .integrated-build-headin
 div:where(#buildDirectBody) .hdr.app-header { background:var(--builder-header-bg); min-height:44px; padding:6px var(--studio-header-pad); border-bottom:0; box-shadow:none; }
 div:where(#buildDirectBody) .hdr-title-wrap h1 { font-size:var(--studio-header-font); font-weight:600; line-height:1.4; letter-spacing:0; }
 div:where(#buildDirectBody) :is(.rune-card-heading,.buff-config-heading,
-  .ub-collection-head,.unit-sanctuary-heading,.ub-edit-section > h3,.ub-expansion-head) {
+  .unit-sanctuary-heading) {
   min-height:36px; height:auto; max-height:none; display:flex; align-items:center; gap:8px;
   padding:8px 12px; margin:0 0 8px; background:transparent;
   border:0; border-bottom:1px solid var(--ui-line-strong); border-radius:0; box-shadow:none;
   color:var(--ui-integrated-head-text); font-size:var(--studio-subheader-font); font-weight:600; line-height:1.4; letter-spacing:0;
 }
 div:where(#buildDirectBody) :is(.buff-config-heading strong,
-  .ub-collection-head h3,.unit-sanctuary-heading h3,.ub-expansion-head h4) {
+  .unit-sanctuary-heading h3) {
   margin:0; font-family:var(--font-main); font-size:var(--studio-subheader-font); font-weight:600;
   line-height:1.4; letter-spacing:0; color:var(--ui-integrated-head-text);
 }
-div:where(#buildDirectBody) :is(.unit-slot-card-head,.unit-sanctuary-card-head,.dps-jewel-card-head) {
+div:where(#buildDirectBody) :is(.unit-slot-card-head,.unit-sanctuary-card-head) {
   min-height:36px; padding:8px 12px; gap:8px; box-shadow:none; border-bottom:1px solid var(--ui-line-strong);
 }
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-header,div:where(#buildDirectBody) .trait-preset-backup-panel .trait-preset-modal-head { padding:12px var(--studio-header-pad); min-height:var(--studio-header-height); }
-div:where(#buildDirectBody) #dpsUnitSlotModal .unit-slot-modal-heading strong,div:where(#buildDirectBody) .trait-preset-backup-panel .trait-preset-modal-head h2 { font-size:var(--studio-header-font); font-weight:600; line-height:1.4; letter-spacing:0; }
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-header,div:where(#buildDirectBody) .trait-preset-backup-panel .trait-preset-modal-head { padding:12px var(--studio-header-pad); min-height:var(--studio-header-height); }
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-heading strong,div:where(#buildDirectBody) .trait-preset-backup-panel .trait-preset-modal-head h2 { font-size:var(--studio-header-font); font-weight:600; line-height:1.4; letter-spacing:0; }
 div:where(#buildDirectBody) .trait-board-panel .trait-tier-panel > h4 { min-height:40px; padding:6px 12px; border-bottom:1px solid var(--ui-line-strong); box-shadow:none; }
 div:where(#buildDirectBody) .trait-board-panel .trait-tier-name { font-size:var(--studio-subheader-font); font-weight:600; line-height:1.4; }
 @media (max-width:1024px) {
@@ -717,17 +649,6 @@ div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main { backgro
 div:where(#buildDirectBody) #basicSettingsPanel2 :is(.bus-cut-card,.final-damage-card) {
   border:0; border-radius:0; box-shadow:none; background:transparent;
 }
-div:where(#buildDirectBody) #zeroGuideContent .zero-rank-info-section { padding:16px 0; }
-div:where(#buildDirectBody) #zeroGuideContent .zero-rank-score-section {
-  margin-top:16px; padding-top:24px; border-top:2px solid var(--ui-line-strong);
-}
-div:where(#buildDirectBody) #zeroGuideContent .reference-section-heading {
-  margin:0 0 16px; padding:0 0 12px; border-bottom:1px solid var(--ui-line);
-  font-size:calc(14px * var(--app-font-scale)); font-weight:600; line-height:1.4;
-  color:var(--ui-integrated-head-text);
-}
-div:where(#buildDirectBody) #zeroGuideContent :is(.zero-inline-benefits,.zero-inline-scores) { padding:0; border:0; }
-
 /* Compact header controls without changing content zoom or the original PC columns. */
 div:where(#buildDirectBody) :is(.trait-preset-modal-close,.unit-slot-modal-close,.dps-compare-close) {
   width:28px; min-width:28px; height:28px; min-height:28px;
@@ -788,8 +709,8 @@ div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack
 div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary :is(th,td)::before { content:none !important; }
 div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary .unit-basic-empty { padding:16px 8px; color:var(--ui-sub); }
 div:where(#buildDirectBody) #unitSanctuaryPanel .sanctuary-summary-slot { width:12%; }
-div:where(#buildDirectBody) #unitSanctuaryPanel .sanctuary-summary-round { width:17%; }
-div:where(#buildDirectBody) #unitSanctuaryPanel .sanctuary-summary-skill { width:27%; }
+div:where(#buildDirectBody) #unitSanctuaryPanel .sanctuary-summary-round { width:28%; }
+div:where(#buildDirectBody) #unitSanctuaryPanel .sanctuary-summary-skill { width:30%; }
 @media(max-width:600px) {
   div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary :is(th,td) { padding:8px 4px; font-size:calc(10px * var(--app-font-scale)); }
   div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary thead th { font-size:calc(10px * var(--app-font-scale)); }
@@ -860,7 +781,6 @@ div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack
   background:var(--role-manual-input-bg); color:var(--ui-text);
 }
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main { box-sizing:border-box; width:100%; padding:12px; border:0; border-radius:0; }
-div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-fields { box-sizing:border-box; width:100%; padding:12px; }
 div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-slots { gap:12px; }
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-overview-card.is-selected { border-color:var(--ui-button-active-border); }
 /* 글로벌 헤더 아래 선만 제거한다. 전환 탭의 선택 밑줄은 유지한다. */
@@ -880,63 +800,7 @@ div:where(#buildDirectBody) .trait-build-merged-panel .trait-build-section + .tr
 div:where(#buildDirectBody) .trait-build-merged-panel .trait-build-section > .trait-limit-guide-heading .workspace-section-title { padding:0; }
 div:where(#buildDirectBody) .trait-standalone-panel { margin-top:20px; }
 div:where(#buildDirectBody) .right-analytics-workspace .analytics-detail-group > .workspace-section-title { padding:16px 12px 12px; }
-div:where(#buildDirectBody) .right-analytics-workspace :is(.ub-collection-head,.unit-sanctuary-heading) { margin-bottom:12px; }
-/* 승단 혜택과 점수 기준은 각각 독립된 영역으로 표시. */
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent { padding:12px 0 16px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent > .zero-rank-info-section {
-  box-sizing:border-box; margin:0; padding:16px;
-  border:1px solid var(--ui-unified-line-strong); border-radius:10px;
-  background:var(--ui-panel-body-bg); box-shadow:none;
-}
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent > .zero-rank-score-section { margin-top:16px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent .reference-section-heading { margin:0 0 12px; padding:0 0 12px; font-size:calc(13px * var(--app-font-scale)); }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent .zero-inline-benefits { padding:0; }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent .zero-inline-scores { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 16px; padding:0; border:0; }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent .zero-score-help-panel { min-width:0; margin:0; padding:0; border:0; border-radius:0; background:transparent; }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent .zero-score-help-panel h5 { margin:0 0 8px; padding:0 0 8px; border-bottom:1px solid var(--ui-line); font-size:calc(12px * var(--app-font-scale)); font-weight:600; }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent .zero-current-benefits-items > span { padding:8px 0; line-height:1.5; font-size:calc(11px * var(--app-font-scale)); }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent .zero-rank-score-row { padding:8px 0; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-guide-close { margin-top:16px; min-height:36px; }
-/* 01~15: 같은 열과 같은 경계를 공유하는 개별 난이도 항목. */
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-table-wrap { padding:0 12px 16px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-table-wrap > .workspace-section-title { padding:16px 0 12px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-table { --zero-progress-columns:calc(32px * var(--app-font-scale)) calc(32px * var(--app-font-scale)) calc(32px * var(--app-font-scale)) calc(52px * var(--app-font-scale)); --zero-progress-gap:4px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-list-head { padding:10px 37px 10px 13px; color:var(--ui-sub); }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroScoreRows { gap:10px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroScoreRows > .zero-calc-row {
-  min-width:0; border:1px solid var(--ui-unified-line-strong); border-radius:8px;
-  background:var(--ui-panel-body-bg); box-shadow:none; overflow:hidden;
-}
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row-bar { padding:0; gap:0; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row-head { position:relative; width:100%; margin:0; padding:12px 36px 12px 12px; gap:12px; box-sizing:border-box; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row-head::after { content:'＋'; position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--ui-sub); font-size:14px; line-height:1; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row.is-expanded .zero-calc-row-head::after { content:'－'; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row.is-expanded > .zero-calc-row-bar { background:var(--ui-integrated-head-bg); border-bottom:1px solid var(--ui-line-strong); box-shadow:none; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-name { flex-wrap:nowrap; gap:8px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-name strong { font-size:calc(12px * var(--app-font-scale)); line-height:1.4; word-break:normal; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row-symbol { flex:0 0 26px; width:26px; height:24px; border-radius:4px; border-color:var(--ui-button-border); background:var(--role-manual-input-bg); font-size:calc(11px * var(--app-font-scale)); }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-inline-labels { display:none; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-fields { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:none; gap:0; padding:0 12px 12px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-input-row { display:grid; grid-template-columns:minmax(72px,.8fr) repeat(2,minmax(0,1fr)); align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--ui-line); }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-kind { color:var(--ui-text); font-size:calc(12px * var(--app-font-scale)); line-height:1.4; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-input-footer { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; padding-top:12px; }
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-field > span,div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-metric > span:first-child { color:var(--ui-sub); font-size:calc(11px * var(--app-font-scale)); }
-@media(max-width:700px) {
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-table-wrap { padding-inline:9px; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-table { --zero-progress-columns:calc(clamp(26px,calc(var(--dps-vw,1vw) * 7.5),32px) * var(--app-font-scale)) calc(clamp(26px,calc(var(--dps-vw,1vw) * 7.5),32px) * var(--app-font-scale)) calc(clamp(26px,calc(var(--dps-vw,1vw) * 7.5),32px) * var(--app-font-scale)) calc(52px * var(--app-font-scale)); --zero-progress-gap:4px; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-name strong { min-width:0; overflow-wrap:anywhere; }
-
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-list-head { display:flex; padding:10px 37px 10px 13px; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row-head { display:flex; gap:8px; padding:12px 36px 12px 12px; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row-head::after { top:50%; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row-head .zero-calc-name { padding-right:0; }
-
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-head-summary { width:auto; justify-content:flex-end; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-input-row { grid-template-columns:minmax(64px,.75fr) repeat(2,minmax(0,1fr)); gap:8px; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 #zeroGuideContent > .zero-rank-info-section { padding:12px; }
-}
-
-div:where(#buildDirectBody) #basicSettingsPanel3 #zeroScoreRows > .zero-calc-row.is-expanded > .zero-calc-row-bar { background:var(--ui-integrated-head-bg); border-bottom:1px solid var(--ui-line-strong); box-shadow:none; }
+div:where(#buildDirectBody) .right-analytics-workspace .unit-sanctuary-heading { margin-bottom:12px; }
 
 /* 헤더 마감: 기존 크기·배치를 유지하는 무광 검정과 절제된 파랑. */
 div:where(#buildDirectBody) {
@@ -956,7 +820,7 @@ div:where(#buildDirectBody) :is(.basic-goal-brand-copy strong,.right-workspace-c
   color:#dbe4ef;
 }
 div:where(#buildDirectBody) :is(.rune-card-heading,.buff-config-heading,
-  .ub-collection-head,.unit-sanctuary-heading,.ub-edit-section > h3,.ub-expansion-head) {
+  .unit-sanctuary-heading) {
   background:var(--builder-header-bg); border-bottom-color:#252c35;
 }
 div:where(#buildDirectBody) .workspace-section-title { color:#b5c6db; }
@@ -977,16 +841,16 @@ div:where(#buildDirectBody) :is(.integrated-tabs,.dps-compare-tabs) > button[rol
   color:var(--ui-sub); opacity:.42; cursor:not-allowed;
 }
 div:where(#buildDirectBody) :is(.integrated-tabs,.dps-compare-tabs) > button[role=tab]:focus:not(:focus-visible) { outline:none; }
-div:where(#buildDirectBody) :is(.integrated-tabs,.dps-compare-tabs) > button[role=tab]:focus-visible { outline:1px solid #84a8d5; outline-offset:-3px; }
+div:where(#buildDirectBody) :is(.integrated-tabs,.dps-compare-tabs) > button[role=tab]:focus-visible { outline:var(--nexus-focus-outline,1px solid #84a8d5); outline-offset:-3px; }
 /* 제목 안의 보조 기능은 같은 무광 버튼 문법을 사용한다. */
 div:where(#buildDirectBody) :is(.hdr.app-header,.right-workspace-head,.trait-preset-modal-head,.unit-slot-modal-header,
-  .dps-compare-header,.unit-sanctuary-heading,.ub-collection-head,.unit-slot-card-head,.unit-sanctuary-card-head)
+  .dps-compare-header,.unit-sanctuary-heading,.unit-slot-card-head,.unit-sanctuary-card-head)
   :is(button:not(.additional-settings-button,.ui-reset-btn),a.ui-action-btn) {
   border-color:#3b4655; border-radius:6px; background:var(--studio-control-bg);
   color:#b9c9dc; box-shadow:none; text-shadow:none;
 }
 div:where(#buildDirectBody) :is(.hdr.app-header,.right-workspace-head,.trait-preset-modal-head,.unit-slot-modal-header,
-  .dps-compare-header,.unit-sanctuary-heading,.ub-collection-head,.unit-slot-card-head,.unit-sanctuary-card-head)
+  .dps-compare-header,.unit-sanctuary-heading,.unit-slot-card-head,.unit-sanctuary-card-head)
   :is(button:not(.additional-settings-button,.ui-reset-btn),a.ui-action-btn):hover:not(:disabled) {
   background:var(--studio-control-hover); border-color:#6a87ac; color:#e3ebf6;
 }
@@ -996,18 +860,18 @@ div:where(#buildDirectBody) :is(.trait-preset-modal-close,.unit-slot-modal-close
 }
 div:where(#buildDirectBody) :is(.trait-preset-modal-close,.unit-slot-modal-close,.dps-compare-close,
   .inline-guide-trigger):focus-visible {
-  outline:2px solid #84a8d5; outline-offset:-3px;
+  outline:var(--nexus-focus-outline,2px solid #84a8d5); outline-offset:-3px;
 }
 
 /* ── 05 · 유닛 헤더·비교표·성소 정보 ── */
-div:where(#buildDirectBody) .right-analytics-workspace :is(.ub-collection-head,.unit-sanctuary-heading) {
+div:where(#buildDirectBody) .right-analytics-workspace .unit-sanctuary-heading {
   background:transparent; background-image:none; border-radius:0;
   border:0; border-bottom:1px solid var(--studio-head-line);
   box-shadow:none; padding:12px 0; margin:0 0 12px;
   overflow:visible; clip-path:none;
 }
-div:where(#buildDirectBody) .right-analytics-workspace :is(.ub-collection-head,.unit-sanctuary-heading)::before,div:where(#buildDirectBody) .right-analytics-workspace :is(.ub-collection-head,.unit-sanctuary-heading)::after { content:none; }
-div:where(#buildDirectBody) .right-analytics-workspace :is(.ub-collection-head,.unit-sanctuary-heading) h3 {
+div:where(#buildDirectBody) .right-analytics-workspace .unit-sanctuary-heading::before,div:where(#buildDirectBody) .right-analytics-workspace .unit-sanctuary-heading::after { content:none; }
+div:where(#buildDirectBody) .right-analytics-workspace .unit-sanctuary-heading h3 {
   color:#dbe4ef; font-size:calc(13px * var(--app-font-scale)); font-weight:600; line-height:1.4;
 }
 
@@ -1037,18 +901,6 @@ div:where(#buildDirectBody) #dpsCompareModal .dps-compare-floor-table tbody tr.i
   background:#29445e; text-shadow:none;
 }
 
-/* 완료 항목은 열 제목 없이 목표 달성과 펼침 버튼만 표시한다. */
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row.is-complete:not(.is-expanded) .zero-calc-row-head{display:flex;padding-right:36px;}
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row.is-complete:not(.is-expanded) .zero-calc-head-summary{width:auto;margin-left:auto;}
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row.is-complete:not(.is-expanded) .zero-calc-complete{display:flex;}
-div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row.is-complete:not(.is-expanded) .zero-calc-row-head::after{top:50%;}
-
-@media(max-width:360px) {
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-name { gap:5px; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-row-symbol { flex-basis:22px; width:22px; }
-  div:where(#buildDirectBody) #basicSettingsPanel3 .zero-calc-name strong { font-size:calc(11px * var(--app-font-scale)); }
-}
-
 /* ── 06 · 버스 설정·성소 스킬·상세 대화상자 ── */
 div:where(#buildDirectBody) #basicSettingsPanel2 {
   padding:0;
@@ -1076,21 +928,9 @@ div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-title {
   font-weight:500; line-height:1.4;
 }
 div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-title::before,div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-title::after { content:none; }
-/* 상세 설정은 배경 장식 없이 제목·구분선·입력 영역으로 정렬한다. */
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-edit-section > h3,div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head {
-  height:auto; min-height:0; margin:0 0 14px; padding:0 0 10px;
-  background:transparent; background-image:none; border:0;
-  border-bottom:1px solid var(--studio-head-line); border-radius:0;
-  box-shadow:none; overflow:visible; clip-path:none;
-}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-edit-section > h3::before,div:where(#buildDirectBody) #dpsUnitSlotModal .ub-edit-section > h3::after,div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head::before,div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head::after { content:none; }
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head { margin-bottom:0; padding-bottom:0; border-bottom:0; }
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head h4 { background:transparent; box-shadow:none; }
 @media(max-width:600px) {
   div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-box-header { margin:0 10px; padding:12px 0 0; }
   div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-section + .basic-settings-inline-section::before { left:10px; right:10px; }
-  div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head { flex-wrap:wrap; }
-  div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-head > div { flex-basis:180px; }
 }
 
 /* ── 07 · 목표·투자 제한·최적화 화면 ── */

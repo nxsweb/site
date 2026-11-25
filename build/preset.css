@@ -17,7 +17,7 @@
 :where(#buildDirectPane) .trait-preset-support-by{display:flex;align-items:center;gap:3px;white-space:nowrap;color:#9aadc0;}
 :where(#buildDirectPane) .trait-preset-support-by svg{width:13px;height:13px;flex:none;}
 :where(#buildDirectPane) .trait-preset-footer .trait-preset-support:hover{background:#1a2530;border-color:#59778f;}
-:where(#buildDirectPane) .trait-preset-footer .trait-preset-support:focus-visible{outline:2px solid var(--role-manual-active-bd);outline-offset:2px;}
+:where(#buildDirectPane) .trait-preset-footer .trait-preset-support:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:2px;}
 :where(#buildDirectPane) .trait-preset-header-controls{display:flex;align-items:center;gap:8px;flex:none;}
 :where(#buildDirectPane) .trait-preset-header-reset{width:76px;height:34px;padding:0 5px;font:600 calc(11px * var(--app-font-scale))/1.2 sans-serif;}
 :where(#buildDirectPane) .trait-preset-header-controls .trait-preset-modal-close{flex:none;}
@@ -44,9 +44,9 @@ div:where(#buildDirectBody) .trait-preset-status-share[hidden]{display:none;}
 div:where(#buildDirectBody) .trait-preset-work-grid{display:grid;grid-column:1;grid-row:1;grid-template-columns:minmax(0,1fr);align-items:stretch;min-width:0;grid-template-rows:auto auto;gap:12px;border-top:1px solid #293440;margin:8px 16px 0;padding:12px 0;}
 div:where(#buildDirectBody) .trait-preset-actions{display:grid;grid-column:1;grid-row:2;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:122px;border-right:0;box-sizing:border-box;border-bottom:0;position:relative;z-index:0;gap:8px;align-items:stretch;padding:12px 0 0;min-width:0;border-top:1px solid #25303d;--preset-command-height:122px;--preset-command-padding:8px 3px;}
 div:where(#buildDirectBody) .trait-preset-body input:not([type="file"]),div:where(#buildDirectBody) .trait-preset-body select{width:100%;min-width:0;box-sizing:border-box;height:46px;min-height:46px;margin:0;padding:0 12px;border:1px solid #405163;border-radius:8px;background:#11171e;background-image:none;color:#fff;font-size:calc(12px * var(--app-font-scale));text-align:left;text-align-last:left;box-shadow:none;text-shadow:none;transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,color .16s ease;}
-div:where(#buildDirectBody) .trait-preset-body input:not([type="file"]):focus-visible{outline:2px solid var(--role-manual-active-bd);outline-offset:2px;border-color:#8694a5;}
+div:where(#buildDirectBody) .trait-preset-body input:not([type="file"]):focus-visible{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:2px;border-color:#8694a5;}
 div:where(#buildDirectBody) .trait-preset-panel .trait-preset-name-row > #traitPresetName:not(:disabled){border:1px solid #405163;border-radius:8px;background:#11171e;background-image:none;color:#fff;box-shadow:none;}
-div:where(#buildDirectBody) .trait-preset-panel .trait-preset-name-row > #traitPresetName:not(:disabled):focus{border-color:var(--role-manual-active-bd);outline:2px solid var(--role-manual-active-bd);outline-offset:1px;box-shadow:none;}
+div:where(#buildDirectBody) .trait-preset-panel .trait-preset-name-row > #traitPresetName:not(:disabled):focus{border-color:var(--role-manual-active-bd);outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:1px;box-shadow:none;}
 div:where(#buildDirectBody) .trait-preset-body #traitPresetName::placeholder{color:#dceeff;opacity:1;}
 div:where(#buildDirectBody) .trait-preset-body select:not(:disabled){background:#11171e;color:#fff;border-color:#405163;}
 div:where(#buildDirectBody) .trait-preset-body select optgroup{text-align:left;text-align-last:left;}
@@ -60,7 +60,7 @@ div:where(#buildDirectBody) .trait-preset-panel.is-menu-open > .trait-preset-bod
 div:where(#buildDirectBody) .trait-preset-form-card.is-menu-open{z-index:60;}
 div:where(#buildDirectBody) .trait-preset-custom-select.opens-up .trait-preset-custom-menu{top:auto;bottom:calc(100% + 6px);}
 div:where(#buildDirectBody) .trait-preset-custom-button{position:relative;display:flex;align-items:center;justify-content:flex-start;width:100%;min-width:0;box-sizing:border-box;height:46px;min-height:46px;margin:0;padding:0 30px 0 12px;border:1px solid #405163;border-radius:8px;background:#11171e;color:#fff;font-size:calc(12px * var(--app-font-scale));line-height:1;text-align:left;box-shadow:none;cursor:pointer;text-shadow:none;}
-div:where(#buildDirectBody) .trait-preset-custom-button:focus{outline:2px solid var(--role-manual-active-bd);outline-offset:2px;border-color:var(--role-manual-active-bd);box-shadow:none;}
+div:where(#buildDirectBody) .trait-preset-custom-button:focus{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:2px;border-color:var(--role-manual-active-bd);box-shadow:none;}
 div:where(#buildDirectBody) .trait-preset-custom-button:disabled{cursor:not-allowed;color:var(--ui-sub);border-color:#39475a;background:#11171e;box-shadow:none;filter:grayscale(.4);}
 div:where(#buildDirectBody) .trait-preset-custom-button-text{display:block;width:100%;min-width:0;overflow:hidden;text-align:left;text-overflow:ellipsis;white-space:nowrap;}
 div:where(#buildDirectBody) .trait-preset-custom-arrow{position:absolute;right:12px;top:50%;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-65%) rotate(45deg);pointer-events:none;}
@@ -74,7 +74,7 @@ div:where(#buildDirectBody) .trait-preset-custom-group + .trait-preset-custom-gr
 div:where(#buildDirectBody) .trait-preset-custom-group-label{min-height:22px;padding:4px 12px;color:#7f8fa5;font-size:calc(10.75px * var(--app-font-scale));line-height:1;text-align:center;}
 div:where(#buildDirectBody) .trait-preset-custom-option{position:relative;display:flex;align-items:center;justify-content:center;width:100%;min-width:0;height:26px;min-height:26px;padding:0 34px;border:0;border-radius:7px;background:transparent;color:#eaf2ff;font-size:calc(12px * var(--app-font-scale));line-height:1;text-align:center;cursor:pointer;}
 div:where(#buildDirectBody) .trait-preset-custom-option:hover{outline:none;background:#141518;color:#fff;}
-div:where(#buildDirectBody) .trait-preset-custom-option:focus-visible{outline:2px solid var(--role-manual-active-bd);outline-offset:-2px;}
+div:where(#buildDirectBody) .trait-preset-custom-option:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:-2px;}
 div:where(#buildDirectBody) .trait-preset-custom-option.is-selected{color:#fff;}
 div:where(#buildDirectBody) .trait-preset-custom-option-text{display:block;width:100%;min-width:0;overflow:hidden;text-align:center;text-overflow:ellipsis;white-space:nowrap;}
 div:where(#buildDirectBody) .trait-preset-custom-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px;min-width:0;padding:2px 3px;border-radius:8px;}
@@ -85,7 +85,7 @@ div:where(#buildDirectBody) .trait-preset-custom-delete{display:flex;align-items
 div:where(#buildDirectBody) .trait-preset-custom-delete svg{display:block;flex:none;width:17px;height:17px;}
 div:where(#buildDirectBody) .trait-preset-delete-confirm-text{display:none;}
 div:where(#buildDirectBody) .trait-preset-custom-delete:hover{color:#ff95aa;}
-div:where(#buildDirectBody) .trait-preset-custom-delete:focus-visible{outline:2px solid var(--role-manual-active-bd);outline-offset:1px;}
+div:where(#buildDirectBody) .trait-preset-custom-delete:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:1px;}
 div:where(#buildDirectBody) .trait-preset-custom-delete.is-confirming{width:auto;color:#ffb3bf;}
 div:where(#buildDirectBody) .trait-preset-custom-delete.is-confirming .trait-preset-delete-confirm-text{display:inline;}
 @media(max-width:480px){
@@ -97,7 +97,7 @@ div:where(#buildDirectBody) .trait-preset-body .btn{width:100%;min-width:0;heigh
 div:where(#buildDirectBody) .trait-preset-panel .trait-preset-body .btn.preset-command{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;box-sizing:border-box;width:100%;min-width:0;height:var(--preset-command-height,46px);min-height:var(--preset-command-height,46px);margin:0;padding:var(--preset-command-padding,11px 12px);border:1px solid #405166;border-radius:11px;background:linear-gradient(180deg,#192430,#141c27);color:#eaf1fb;box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 2px 3px rgba(0,0,0,.12);text-align:left;white-space:normal;cursor:pointer;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;}
 div:where(#buildDirectBody) .trait-preset-panel .trait-preset-body .btn.preset-command>svg{display:block;box-sizing:border-box;width:27px;height:27px;flex:none;padding:4px;border:1px solid #627b96;border-radius:50%;background:linear-gradient(180deg,#354b62,#1a2a3b);color:#c7ddf2;stroke-width:1.8;}
 div:where(#buildDirectBody) .trait-preset-panel .trait-preset-body .btn.preset-command:hover:not(:disabled){border-color:#7891ae;background:linear-gradient(180deg,#233246,#1a2737);}
-div:where(#buildDirectBody) .trait-preset-panel .trait-preset-body .btn.preset-command:focus-visible{outline:2px solid #9bc9ff;outline-offset:3px;}
+div:where(#buildDirectBody) .trait-preset-panel .trait-preset-body .btn.preset-command:focus-visible{outline:var(--nexus-focus-outline,2px solid #9bc9ff);outline-offset:3px;}
 div:where(#buildDirectBody) .trait-preset-panel .trait-preset-body .btn.preset-command:disabled{opacity:.42;filter:none;cursor:not-allowed;box-shadow:none;}
 div:where(#buildDirectBody) .trait-preset-panel .trait-preset-body .btn.preset-command:disabled>svg{background:linear-gradient(180deg,#252c34,#151a20);border-color:#526170;color:#a3afbd;}
 div:where(#buildDirectBody) .trait-preset-panel .trait-preset-body .btn.trait-preset-form-action{height:46px;min-height:46px;padding:3px 6px;gap:8px;text-align:center;align-self:stretch;}
@@ -195,7 +195,7 @@ div:where(#buildDirectBody).trait-preset-backup-open{overflow:hidden;}
 :where(#buildDirectPane) .trait-preset-backup-file-box .trait-preset-modal-field{margin:0;min-width:0;grid-template-columns:var(--preset-footer-columns);gap:var(--preset-footer-gap);}
 :where(#buildDirectPane) .trait-preset-backup-file-box .trait-preset-modal-field span{height:auto;min-height:40px;justify-content:center;padding:0;color:#c6d4e4;font-size:calc(12px * var(--app-font-scale));line-height:1.4;text-align:center;overflow-wrap:anywhere;}
 :where(#buildDirectPane) .trait-preset-backup-file-box .trait-preset-modal-field input{height:40px;min-height:40px;border-color:var(--ui-field-border);background:var(--role-manual-input-bg);color:var(--ui-unified-text);font-size:calc(12px * var(--app-font-scale));}
-:where(#buildDirectPane) .trait-preset-backup-file-box .trait-preset-modal-field input:focus-visible{outline:2px solid var(--role-manual-active-bd);outline-offset:1px;}
+:where(#buildDirectPane) .trait-preset-backup-file-box .trait-preset-modal-field input:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:1px;}
 :where(#buildDirectPane) .trait-preset-backup-actions{display:grid;grid-template-columns:var(--preset-footer-columns);gap:var(--preset-footer-gap);align-items:stretch;min-width:0;padding-top:12px;border-top:1px solid var(--ui-modal-border);}
 :where(#buildDirectPane) .trait-preset-backup-actions.is-single-action{grid-template-columns:minmax(0,1fr);}
 :where(#buildDirectPane) .trait-preset-backup-source{display:grid;gap:6px;padding:11px 15px;color:var(--ui-unified-text);font-size:calc(11px * var(--app-font-scale));}
@@ -203,7 +203,7 @@ div:where(#buildDirectBody).trait-preset-backup-open{overflow:hidden;}
 :where(#buildDirectPane) .trait-preset-backup-invalid{margin:10px 15px;padding:10px;border:1px solid #80505f;border-radius:8px;color:#ffc7d2;font-size:calc(11px * var(--app-font-scale));overflow-wrap:anywhere;}
 :where(#buildDirectPane) .trait-preset-backup-actions .btn.ui-action-btn{width:100%;min-width:0;min-height:40px;height:auto;align-self:stretch;display:flex;align-items:center;justify-content:center;margin:0;padding:8px 6px;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;text-align:center;line-height:1.4;border-color:var(--ui-button-active-border);border-radius:9px;background:var(--ui-button-active-bg);box-shadow:var(--ui-button-active-shadow);color:var(--ui-button-active-text);font-size:calc(12px * var(--app-font-scale));}
 :where(#buildDirectPane) .trait-preset-backup-actions .btn.is-cancel{border-color:var(--ui-button-border);background:var(--ui-button-bg);box-shadow:none;color:var(--ui-button-text);}
-:where(#buildDirectPane) .trait-preset-backup-actions .btn:focus-visible{outline:2px solid var(--role-manual-active-bd);outline-offset:2px;}
+:where(#buildDirectPane) .trait-preset-backup-actions .btn:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:2px;}
 :where(#buildDirectPane) .trait-preset-backup-actions .btn:disabled{opacity:.5;cursor:not-allowed;}
 @media (max-width:680px){
   :where(#buildDirectPane) .trait-preset-backup-overlay{padding:10px;}

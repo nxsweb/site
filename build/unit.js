@@ -443,8 +443,7 @@ function dpsJewelFinalStatItemHtml(label,value,suffix='%'){
 }
 
 function dpsJewelFinalStatsHtml(finalStats){
-  return `<span class="dps-jewel-final-label">최종 능력치</span>
-      ${dpsJewelFinalStatItemHtml('공격력',finalStats.ad)}
+  return `${dpsJewelFinalStatItemHtml('공격력',finalStats.ad)}
       ${dpsJewelFinalStatItemHtml('공격속도',finalStats.as)}
       ${dpsJewelFinalStatItemHtml('총 데미지',finalStats.td)}
       ${dpsJewelFinalStatItemHtml('가속',finalStats.ua)}`;
@@ -484,8 +483,7 @@ function dpsJewelConfigCardHtml(name,settings){
       ${renderJewelAbility('전설', ability.legendary)}
       ${renderJewelAbility('신화', ability.mythic)}
     </div>
-    <div class="dps-jewel-settings-title">능력치 설정</div>
-    <div class="dps-jewel-fields">${field('ad','공격력')}${field('as','공격속도')}${field('td','총 데미지')}${field('ua','가속')}${field('enhance','강화')}${field('mythic','신화 여부')}</div>
+    <div class="dps-jewel-fields">${field('ad','공격력')}${field('as','공격속도')}${field('td','총 데미지')}${field('ua','가속')}${field('enhance','강화')}<div class="dps-jewel-field" data-jewel-stat="mythic"><span>신화 여부</span><button type="button" data-dps-jewel-name="${escapeHtml(name)}" data-dps-jewel-field="mythic" value="${input.mythic}" aria-label="${escapeHtml(name)} 신화 여부" aria-pressed="${mythic}">${input.mythic}</button></div></div>
     <div class="dps-jewel-final" aria-label="${escapeHtml(name)} 최종 옵션">
       ${dpsJewelFinalStatsHtml(finalStats)}
     </div>
@@ -493,10 +491,12 @@ function dpsJewelConfigCardHtml(name,settings){
   </article>`;
 }
 
-function refreshDpsJewelConfigCard(name,settings=null,focusKey=''){
-  const grid=$('dpsJewelConfigGrid');
-  if(!grid) return false;
-  const card=[...grid.querySelectorAll('[data-dps-jewel-card]')].find(item=>String(item.getAttribute('data-dps-jewel-card') || '')===String(name || ''));
+function refreshDpsJewelConfigCard(name,settings=null,focusKey='',card=null){
+  if(!card){
+    const grid=$('dpsJewelConfigGrid');
+    if(!grid) return false;
+    card=[...grid.querySelectorAll('[data-dps-jewel-card]')].find(item=>item.dataset.dpsJewelCard===String(name || ''));
+  }
   if(!card) return false;
   const normalized=settings || dpsJewelSettingsObject();
   const input=typeof normalizeDpsJewelSettingForName==='function' ? normalizeDpsJewelSettingForName(name,normalized?.[name]) : normalizeDpsJewelSetting(normalized?.[name]);
@@ -528,6 +528,10 @@ function refreshDpsJewelConfigCard(name,settings=null,focusKey=''){
       }
     }
     if(String(control.value)!==next) control.value=next;
+    if(field==='mythic'){
+      if(control.textContent!==next) control.textContent=next;
+      control.setAttribute('aria-pressed',String(mythic));
+    }
   });
   if(focusKey){
     requestAnimationFrame(()=>card.querySelector(`[data-dps-jewel-field="${String(focusKey).replace(/"/g,'\\"')}"]`)?.focus({preventScroll:true}));
@@ -574,18 +578,50 @@ function renderDpsJewelConfigGrids(options={}){
   if(store.value!==normalized) store.value=normalized;
   const names=dpsJewelNames();
   const cards=[...grid.querySelectorAll('[data-dps-jewel-card]')];
-  const sameCards=cards.length===names.length && cards.every((card,index)=>String(card.getAttribute('data-dps-jewel-card') || '')===String(names[index] || ''));
-  if(options.force || !sameCards){
-    grid.innerHTML=names.map(name=>dpsJewelConfigCardHtml(name,settings)).join('');
+  const byName=new Map(cards.map(card=>[card.dataset.dpsJewelCard,card]));
+  const groups=['active','inactive'];
+  if(options.force || cards.length!==names.length || !names.every(name=>byName.has(name)) || groups.some(group=>!grid.querySelector(`[data-dps-jewel-group="${group}"]`))){
+    grid.innerHTML=groups.map(group=>{
+      const active=group==='active';
+      const members=names.filter(name=>dpsJewelSettingIsActive(settings[name],name)===active);
+      return `<section class="dps-jewel-group" aria-label="${active?'활성화':'비활성화'} 쥬얼" data-dps-jewel-group="${group}">
+        <div class="dps-jewel-group-heading"><h3>${active?'활성화':'비활성화'}</h3><span class="dps-jewel-group-count">${members.length}개</span></div>
+        ${active?'':'<p class="dps-jewel-group-guide">능력치 수치를 입력하면 쥬얼이 활성화됩니다.</p>'}
+        <div class="dps-jewel-group-list">${members.map(name=>dpsJewelConfigCardHtml(name,settings)).join('')}</div>
+      </section>`;
+    }).join('');
     return;
   }
-  names.forEach(name=>refreshDpsJewelConfigCard(name,settings));
+  const focused=grid.contains(document.activeElement)?document.activeElement:null;
+  const members={active:[],inactive:[]};
+  names.forEach(name=>{
+    const card=byName.get(name);
+    refreshDpsJewelConfigCard(name,settings,'',card);
+    // Keep the expanded card in its current group until its disclosure closes.
+    const group=card.classList.contains('is-expanded')?card.closest('[data-dps-jewel-group]').dataset.dpsJewelGroup:(card.classList.contains('is-unconfigured')?'inactive':'active');
+    members[group].push(card);
+  });
+  groups.forEach(group=>{
+    const section=grid.querySelector(`[data-dps-jewel-group="${group}"]`);
+    const list=section.querySelector('.dps-jewel-group-list');
+    let next=null;
+    // Insert collapsed cards around the expanded card without detaching it.
+    for(let index=members[group].length-1;index>=0;index--){
+      const card=members[group][index];
+      if(!card.classList.contains('is-expanded') && (card.parentElement!==list || card.nextElementSibling!==next)) list.insertBefore(card,next);
+      next=card;
+    }
+    const count=section.querySelector('.dps-jewel-group-count');
+    const text=`${members[group].length}개`;
+    if(count.textContent!==text) count.textContent=text;
+  });
+  if(focused && focused.isConnected && document.activeElement!==focused) focused.focus({preventScroll:true});
 }
 
 function dpsJewelSettingIsActive(value,name=''){
   const setting=typeof normalizeDpsJewelSettingForName==='function' ? normalizeDpsJewelSettingForName(name,value) : normalizeDpsJewelSetting(value);
   if(typeof dpsJewelIsChrysoberyl==='function' && dpsJewelIsChrysoberyl(name)) return dpsChrysoberylSettingIsFixed(setting);
-  return ['ad','as','td','ua','enhance'].some(key=>Number(setting[key])>0) || setting.mythic==='Y';
+  return ['ad','as','td','ua','enhance'].some(key=>Number(setting[key])>0);
 }
 
 function activeDpsJewelNames(settings=dpsJewelSettingsObject()){return dpsJewelNames().filter(name=>dpsJewelSettingIsActive(settings?.[name],name));}
@@ -731,9 +767,9 @@ function dpsBaseUnitAdditionalSettingsHtml(unit){
       : '<option value="0" selected>사용 불가</option>';
     const ownerKey=dpsBaseUnitJewelOwnerKey(unit.id,index);
     const jewelOptions=dpsBaseUnitJewelOptionsHtml(setting.legendaryMythicJewel,ownerKey);
-    return `<div class="dps-base-unit-extra-slot"><span class="dps-base-unit-extra-slot-title">${unitNumber}기</span><label class="${allowLimitBreak?'':'is-disabled'}"><span>한계 돌파</span><select data-dps-base-unit-extra-limit-break="${escapeHtml(unit.id)}" data-dps-base-unit-extra-index="${index}" aria-label="${escapeHtml(dpsBaseUnitLabel(unit))} ${unitNumber}기 한계 돌파${allowLimitBreak?'':' 사용 불가'}"${allowLimitBreak?'':' disabled'}>${limitOptions}</select></label><label><span>전설·신화 쥬얼</span><select data-dps-base-unit-extra-jewel="${escapeHtml(unit.id)}" data-dps-base-unit-extra-index="${index}" aria-label="${escapeHtml(dpsBaseUnitLabel(unit))} ${unitNumber}기 전설·신화 쥬얼">${jewelOptions}</select></label></div>`;
+    return `<div class="dps-base-unit-extra-slot"><span class="dps-base-unit-extra-slot-title">${unitNumber}기</span><label class="${allowLimitBreak?'':'is-disabled'}"><select data-dps-base-unit-extra-limit-break="${escapeHtml(unit.id)}" data-dps-base-unit-extra-index="${index}" aria-label="${escapeHtml(dpsBaseUnitLabel(unit))} ${unitNumber}기 한계 돌파${allowLimitBreak?'':' 사용 불가'}"${allowLimitBreak?'':' disabled'}>${limitOptions}</select></label><label><select data-dps-base-unit-extra-jewel="${escapeHtml(unit.id)}" data-dps-base-unit-extra-index="${index}" aria-label="${escapeHtml(dpsBaseUnitLabel(unit))} ${unitNumber}기 전설·신화 쥬얼">${jewelOptions}</select></label></div>`;
   }).join('');
-  return `<section class="dps-base-unit-extra-settings" data-dps-base-unit-extra-settings="${escapeHtml(unit.id)}" aria-label="${escapeHtml(dpsBaseUnitLabel(unit))} 추가 유닛 쥬얼 및 한계 돌파 설정"><div class="dps-base-unit-extra-grid">${fields}</div></section>`;
+  return `<section class="dps-base-unit-extra-settings" data-dps-base-unit-extra-settings="${escapeHtml(unit.id)}" aria-label="${escapeHtml(dpsBaseUnitLabel(unit))} 추가 유닛 쥬얼 및 한계 돌파 설정"><div class="dps-base-unit-extra-grid"><div class="dps-base-unit-extra-head" aria-hidden="true"><span></span><span>한계 돌파</span><span>전설·신화 쥬얼</span></div>${fields}</div></section>`;
 }
 
 function applyDpsBaseUnitJewelAssignment(jewelName,ownerKey,writeAssignment){
@@ -863,8 +899,11 @@ function dpsBaseUnitCompactFieldsHtml(unit,slotIndex,readOnly=false){
     : `<div class="ub-dps ub-result-summary">${resultMetric(dpsLabel,dps)}${resultMetric('등급',unit?(unit.grade || '유닛'):'—')}</div>`;
   const automatic=`${dpsSummary}<div class="ub-metrics">${metric('공격력',attack)}${metric(speed.label,speed.value,speed.maximum?'is-max-speed':'')}${metric('방어력 관통',pierce)}</div>`;
   if(readOnly){
-    const setting=(title,value,wide=false)=>`<div class="ub-setting${wide?' ub-wide':''}"><span>${escapeHtml(title)}</span><b>${escapeHtml(String(value))}</b></div>`;
-    return `<div class="ub-card-data"><div class="ub-auto-label"><span class="ub-status-dot" aria-hidden="true"></span>자동 계산</div>${automatic}<div class="ub-applied"><span class="ub-section-label">적용 설정</span><div class="ub-settings-list">${setting('강화 기대값',canUseEnhance?enhance:'0')}${setting('마리수',dpsBaseUnitQuantityText(unit))}${setting('한계 돌파',canUseLimitBreak?limitBreak:'사용 불가')}${setting('공허의 힘',advanced && unit.id!=='prodNarud' ? (voidPower==='ON'?'ON':'OFF'):'사용 불가')}${setting('전설·신화 쥬얼',advanced?(jewelName||'없음'):'사용 불가',true)}</div></div></div>`;
+    const setting=(title,value)=>`<div class="ub-setting"><span>${escapeHtml(title)}</span><b>${escapeHtml(String(value))}</b></div>`;
+    const expanded=dpsBaseUnitSlotExpanded(unit);
+    const opened=expanded && dpsUnitExpandedCardIds.has(unit.id);
+    const expansion=expanded ? `<div class="ub-setting"><span>슬롯 확장</span><button type="button" class="unit-slot-expansion-toggle" data-unit-slot-expansion-toggle="${unitId}" aria-expanded="${opened}" aria-controls="unit-expanded-settings-${unitId}" aria-label="${label} 추가 유닛 설정 ${opened?'접기':'펼치기'}"><b>ON</b><svg aria-hidden="true" focusable="false" viewBox="0 0 16 16"><path d="${opened?'M4 10l4-4 4 4':'M4 6l4 4 4-4'}"/></svg></button></div>` : setting('슬롯 확장',unit && dpsBaseUnitAllowsSlotExpansion(unit) && dpsBaseUnitHasQuantity(unit)?'OFF':'사용 불가');
+    return `<div class="ub-card-data">${automatic}<div class="ub-applied"><div class="ub-settings-list">${setting('강화 기대값',canUseEnhance?enhance:'0')}${setting('마리수',dpsBaseUnitQuantityText(unit))}${setting('한계 돌파',canUseLimitBreak?limitBreak:'사용 불가')}${setting('공허의 힘',advanced && unit.id!=='prodNarud' ? (voidPower==='ON'?'ON':'OFF'):'사용 불가')}${setting('전설·신화 쥬얼',advanced?(jewelName||'없음'):'사용 불가')}${expansion}</div></div></div>`;
   }
   const emptyOption=unit ? '사용 불가' : '유닛 선택 후 사용';
   const limitOptions=canUseLimitBreak
@@ -876,8 +915,9 @@ function dpsBaseUnitCompactFieldsHtml(unit,slotIndex,readOnly=false){
   const jewelControl=`<select class="dps-base-unit-setting-select" ${unit?`id="dpsBaseUnitSlotJewel${slotIndex+1}" data-dps-base-unit-slot-jewel="${unitId}"`:''} aria-label="${label} 전설·신화 쥬얼"${advanced?'':' disabled'}>${jewelOptions}</select>`;
   const quantityControl=`<div class="dps-base-unit-board-cell dps-base-unit-board-quantity">${dpsBaseUnitQuantityControlHtml(unit,slotIndex)}</div>`;
   const voidControl=`<button class="ui-choice-btn dps-base-unit-void-power-control${voidPower==='ON'?' is-active':''}" type="button" ${unit?`id="dpsBaseUnitSlotVoidPower${slotIndex+1}" data-dps-base-unit-void-power-toggle="${unitId}"`:''} aria-pressed="${voidPower==='ON'}" aria-label="${label} 공허의 힘 ${voidUsage} / ${voidLimit}"${voidCanEnable?'':' disabled'}><span>${voidPower==='ON'?'ON':'OFF'}</span><small>사용 ${voidUsage} / ${voidLimit}</small></button>`;
-  const field=(title,control,wide=false)=>dpsBaseUnitFieldHtml(title,`ub-editor-field${wide?' ub-wide':''}`,control);
-  return `<div class="ub-editor-layout"><div class="ub-editor-sections"><section class="ub-edit-section"><h3><span>01</span>기본 설정</h3><div class="ub-fields">${field('마리수',quantityControl)}${field('강화 기대값',enhanceControl)}</div></section><section class="ub-edit-section"><h3><span>02</span>추가 옵션</h3><div class="ub-fields">${field('한계 돌파',limitControl)}${field('공허의 힘',voidControl)}${field('전설·신화 쥬얼',jewelControl,true)}</div></section></div><section class="ub-live-result" aria-label="자동 계산 결과"><div class="ub-auto-label"><span class="ub-status-dot" aria-hidden="true"></span>자동 계산 결과</div>${automatic}<p>현재 빌드와 유닛 설정을 반영한 수치입니다.</p></section></div>`;
+  const field=(title,control)=>dpsBaseUnitFieldHtml(title,'ub-editor-field',control);
+  const expansionControl=dpsBaseUnitSlotExpansionButtonHtml(unit) || '<span class="dps-base-unit-fixed-qty is-auto-value">'+escapeHtml(emptyOption)+'</span>';
+  return `<div class="ub-editor-layout"><div class="ub-fields">${field('마리수',quantityControl)}${field('강화 기대값',enhanceControl)}${field('한계 돌파',limitControl)}${field('공허의 힘',voidControl)}${field('전설·신화 쥬얼',jewelControl)}${field('슬롯 확장',expansionControl)}</div><section class="ub-live-result" aria-label="계산 결과">${automatic}</section></div>`;
 
 }
 
@@ -887,13 +927,11 @@ function dpsBaseUnitSlotExpansionButtonHtml(unit){
   const expanded=dpsBaseUnitSlotExpanded(unit);
   const reason=dpsBaseUnitHasQuantity(unit)?'수량 2마리 이상 필요':'수량 1마리 제한';
   const label=escapeHtml(dpsBaseUnitLabel(unit));
-  return `<button class="ui-choice-btn dps-base-unit-option-btn dps-base-unit-slot-expansion-btn${expanded?' is-active':''}" data-dps-base-unit-slot-expansion-toggle="${escapeHtml(unit.id)}" type="button" aria-pressed="${expanded}" aria-expanded="${expanded}" aria-controls="dpsUnitAdditionalSettings" aria-label="${label} 슬롯 확장${available?'':` 불가, ${reason}`}"${available?'':' disabled'}><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/></svg>슬롯 확장 <span aria-hidden="true">${expanded?'ON':'OFF'}</span></button>`;
+  return `<button class="ui-choice-btn dps-base-unit-option-btn dps-base-unit-slot-expansion-btn${expanded?' is-active':''}" data-dps-base-unit-slot-expansion-toggle="${escapeHtml(unit.id)}" type="button" aria-pressed="${expanded}" aria-expanded="${expanded}" aria-controls="dpsUnitAdditionalSettings" aria-label="${label} 슬롯 확장${available?'':` 불가, ${reason}`}"${available?'':' disabled'}><span aria-hidden="true">${expanded?'ON':'OFF'}</span></button>`;
 }
 
 function dpsBaseUnitSettingsHtml(unit,slotIndex){
-  const button=dpsBaseUnitSlotExpansionButtonHtml(unit);
-  const expanded=!!unit && dpsBaseUnitSlotExpanded(unit);
-  const expansion=button ? `<section class="ub-expansion-section" aria-label="추가 유닛 설정"><div class="ub-expansion-head"><div><h4><span class="ub-section-index">03</span>추가 유닛 설정</h4><p>${dpsBaseUnitSlotExpansionAvailable(unit)?'각 유닛의 쥬얼과 한계 돌파를 따로 설정합니다.':'마리수를 2 이상으로 설정하면 슬롯을 확장할 수 있습니다.'}</p></div>${button}</div><div id="dpsUnitAdditionalSettings"${expanded?'':' hidden'}>${dpsBaseUnitAdditionalSettingsHtml(unit)}</div></section>` : '';
+  const expansion=unit && dpsBaseUnitAllowsSlotExpansion(unit) ? `<section class="ub-expansion-section" id="dpsUnitAdditionalSettings" aria-label="추가 유닛 설정"${dpsBaseUnitSlotExpanded(unit)?'':' hidden'}>${dpsBaseUnitAdditionalSettingsHtml(unit)}</section>` : '';
   return dpsBaseUnitCompactFieldsHtml(unit,slotIndex)+expansion+(unit?'':'<p class="unit-slot-empty-guidance">위에서 유닛을 선택하면 모든 설정을 바로 사용할 수 있습니다.</p>');
 }
 
@@ -939,11 +977,10 @@ function dpsUnitExpandedSettingsHtml(unit){
   const rows=opened ? extras.map((setting,index)=>{
     const jewelName=setting.legendaryMythicJewel || '';
     const jewel=jewelName ? `${dpsJewelFinalStats(jewelName,jewelSettings).mythic==='Y'?'신화':'전설'} ${jewelName}` : '없음';
-    return `<div class="ub-extra-card" role="listitem"><span class="ub-extra-number">${index+2}기</span><div class="ub-extra-jewel"><small>쥬얼</small><b>${escapeHtml(jewel)}</b></div><div class="ub-extra-break"><small>한계 돌파</small><b>${escapeHtml(String(setting.limitBreak ?? 0))}</b></div></div>`;
+    return `<div class="ub-extra-card" role="listitem"><span class="ub-extra-number">${index+2}기</span><div class="ub-extra-break"><small>돌파</small><b>${escapeHtml(String(setting.limitBreak ?? 0))}</b></div><div class="ub-extra-jewel"><small>쥬얼</small><b>${escapeHtml(jewel)}</b></div></div>`;
   }).join('') : '';
-  const lastUnit=extras.length+1;
   const listId=`unit-expanded-settings-${escapeHtml(unit.id)}`;
-  return `<div class="unit-slot-expansion"><button type="button" class="unit-slot-expansion-toggle" data-unit-slot-expansion-toggle="${escapeHtml(unit.id)}" aria-expanded="${opened}" aria-controls="${listId}" aria-label="${escapeHtml(dpsBaseUnitLabel(unit))} 2~${lastUnit}기 설정 ${opened?'접기':'펼치기'}"><span class="ub-extra-heading">추가 유닛 <b>${extras.length}</b></span><span class="ub-extra-chevron" aria-hidden="true">${opened?'⌃':'⌄'}</span></button><div class="unit-slot-expansion-rows" id="${listId}" role="list" aria-label="추가 유닛별 설정"${opened?'':' hidden'}>${rows}</div></div>`;
+  return `<div class="unit-slot-expansion"${opened?'':' hidden'}><div class="unit-slot-expansion-rows" id="${listId}" role="list" aria-label="추가 유닛별 설정">${rows}</div></div>`;
 }
 
 // 요약표와 클리어 기록가 동일한 대표·확장 유닛 설정을 읽는다.
@@ -959,6 +996,11 @@ function dpsUnitSummaryEntry(unit,index,jewelSettings){
 function dpsBaseUnitSlotsHtml(slots){
   dpsUnitSelectedSlot=Math.max(0,Math.min(slots.length-1,dpsUnitSelectedSlot));
   const visibleCount=dpsUnitVisibleCount(slots);
+  const counter=$('unitCompositionCount');
+  if(counter){
+    counter.hidden=visibleCount===0;
+    if(counter.textContent!==`${visibleCount} / 10`) counter.textContent=`${visibleCount} / 10`;
+  }
   const jewelSettings=dpsJewelSettingsObject();
   const entries=slots.slice(0,visibleCount).flatMap((id,index)=>{const unit=dpsBaseUnitById(id);return unit?[dpsUnitSummaryEntry(unit,index,jewelSettings)]:[];});
   const expanded=entries.some(entry=>entry.extras.length);
@@ -975,16 +1017,13 @@ function dpsBaseUnitSlotsHtml(slots){
     const selected=index===dpsUnitSelectedSlot && dpsUnitDetailOpen;
     return `<article class="unit-slot-overview-card${selected?' is-selected':''}" aria-label="${index+1}번 유닛 슬롯">
       <div class="unit-slot-card-head"><div class="unit-slot-heading"><span class="unit-slot-number" aria-hidden="true">${String(index+1).padStart(2,'0')}</span><span class="ub-card-title"><span class="unit-slot-grade">${escapeHtml(grade)}</span>${race ? `<span class="unit-slot-grade">${escapeHtml(race)}</span>` : ''}<strong>${escapeHtml(unitName)}</strong></span></div><div class="unit-slot-card-actions"><button type="button" class="unit-list-remove" data-unit-list-remove="${index}" aria-label="${index+1}번 슬롯 삭제">×</button></div></div>
-      <button type="button" class="unit-slot-card-main" data-unit-list-select="${index}" aria-label="${index+1}번 슬롯 상세 설정 열기" aria-haspopup="dialog" aria-expanded="${selected}" aria-controls="dpsUnitSlotModal">
-        ${dpsBaseUnitCompactFieldsHtml(unit,index,true)}
-        
-      </button>
+      <div class="unit-slot-card-main"><button type="button" class="unit-slot-edit-target" data-unit-list-select="${index}" aria-label="${index+1}번 유닛 상세 설정 열기" aria-haspopup="dialog" aria-expanded="${selected}" aria-controls="dpsUnitSlotModal"></button>${dpsBaseUnitCompactFieldsHtml(unit,index,true)}</div>
       ${dpsUnitExpandedSettingsHtml(unit)}</article>`;
   }).join('');
   const basicInfo=`<div class="unit-basic-summary"><table class="${expanded?'has-expanded-units':''}" aria-label="설정된 유닛 기본정보"><colgroup><col class="unit-basic-number"><col class="unit-basic-name"><col class="unit-basic-quantity">${expanded?'<col class="unit-basic-member-col">':''}<col class="unit-basic-limit-break"><col class="unit-basic-jewel"></colgroup><thead><tr><th scope="col">슬롯 번호</th><th scope="col">유닛명</th><th scope="col">마리수</th>${expanded?'<th scope="col">개체</th>':''}<th scope="col">한계 돌파</th><th scope="col">전설·신화 쥬얼</th></tr></thead><tbody>${basicRows.join('') || `<tr><td colspan="${expanded?6:5}" class="unit-basic-empty">유닛을 설정하면 기본정보가 표시됩니다.</td></tr>`}</tbody></table></div>`;
   const next=visibleCount<slots.length
     ? `<button class="unit-slot-add-card" type="button" data-unit-slot-add="${visibleCount}" aria-label="${visibleCount+1}번 유닛 슬롯 추가"><span class="unit-slot-add-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M12 5v14"/></svg></span><span class="unit-slot-add-copy"><strong>유닛 슬롯 추가</strong><small>${visibleCount+1}번 슬롯 · 최대 10개</small></span></button>` : '';
-  return `<section class="unit-list-collection" aria-label="유닛 슬롯 관리"><header class="ub-collection-head"><h3>유닛 구성 <span>${visibleCount} / 10</span></h3><small>카드를 눌러 상세 설정</small></header>${basicInfo}<div class="unit-slot-cards-grid" aria-label="유닛 슬롯 카드 목록">${rows}${next}</div></section>`;
+  return `<section class="unit-list-collection" aria-label="유닛 슬롯 관리">${basicInfo}<div class="unit-slot-cards-grid" aria-label="유닛 슬롯 카드 목록">${rows}${next}</div></section>`;
 }
 
 /* ── 07 · 성소 정보·스킬·요약 ── */
@@ -1043,19 +1082,19 @@ function dpsSanctuaryValidRows(info=currentDpsSanctuaryInfo()){
 function renderDpsSanctuarySummary(info=currentDpsSanctuaryInfo()){
   const summary=$('unitSanctuarySummary');
   if(!summary) return;
-  const [startLabel,endLabel]=dpsSanctuaryRangeLabels();
-  // 슬롯의 입력 상태를 그대로 보여준다. 클리어 기록 복사에 적용되는 유효성 판정과는 별개다.
+  const rangeLabel=dpsSanctuaryRangeLabels()[0].replace("시작 ","")+" 구간";
+  // 이전 버전에서 저장한 미완료 슬롯도 요약에서 확인할 수 있다.
   const rows=info.slots.flatMap((slot,index)=>{
     if(!(slot.start || slot.end || slot.skill1 || slot.skill2 || slot.count1 || slot.count2)) return [];
     return [`<tr><th scope="row">${String(index+1).padStart(2,'0')}</th>`+
-      `<td>${slot.start}</td><td>${slot.end}</td>`+
-      `<td>${slot.skill1 ? `${slot.skill1} ${slot.count1}회` : '선택 안함'}</td>`+
-      `<td>${slot.skill2 ? `${slot.skill2} ${slot.count2}회` : '선택 안함'}</td></tr>`];
+      `<td>${slot.start} ~ ${slot.end}</td>`+
+      `<td>${slot.skill1 ? `${slot.skill1} ${slot.count1}회` : ''}</td>`+
+      `<td>${slot.skill2 ? `${slot.skill2} ${slot.count2}회` : ''}</td></tr>`];
   });
-  setHTMLIfChanged(summary,`<table aria-label="설정된 성소 정보 기본정보"><colgroup><col class="sanctuary-summary-slot"><col class="sanctuary-summary-round"><col class="sanctuary-summary-round"><col class="sanctuary-summary-skill"><col class="sanctuary-summary-skill"></colgroup><thead><tr>`+
-    `<th scope="col">슬롯 번호</th><th scope="col">${startLabel}</th><th scope="col">${endLabel}</th>`+
+  setHTMLIfChanged(summary,`<table aria-label="설정된 성소 타이밍 요약"><colgroup><col class="sanctuary-summary-slot"><col class="sanctuary-summary-round"><col class="sanctuary-summary-skill"><col class="sanctuary-summary-skill"></colgroup><thead><tr>`+
+    `<th scope="col">슬롯 번호</th><th scope="col">${rangeLabel}</th>`+
     `<th scope="col">1번 스킬 / 사용 횟수</th><th scope="col">2번 스킬 / 사용 횟수</th>`+
-    `</tr></thead><tbody>${rows.join('')||'<tr><td colspan="5" class="unit-basic-empty">선택한 정보가 없습니다</td></tr>'}</tbody></table>`);
+    `</tr></thead><tbody>${rows.join('')||'<tr><td colspan="4" class="unit-basic-empty">선택한 정보가 없습니다</td></tr>'}</tbody></table>`);
 }
 
 function renderDpsSanctuaryInfo(){
@@ -1063,34 +1102,20 @@ function renderDpsSanctuaryInfo(){
   if(!rows) return;
   const info=currentDpsSanctuaryInfo();
   const maximum=dpsSanctuaryRoundLimit();
-  const [startLabel,endLabel]=dpsSanctuaryRangeLabels();
+  const rangeLabel=dpsSanctuaryRangeLabels()[0].replace('시작 ','')+' 구간';
   renderDpsSanctuarySummary(info);
-  const options=selected=>`<option value="">선택 안함</option>${DPS_SANCTUARY_SKILLS.map(name=>`<option value="${name}"${name===selected?' selected':''}>${name}</option>`).join('')}`;
-  const counts=(selected,max,hasSkill)=>{
-    const first=hasSkill ? 1 : 0;
-    const last=hasSkill ? max : 0;
-    return Array.from({length:last-first+1},(_,i)=>{
-      const n=first+i;
-      return `<option value="${n}"${n===selected?' selected':''}>${n}회</option>`;
-    }).join('');
-  };
-  const field=(index,name)=>`data-sanctuary-index="${index}" data-sanctuary-field="${name}"`;
-  const box=(label,control)=>`<label class="unit-sanctuary-field"><span>${label}</span>${control}</label>`;
-  rows.innerHTML=info.slots.map((slot,index)=>{
-    const invalid=slot.start>0 && slot.end>0 && (slot.start>slot.end || slot.end>maximum);
-    return `<article class="unit-sanctuary-card${invalid?' is-invalid':''}" aria-label="${index+1}번 성소 슬롯">`+
-      `<header class="unit-sanctuary-card-head"><span class="unit-slot-number" aria-hidden="true">${String(index+1).padStart(2,'0')}</span><strong>슬롯</strong><button type="button" class="unit-list-remove" data-sanctuary-remove="${index}" aria-label="${index+1}번 성소 슬롯 삭제">×</button></header>`+
-      `<div class="unit-sanctuary-fields">`+
-      box(startLabel,`<input aria-label="${index+1}번 ${startLabel}" type="number" min="0" max="${maximum}" inputmode="numeric" value="${slot.start}" ${field(index,'start')}>`)+
-      box('1번 스킬',`<select aria-label="${index+1}번 1번 스킬" ${field(index,'skill1')}>${options(slot.skill1)}</select>`)+
-      box('1번 사용 횟수',`<select aria-label="${index+1}번 1번 사용 횟수" ${field(index,'count1')}>${counts(slot.count1,4-slot.count2,!!slot.skill1)}</select>`)+
-      box(endLabel,`<input aria-label="${index+1}번 ${endLabel}" type="number" min="0" max="${maximum}" inputmode="numeric" value="${slot.end}" ${field(index,'end')}>`)+
-      box('2번 스킬',`<select aria-label="${index+1}번 2번 스킬" ${field(index,'skill2')}>${options(slot.skill2)}</select>`)+
-      box('2번 사용 횟수',`<select aria-label="${index+1}번 2번 사용 횟수" ${field(index,'count2')}>${counts(slot.count2,4-slot.count1,!!slot.skill2)}</select>`)+
-      `</div></article>`;
-  }).join('');
+  const metric=(label,value)=>`<div class="unit-sanctuary-metric"><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`;
+  setHTMLIfChanged(rows,info.slots.map((slot,index)=>{
+    const valid=slot.start>0 && slot.end>=slot.start && slot.end<=maximum && (slot.skill1 || slot.skill2);
+    const skills=[1,2].filter(n=>slot['skill'+n]).map(n=>`<b>${escapeHtml(`${slot['skill'+n]} · ${slot['count'+n]}회`)}</b>`).join('');
+    const skillMetric=skills ? `<div class="unit-sanctuary-metric"><span>사용 스킬</span><div class="unit-sanctuary-skill-list">${skills}</div></div>` : '';
+    return `<article class="unit-sanctuary-card${valid?'':' is-invalid'}" aria-label="${index+1}번 성소 슬롯"><header class="unit-sanctuary-card-head"><span class="unit-slot-number" aria-hidden="true">${String(index+1).padStart(2,'0')}</span><strong>성소${valid?'':' · 설정 확인 필요'}</strong><button type="button" class="unit-list-remove" data-sanctuary-remove="${index}" aria-label="${index+1}번 성소 슬롯 삭제">×</button></header><button type="button" class="unit-slot-card-main unit-sanctuary-card-main" data-sanctuary-edit="${index}" aria-haspopup="dialog" aria-controls="dpsSanctuarySlotModal" aria-label="${index+1}번 성소 상세 설정 열기">${metric(rangeLabel,`${slot.start} ~ ${slot.end}`)}${skillMetric}</button></article>`;
+  }).join(''));
   const counter=$('unitSanctuaryCount');
-  if(counter) counter.textContent=`${info.slots.length} / 10`;
+  if(counter){
+    counter.hidden=info.slots.length===0;
+    if(counter.textContent!==`${info.slots.length} / 10`) counter.textContent=`${info.slots.length} / 10`;
+  }
   const add=$('unitSanctuaryAdd');
   if(add){
     add.disabled=info.slots.length>=10;
@@ -1099,47 +1124,87 @@ function renderDpsSanctuaryInfo(){
   }
 }
 
-function updateDpsSanctuaryField(control,render=true){
-  const index=Number(control.dataset.sanctuaryIndex);
-  const field=control.dataset.sanctuaryField;
-  if(!Number.isInteger(index) || !['start','end','skill1','count1','skill2','count2'].includes(field)) return;
-  const info=currentDpsSanctuaryInfo();
-  if(!info.slots[index]) return;
-  const slot=info.slots[index];
+// 성소 입력은 모달의 임시 객체에만 보관하고 확정 시 기존 저장 형식으로 한 번 반영한다.
+let dpsSanctuaryDraft=null;
+function dpsSanctuaryCountOptions(selected,max,hasSkill){
+  const first=hasSkill?1:0,last=hasSkill?max:0;
+  return Array.from({length:last-first+1},(_,i)=>{const n=first+i;return `<option value="${n}"${n===selected?' selected':''}>${n}회</option>`;}).join('');
+}
+function openDpsSanctuaryModal(index,trigger){
+  const info=currentDpsSanctuaryInfo(), shell=$('dpsSanctuarySlotModal');
+  if(!shell || dpsSanctuaryDraft || dpsUnitDetailOpen || !Number.isInteger(index) || index<0 || index>info.slots.length || index>=10) return;
+  const slot={...(info.slots[index] || DPS_SANCTUARY_BLANK_SLOT())};
+  dpsSanctuaryDraft={index,slot,original:$('dpsSanctuaryInfo').value,trigger};
+  const maximum=dpsSanctuaryRoundLimit(), [startLabel,endLabel]=dpsSanctuaryRangeLabels();
+  const options=selected=>`<option value="">선택 안함</option>${DPS_SANCTUARY_SKILLS.map(name=>`<option value="${escapeHtml(name)}"${name===selected?' selected':''}>${escapeHtml(name)}</option>`).join('')}`;
+  const field=(label,control)=>`<label class="dps-base-unit-field ub-editor-field"><span class="dps-base-unit-field-label">${label}</span>${control}</label>`;
+  const round=(label,name)=>field(label,`<input class="dps-base-unit-setting-input" type="number" min="0" max="${maximum}" inputmode="numeric" value="${slot[name]}" data-sanctuary-field="${name}" aria-label="${label}">`);
+  const skill=n=>field(`${n}번 스킬`,`<select class="dps-base-unit-setting-select" data-sanctuary-field="skill${n}" aria-label="${n}번 스킬">${options(slot['skill'+n])}</select>`);
+  const count=n=>field(`${n}번 사용 횟수`,`<select class="dps-base-unit-setting-select" data-sanctuary-field="count${n}" aria-label="${n}번 사용 횟수">${dpsSanctuaryCountOptions(slot['count'+n],4-slot['count'+(3-n)],!!slot['skill'+n])}</select>`);
+  $('dpsSanctuarySlotDetailNumber').textContent=String(index+1).padStart(2,'0');
+  $('dpsSanctuarySlotDetail').innerHTML=`<div class="ub-fields">${round(startLabel,'start')}${round(endLabel,'end')}${skill(1)}${count(1)}${skill(2)}${count(2)}</div>`;
+  $('sanctuarySlotValidation').hidden=true;
+  shell.hidden=false; shell.classList.add('is-open');
+  DPS_BODY.classList.add('sanctuary-slot-modal-open');
+  $('sanctuarySlotModalClose')?.focus({preventScroll:true});
+}
+function closeDpsSanctuaryModal(){
+  if(!dpsSanctuaryDraft) return;
+  const {index,trigger}=dpsSanctuaryDraft;
+  dpsSanctuaryDraft=null;
+  const shell=$('dpsSanctuarySlotModal');
+  shell.hidden=true; shell.classList.remove('is-open');
+  DPS_BODY.classList.remove('sanctuary-slot-modal-open');
+  $('dpsSanctuarySlotDetail').replaceChildren();
+  const target=trigger?.isConnected?trigger:$('unitSanctuaryRows')?.querySelector(`[data-sanctuary-edit="${index}"]`) || $('unitSanctuaryAdd');
+  target?.focus({preventScroll:true});
+}
+function updateDpsSanctuaryField(control){
+  if(!dpsSanctuaryDraft) return;
+  const field=control.dataset.sanctuaryField, slot=dpsSanctuaryDraft.slot;
   if(field==='start' || field==='end'){
-    slot[field]=Math.max(0,Math.min(dpsSanctuaryRoundLimit(),Math.round(Number(control.value)||0)));
-  }else{
-    const ownSkill=field.endsWith('1') ? 'skill1' : 'skill2';
-    const ownCount=field.endsWith('1') ? 'count1' : 'count2';
-    const otherCount=field.endsWith('1') ? 'count2' : 'count1';
+    slot[field]=Number(control.value)||0;
+  }else if(['skill1','skill2','count1','count2'].includes(field)){
+    const n=Number(field.at(-1)), ownSkill='skill'+n, ownCount='count'+n, otherCount='count'+(3-n);
     if(field.startsWith('skill')){
-      slot[field]=DPS_SANCTUARY_SKILLS.includes(control.value) ? control.value : '';
-      slot[ownCount]=slot[field] ? Math.max(1,slot[ownCount]) : 0;
-    }else{
-      slot[field]=slot[ownSkill] ? Math.max(1,Math.min(4,Math.round(Number(control.value)||1))) : 0;
-    }
-    // 방금 편집한 스킬·횟수를 우선 유지하며, 다른 스킬과의 총합을 4회로 제한한다.
+      slot[field]=DPS_SANCTUARY_SKILLS.includes(control.value)?control.value:'';
+      slot[ownCount]=slot[field]?Math.max(1,slot[ownCount]):0;
+    }else slot[field]=slot[ownSkill]?Math.max(1,Math.min(4,Number(control.value)||1)):0;
+    // 새로 선택한 스킬에 최소 1회를 확보하고 총 사용 횟수는 4회 이하로 유지한다.
     if(slot[ownCount]+slot[otherCount]>4) slot[otherCount]=Math.max(1,4-slot[ownCount]);
+    if(slot[ownCount]+slot[otherCount]>4) slot[ownCount]=4-slot[otherCount];
+    for(const i of [1,2]){
+      const select=$('dpsSanctuarySlotDetail').querySelector(`[data-sanctuary-field="count${i}"]`);
+      setHTMLIfChanged(select,dpsSanctuaryCountOptions(slot['count'+i],4-slot['count'+(3-i)],!!slot['skill'+i]));
+      select.value=String(slot['count'+i]);
+    }
   }
-  const store=$('dpsSanctuaryInfo');
-  if(store) store.value=JSON.stringify(normalizeDpsSanctuaryInfo(info));
-  renderDpsSanctuarySummary(normalizeDpsSanctuaryInfo(info));
-  // 숫자 입력 중 테이블 전체를 재생성하면 다음 칸의 포커스·입력이 소실된다.
-  if(control.tagName==='INPUT'){
-    if(render) control.value=String(slot[field]);
-    const limit=dpsSanctuaryRoundLimit();
-    control.closest('.unit-sanctuary-card')?.classList.toggle('is-invalid',slot.start>0 && slot.end>0 && (slot.start>slot.end || slot.end>limit));
-  }else if(render) renderDpsSanctuaryInfo();
-  scheduleAutoSave();
+  $('sanctuarySlotValidation').hidden=true;
+}
+function confirmDpsSanctuaryModal(){
+  if(!dpsSanctuaryDraft) return;
+  const {index,slot,original}=dpsSanctuaryDraft, store=$('dpsSanctuaryInfo');
+  const validation=$('sanctuarySlotValidation');
+  const error=store.value!==original?'저장된 성소 정보가 변경되었습니다. 취소 후 다시 설정해 주세요.':
+    !Number.isInteger(slot.start)||!Number.isInteger(slot.end)||slot.start<1||slot.end<slot.start||slot.end>dpsSanctuaryRoundLimit()?'시작·종료 구간을 올바르게 입력해 주세요.':
+    !slot.skill1&&!slot.skill2?'성소 스킬을 하나 이상 선택해 주세요.':'';
+  if(error){validation.textContent=error;validation.hidden=false;return;}
+  const info=currentDpsSanctuaryInfo();
+  info.slots[index]=slot;
+  const next=JSON.stringify(normalizeDpsSanctuaryInfo(info));
+  const changed=next!==JSON.stringify(currentDpsSanctuaryInfo());
+  closeDpsSanctuaryModal();
+  if(changed){store.value=next;renderDpsSanctuaryInfo();scheduleAutoSave();}
+  $('unitSanctuaryRows')?.querySelector(`[data-sanctuary-edit="${index}"]`)?.focus({preventScroll:true});
 }
 
 function setUnitSanctuaryGuideVisible(visible){
   const guide=$('unitSanctuaryGuideDetails'), trigger=$('unitSanctuaryGuideOpen');
   if(!guide || !trigger || guide.hidden===!visible) return;
   guide.hidden=!visible;
-  ['unitSanctuarySummary','unitSanctuaryRows','unitSanctuaryFooter','unitSanctuaryCount'].forEach(id=>$(id).hidden=visible);
+  ['unitSanctuarySummary','unitSanctuaryRows','unitSanctuaryFooter'].forEach(id=>$(id).hidden=visible);
   $('unitSanctuaryReset').disabled=visible;
-  $('unitSanctuaryGuideTitle').textContent=visible?'사용 방법':'성소 정보';
+  $('unitSanctuaryGuideTitle').hidden=!visible;
   trigger.setAttribute('aria-expanded',String(visible));
   trigger.querySelector('span').textContent=visible?'뒤로가기':'사용 방법';
   trigger.querySelector('use').setAttribute('href',visible?'#dpsUiBackGlyph':'#dpsUiInfoGlyph');
@@ -1149,15 +1214,10 @@ function bindDpsSanctuaryEvents(){
   $('unitSanctuaryGuideOpen')?.addEventListener('click',()=>{
     if(guide) setUnitSanctuaryGuideVisible(guide.hidden);
   });
-  $('unitSanctuaryAdd')?.addEventListener('click',()=>{
-    const info=currentDpsSanctuaryInfo();
-    if(info.slots.length>=10) return;
-    info.slots.push(DPS_SANCTUARY_BLANK_SLOT());
-    $('dpsSanctuaryInfo').value=JSON.stringify(info);
-    renderDpsSanctuaryInfo();
-    scheduleAutoSave();
-  });
+  $('unitSanctuaryAdd')?.addEventListener('click',event=>openDpsSanctuaryModal(currentDpsSanctuaryInfo().slots.length,event.currentTarget));
   $('unitSanctuaryRows')?.addEventListener('click',event=>{
+    const edit=event.target?.closest?.('[data-sanctuary-edit]');
+    if(edit){openDpsSanctuaryModal(Number(edit.dataset.sanctuaryEdit),edit);return;}
     const remove=event.target?.closest?.('[data-sanctuary-remove]');
     if(!remove || remove.disabled) return;
     const info=currentDpsSanctuaryInfo();
@@ -1174,12 +1234,29 @@ function bindDpsSanctuaryEvents(){
     renderDpsSanctuaryInfo();
     scheduleAutoSave();
   });
-  $('unitSanctuaryPanel')?.addEventListener('input',event=>{
-    if(event.target?.matches?.('input[data-sanctuary-field]')) updateDpsSanctuaryField(event.target,false);
+  const shell=$('dpsSanctuarySlotModal');
+  shell?.addEventListener('input',event=>{
+    if(event.target?.matches?.('input[data-sanctuary-field]')) updateDpsSanctuaryField(event.target);
   });
-  $('unitSanctuaryPanel')?.addEventListener('change',event=>{
-    if(event.target?.matches?.('[data-sanctuary-field]')) updateDpsSanctuaryField(event.target);
+  shell?.addEventListener('change',event=>{
+    if(event.target?.matches?.('select[data-sanctuary-field]')) updateDpsSanctuaryField(event.target);
   });
+  shell?.addEventListener('click',event=>{
+    if(event.target.closest('[data-sanctuary-detail-confirm]')) confirmDpsSanctuaryModal();
+    else if(event.target.closest('[data-sanctuary-detail-close],[data-sanctuary-detail-backdrop]')) closeDpsSanctuaryModal();
+  });
+  DPS_BODY.addEventListener('keydown',event=>{
+    if(!dpsSanctuaryDraft || shell.hidden) return;
+    if(event.key==='Escape'){
+      event.preventDefault();event.stopPropagation();closeDpsSanctuaryModal();
+    }else if(event.key==='Tab'){
+      const controls=[...shell.querySelectorAll('button:not(:disabled),select:not(:disabled),input:not(:disabled),[tabindex="0"]')].filter(el=>el.getClientRects().length);
+      const first=controls[0],last=controls.at(-1);
+      if(!first) return;
+      if(event.shiftKey && (document.activeElement===first || !shell.contains(document.activeElement))){event.preventDefault();last.focus();}
+      else if(!event.shiftKey && (document.activeElement===last || !shell.contains(document.activeElement))){event.preventDefault();first.focus();}
+    }
+  },true);
 }
 
 /* ── 08 · 수량·저장값·연계 버프 동기화 ── */
@@ -1650,6 +1727,30 @@ function bindDpsBaseUnitControlEvents(){
     }
   },true);
   DPS_BODY.addEventListener('click', e=>{
+    const jewelToggle=e.target?.closest?.('[data-dps-jewel-toggle]');
+    if(jewelToggle?.closest?.('#dpsJewelConfigGrid')){
+      const card=jewelToggle.closest('[data-dps-jewel-card]');
+      const expanded=$('dpsJewelConfigGrid').querySelector('.dps-jewel-card.is-expanded');
+      if(expanded){
+        expanded.classList.remove('is-expanded');
+        expanded.querySelector('[data-dps-jewel-toggle]').setAttribute('aria-expanded','false');
+        expanded.querySelector('.dps-jewel-card-detail').hidden=true;
+        renderDpsJewelConfigGrids();
+      }
+      if(card!==expanded){
+        card.classList.add('is-expanded');
+        jewelToggle.setAttribute('aria-expanded','true');
+        card.querySelector('.dps-jewel-card-detail').hidden=false;
+      }
+      return;
+    }
+    const mythicToggle=e.target?.closest?.('button[data-dps-jewel-field="mythic"]');
+    if(mythicToggle?.closest?.('[data-dps-jewel-config]')){
+      e.preventDefault();
+      mythicToggle.value=mythicToggle.value==='Y'?'N':'Y';
+      if(updateDpsJewelConfig(mythicToggle)) commitAppUpdate();
+      return;
+    }
     const cancelSlotRemoval=e.target?.closest?.('[data-unit-slot-remove-cancel]');
     if(cancelSlotRemoval?.closest?.('#dpsUnitSlotRemoveDialog')){
       e.preventDefault();
