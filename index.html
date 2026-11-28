@@ -2,7 +2,7 @@
 <html lang="ko" class="nexus-booting">
 <head>
     <script>
-        window.APP_VERSION = "NXSBuild-V8";
+        window.APP_VERSION = "NXSBuild-V9";
         window.NEXUS_ANDROID_APP = false; // GitHub Pages 웹 배포에서는 기존 버전 확인을 유지한다.
         window.NEXUS_BUILD_VERSION = window.APP_VERSION;
         // Tab 이동의 외곽 포커스 링만 숨기고 포인터 입력 시 기존 스타일로 복귀한다.
@@ -705,7 +705,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 <input id="enchantCode" type="hidden" value="000000"/>
 </div>
 <div class="additional-editor">
-<div class="rune-panel-title rune-card-heading additional-title-row"><span class="rune-card-heading-name">에디셔널</span><span class="additional-controls"><button type="button" id="additionalRuneOpen" class="additional-settings-button">에디설정</button></span></div>
+<div class="rune-panel-title rune-card-heading additional-title-row"><span class="rune-card-heading-name">에디셔널</span><span class="additional-controls"><button type="button" id="additionalRuneOpen" class="additional-settings-button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/></svg><span>에디설정</span></button></span></div>
 <input id="additionalRuneSlots" type="hidden" value="[]"/>
 <div class="additional-list">
 <div class="additional-row"><label>에디셔널 공격력</label><input id="addAD" type="text" value="0" readonly aria-readonly="true"/></div>
@@ -727,77 +727,29 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 
 <div class="unit-enhance-main-row">
 <div class="unit-enhance-left">
-<div class="unit-enhance-control-stack">
-<div class="month-rune-selects">
 <section class="buff-config-group is-donation" aria-label="나눔 유저">
-<div class="buff-config-heading"><div><strong>나눔 유저</strong></div></div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row donation-buff-row">
-<label id="donationBuffLabel" for="donationBuffType">나눔 적용</label>
-<div class="unit-enhance-button-grid donation-buff-grid" role="group" aria-labelledby="donationBuffLabel">
-<button class="ui-choice-btn" type="button" data-action="donationBuff" data-value="none" aria-pressed="true">미적용</button>
-<button class="ui-choice-btn" type="button" data-action="donationBuff" data-value="sp" aria-pressed="false">일반 나눔</button>
-<button class="ui-choice-btn" type="button" data-action="donationBuff" data-value="paid" aria-pressed="false">특별 나눔</button>
-</div>
-<select class="hidden-field" id="donationBuffType" aria-hidden="true" tabindex="-1"><option selected value="none">선택 안함</option><option value="sp">일반 나눔 - 15만 차감</option><option value="paid">특별 나눔</option></select>
-</div>
+<div class="buff-config-heading"><strong>나눔 유저</strong></div>
+<div class="buff-setting-row"><label for="donationBuffType">나눔 적용</label><select id="donationBuffType"><option selected value="none">미적용</option><option value="sp">일반 나눔</option><option value="paid">특별 나눔</option></select></div>
 </section>
 <section class="buff-config-group is-season" aria-label="이달의 룬 효과">
-<div class="buff-config-heading"><div><strong>이달의 룬 효과</strong><small>4월·9월 일반 / 강화</small></div></div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row month-rune-row"><label>4월 일반</label><div class="seg-btns unit-enhance-button-grid month-rune-grid" data-target="aprRuneNormal"><button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button><button class="ui-choice-btn" data-action="selectButton" data-value="1" type="button">1</button><button class="ui-choice-btn" data-action="selectButton" data-value="2" type="button">2</button><button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button><button class="ui-choice-btn" data-action="selectButton" data-value="4" type="button">4</button><button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button><button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button></div><select class="hidden-field" id="aprRuneNormal"><option selected="" value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row month-rune-row"><label>4월 강화(+)</label><div class="seg-btns unit-enhance-button-grid month-rune-grid" data-target="aprRunePlus"><button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button><button class="ui-choice-btn" data-action="selectButton" data-value="1" type="button">1</button><button class="ui-choice-btn" data-action="selectButton" data-value="2" type="button">2</button><button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button><button class="ui-choice-btn" data-action="selectButton" data-value="4" type="button">4</button><button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button><button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button></div><select class="hidden-field" id="aprRunePlus"><option selected="" value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row month-rune-row"><label>9월 일반</label><div class="seg-btns unit-enhance-button-grid month-rune-grid" data-target="sepRuneNormal"><button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button><button class="ui-choice-btn" data-action="selectButton" data-value="1" type="button">1</button><button class="ui-choice-btn" data-action="selectButton" data-value="2" type="button">2</button><button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button><button class="ui-choice-btn" data-action="selectButton" data-value="4" type="button">4</button><button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button><button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button></div><select class="hidden-field" id="sepRuneNormal"><option selected="" value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row month-rune-row"><label>9월 강화(+)</label><div class="seg-btns unit-enhance-button-grid month-rune-grid" data-target="sepRunePlus"><button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button><button class="ui-choice-btn" data-action="selectButton" data-value="1" type="button">1</button><button class="ui-choice-btn" data-action="selectButton" data-value="2" type="button">2</button><button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button><button class="ui-choice-btn" data-action="selectButton" data-value="4" type="button">4</button><button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button><button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button></div><select class="hidden-field" id="sepRunePlus"><option selected="" value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="buff-config-heading"><strong>이달의 룬 효과</strong></div>
+<div class="buff-setting-row"><label for="aprRuneNormal">4월 일반</label><select id="aprRuneNormal"><option selected value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="buff-setting-row"><label for="aprRunePlus">4월 강화+</label><select id="aprRunePlus"><option selected value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="buff-setting-row"><label for="sepRuneNormal">9월 일반</label><select id="sepRuneNormal"><option selected value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="buff-setting-row"><label for="sepRunePlus">9월 강화+</label><select id="sepRunePlus"><option selected value="0">선택 안함</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
 </section>
-</div>
-<div class="enhance-controls unit-enhance-inline-controls">
 <section class="buff-config-group is-enhance" aria-label="강화 효과">
-<div class="buff-config-heading"><div><strong>강화 효과</strong><small>오버핸스·리페핸스·강화의 달인·방어력 관통</small></div></div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row">
-<label>오버핸스</label>
-<div class="seg-btns unit-enhance-button-grid" data-target="overEnhance">
-<button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="3" type="button">3</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="5" type="button">5</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="6" type="button">6</button>
-</div>
-<select class="hidden-field" id="overEnhance"><option selected="" value="0">선택 안함</option><option value="3">3</option><option value="5">5</option><option value="6">6</option></select>
-</div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row">
-<label>리페핸스</label>
-<div class="seg-btns unit-enhance-button-grid" data-target="repairEnhance">
-<button class="ui-choice-btn" data-action="selectButton" data-value="OFF" type="button">선택 안함</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="ON" type="button">리페핸스</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="ON+" type="button">리페핸스+</button>
-</div>
-<select class="hidden-field" id="repairEnhance"><option selected="" value="OFF">OFF</option><option value="ON">ON</option><option value="ON+">ON+</option></select>
-</div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row">
-<label>강화의 달인</label>
-<div class="seg-btns unit-enhance-button-grid" data-target="enhanceMaster">
-<button class="ui-choice-btn" data-action="selectButton" data-value="OFF" type="button">선택 안함</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="ON" type="button">전체활성화</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="ON+" type="button">선택 강화</button>
-</div>
-<select class="hidden-field" id="enhanceMaster"><option selected="" value="OFF">OFF</option><option value="ON">ON</option><option value="ON+">ON+</option></select>
-</div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row spec-board-pierce-row">
-<label for="specBoardPierce">방어력 관통</label>
-<div class="seg-btns unit-enhance-button-grid spec-board-pierce-grid" data-target="specBoardPierce">
-<button class="ui-choice-btn" data-action="selectButton" data-value="0" type="button">선택 안함</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="10" type="button">10</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="15" type="button">15</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="20" type="button">20</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="25" type="button">25</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="30" type="button">30</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="35" type="button">35</button>
-<button class="ui-choice-btn" data-action="selectButton" data-value="40" type="button">40</button>
-</div>
-<select class="hidden-field" id="specBoardPierce"><option selected="" value="0">선택 안함</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option></select>
-</div>
+<div class="buff-config-heading"><strong>강화 효과</strong></div>
+<div class="buff-setting-row"><label for="overEnhance">오버핸스</label><select id="overEnhance"><option selected value="0">선택 안함</option><option value="3">3</option><option value="5">5</option><option value="6">6</option></select></div>
+<div class="buff-setting-row"><label for="repairEnhance">리페핸스</label><select id="repairEnhance"><option selected value="OFF">선택 안함</option><option value="ON">리페핸스</option><option value="ON+">리페핸스+</option></select></div>
+<div class="buff-setting-row"><label for="enhanceMaster">강화의 달인</label><select id="enhanceMaster"><option selected value="OFF">선택 안함</option><option value="ON">전체활성화</option><option value="ON+">선택 강화</option></select></div>
+<div class="buff-setting-row"><label for="specBoardPierce">방어력 관통</label><select id="specBoardPierce"><option selected value="0">선택 안함</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option></select></div>
 </section>
+</div>
+<div class="buff-selection-column">
 <section class="buff-config-group is-selection" aria-label="선택 버프">
-<div class="buff-config-heading"><div><strong>선택 버프</strong><small>필요한 효과를 여러 개 선택할 수 있습니다</small></div></div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row select-buff-row">
+<div class="buff-config-heading"><strong>선택 버프</strong></div>
+<div class="select-buff-row">
 <span class="select-buff-label" id="unitBuffLabel">유닛 버프</span>
 <div class="unit-enhance-button-grid select-buff-grid" role="group" aria-labelledby="unitBuffLabel">
 <label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodArtifact" type="checkbox"/><span>유물</span></label>
@@ -810,7 +762,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 <label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="prodNarud" type="checkbox"/><span>나루드</span></label>
 </div>
 </div>
-<div class="mini-ir mini-ir-button-row unit-enhance-option-row flower-buff-row">
+<div class="flower-buff-row">
 <span class="select-buff-label" id="flowerBuffLabel">꽃 버프</span>
 <div class="unit-enhance-button-grid flower-buff-grid" role="group" aria-labelledby="flowerBuffLabel">
 <label class="ui-choice-btn buff-choice-item"><input class="buff-choice-input" id="flowerSkill1" type="checkbox"/><span>근성의 꽃가루</span></label>
@@ -819,11 +771,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 </div>
 </div>
 </section>
-
 </div>
-</div>
-</div>
-
 </div>
 </div></div></div></div>
 <!-- 더제로 승단정보 -->
@@ -847,13 +795,10 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                     </div>
                     <div class="integrated-tabs" role="tablist" aria-label="더제로 전당 설정">
                       <button type="button" class="integrated-tab is-active" id="zeroSettingsTab" role="tab" aria-selected="true" aria-controls="zeroSettingsPanel" data-integrated-tab="zeroRank" data-integrated-index="0" tabindex="0">승단 설정</button>
-                      <button type="button" class="integrated-tab" id="zeroBenefitsTab" role="tab" aria-selected="false" aria-controls="zeroBenefitsPanel" data-integrated-tab="zeroRank" data-integrated-index="1" tabindex="-1">승단 혜택</button>
-                      <button type="button" class="integrated-tab" id="zeroCriteriaTab" role="tab" aria-selected="false" aria-controls="zeroCriteriaPanel" data-integrated-tab="zeroRank" data-integrated-index="2" tabindex="-1">승단 점수</button>
+                      <button type="button" class="integrated-tab" id="zeroBenefitsTab" role="tab" aria-selected="false" aria-controls="zeroBenefitsPanel" data-integrated-tab="zeroRank" data-integrated-index="1" tabindex="-1">승단 정보</button>
                     </div>
-                        <section
-                          class="zero-rank-info-section integrated-content" id="zeroBenefitsPanel" role="tabpanel" aria-labelledby="zeroBenefitsTab" data-integrated-panel="zeroRank" data-integrated-index="1" hidden
-                          aria-label="승단 혜택"
-                        >
+                        <div class="integrated-content" id="zeroBenefitsPanel" role="tabpanel" aria-labelledby="zeroBenefitsTab" data-integrated-panel="zeroRank" data-integrated-index="1" hidden>
+                        <section class="zero-rank-info-section" aria-label="승단 혜택">
 
                           <section
                             id="zeroTitleBenefitsPopover"
@@ -896,18 +841,15 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                             </section>
                           </section>
                         </section>
-                        <section
-                          class="zero-rank-info-section integrated-content" id="zeroCriteriaPanel" role="tabpanel" aria-labelledby="zeroCriteriaTab" data-integrated-panel="zeroRank" data-integrated-index="2" hidden
-                          aria-label="승단 점수 기준"
-                        >
+                        <section class="zero-rank-info-section" aria-label="승단 점수 기준">
 
                           <section
                             id="zeroRankScorePopover"
-                            class="zero-rank-score-popover zero-inline-scores"
+                            class="zero-inline-scores"
                           >
-                            <section class="unit-achievement-help-section zero-score-tab-section">
+                            <section class="zero-score-tab-section" aria-label="고행 기준">
                               <div
-                                class="unit-achievement-help-panel zero-score-help-panel"
+                                class="zero-score-help-panel"
                                 id="zeroScoreHelpPanel0"
                               >
                                 <h5>일반 고행</h5>
@@ -943,7 +885,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                                 </div>
                               </div>
                               <div
-                                class="unit-achievement-help-panel zero-score-help-panel"
+                                class="zero-score-help-panel"
                                 id="zeroScoreHelpPanel1"
                               >
                                 <h5>명예 고행</h5>
@@ -975,8 +917,10 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                                   </div>
                                 </div>
                               </div>
+                            </section>
+                            <section class="zero-score-tab-section" aria-label="도전의 탑 기준">
                               <div
-                                class="unit-achievement-help-panel zero-score-help-panel"
+                                class="zero-score-help-panel"
                                 id="zeroScoreHelpPanel2"
                               >
                                 <h5>일반 도전의 탑</h5>
@@ -999,7 +943,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                                 </div>
                               </div>
                               <div
-                                class="unit-achievement-help-panel zero-score-help-panel"
+                                class="zero-score-help-panel"
                                 id="zeroScoreHelpPanel3"
                               >
                                 <h5>명예 도전의 탑</h5>
@@ -1024,6 +968,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
                             </section>
                           </section>
                         </section>
+                        </div>
                     <div class="zero-calc-table-wrap integrated-content is-active" id="zeroSettingsPanel" role="tabpanel" aria-labelledby="zeroSettingsTab" data-integrated-panel="zeroRank" data-integrated-index="0">
                       <div class="zero-calc-table" aria-label="난이도별 승단 점수 입력">
                         <div id="zeroScoreRows" class="zero-calc-rows"></div>
@@ -1099,19 +1044,15 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
   <section class="trait-optimizer-row" aria-labelledby="traitOptimizeScopeTitle">
     <div class="trait-scope-heading"><strong id="traitOptimizeScopeTitle">특성 최적화</strong><button class="btn subtle ui-action-btn ui-reset-btn trait-scope-reset" data-action="clearAll" type="button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>특성 초기화</span></button></div>
     <div class="trait-scope-pickers">
-      <div class="trait-scope-field"><span>시작 구간</span><strong class="trait-scope-fixed">루키</strong></div>
-      <span class="trait-scope-arrow" aria-hidden="true">→</span>
-      <label class="trait-scope-field" for="optTier"><span>종료 구간</span><select id="optTier" aria-label="특성 최적화 종료 구간"><option selected>루키</option><option>비기너</option><option>아마추어</option><option>프로</option><option>엑스퍼트</option><option>마스터</option><option>디바인</option><option>더원1</option><option>더원2</option><option>무한∞</option><option>EP특성</option><option>RP특성</option><option>심연특성</option></select></label>
-      <button class="btn pri ui-action-btn trait-scope-run" data-action="optimizeSP" type="button" aria-label="특성 최적화 실행"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiRunGlyph"/></svg><span>실행</span></button>
+      <span class="trait-scope-caption">시작 구간</span><label class="trait-scope-caption" for="optTier">종료 구간</label>
+      <div class="trait-scope-control"><strong class="trait-scope-fixed">루키 <span class="trait-scope-arrow" aria-hidden="true">→</span></strong><div class="trait-scope-field"><select id="optTier" aria-label="특성 최적화 종료 구간"><option selected>루키</option><option>비기너</option><option>아마추어</option><option>프로</option><option>엑스퍼트</option><option>마스터</option><option>디바인</option><option>더원1</option><option>더원2</option><option>무한∞</option><option>EP특성</option><option>RP특성</option><option>심연특성</option></select></div><button class="btn pri ui-action-btn trait-scope-run" data-action="optimizeSP" type="button" aria-label="특성 최적화 실행"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiRunGlyph"/></svg><span>실행</span></button></div>
     </div>
   </section>
   <section class="trait-optimizer-row" aria-labelledby="traitUtilityScopeTitle">
     <div class="trait-scope-heading"><strong id="traitUtilityScopeTitle">유틸 마스터</strong><button class="btn subtle ui-action-btn ui-reset-btn trait-scope-reset" data-action="clearUtility" type="button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>유틸 초기화</span></button></div>
     <div class="trait-scope-pickers">
-      <div class="trait-scope-field"><span>시작 구간</span><strong class="trait-scope-fixed">루키</strong></div>
-      <span class="trait-scope-arrow" aria-hidden="true">→</span>
-      <label class="trait-scope-field" for="utilOptTier"><span>종료 구간</span><select id="utilOptTier" aria-label="유틸 마스터 종료 구간"><option selected>루키</option><option>비기너</option><option>아마추어</option><option>프로</option><option>엑스퍼트</option><option>마스터</option><option>디바인</option><option>더원1</option><option>더원2</option><option>무한∞</option><option>EP특성</option><option>RP특성</option><option>심연특성</option></select></label>
-      <button class="btn pri ui-action-btn trait-scope-run" data-action="optimizeUtility" type="button" aria-label="유틸 마스터 실행"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiRunGlyph"/></svg><span>실행</span></button>
+      <span class="trait-scope-caption">시작 구간</span><label class="trait-scope-caption" for="utilOptTier">종료 구간</label>
+      <div class="trait-scope-control"><strong class="trait-scope-fixed">루키 <span class="trait-scope-arrow" aria-hidden="true">→</span></strong><div class="trait-scope-field"><select id="utilOptTier" aria-label="유틸 마스터 종료 구간"><option selected>루키</option><option>비기너</option><option>아마추어</option><option>프로</option><option>엑스퍼트</option><option>마스터</option><option>디바인</option><option>더원1</option><option>더원2</option><option>무한∞</option><option>EP특성</option><option>RP특성</option><option>심연특성</option></select></div><button class="btn pri ui-action-btn trait-scope-run" data-action="optimizeUtility" type="button" aria-label="유틸 마스터 실행"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiRunGlyph"/></svg><span>실행</span></button></div>
     </div>
   </section>
 </div>
@@ -1130,6 +1071,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 <div class="data-card final-damage-card board-modal-card">
 <div class="skill-damage-layout" id="skillDamageLayout">
 <div class="skill-setting-panel">
+<div class="skill-list-head"><span>스킬 설정</span></div>
 <div class="ir skill-ir"><label>더블스페</label><select id="skillDouble"><option selected="" value="1">더블스페</option><option value="1.5">더블스페+</option><option value="1.67">더블스페++</option></select></div>
 <div class="ir skill-ir"><label>모드</label><select id="skillMode"><option selected="" value="normal">일반모드</option><option value="tower">도전의 탑</option><option value="planet">행성탐사</option></select></div>
 <div class="ir skill-ir"><label>라운드</label><input id="skillRound" inputmode="numeric" max="300" type="text" value="1"/></div>
@@ -1378,7 +1320,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
   </div>
 </dialog>
 
-<div id="traitPresetManagerOverlay" class="trait-preset-manager-overlay" hidden><div class="trait-preset-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetManagerTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><h2 id="traitPresetManagerTitle">프리셋 관리</h2></div><div class="trait-preset-header-controls"><button class="trait-preset-header-reset ui-reset-btn" data-action="resetAllTraitPresetState" disabled="" id="traitPresetResetAllBtn" aria-label="프리셋 초기화" type="button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>초기화</span></button><button type="button" class="trait-preset-modal-close" data-trait-preset-manager-close aria-label="프리셋 닫기">×</button></div></header>
+<div id="traitPresetManagerOverlay" class="trait-preset-manager-overlay" hidden><div class="trait-preset-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetManagerTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><h2 id="traitPresetManagerTitle">프리셋 관리</h2></div><button type="button" class="trait-preset-modal-close" data-trait-preset-manager-close aria-label="프리셋 닫기">×</button></header>
 <div class="trait-preset-body trait-subgroup-body">
 
 <div class="trait-preset-management">
@@ -1402,6 +1344,9 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 <button class="btn subtle ui-action-btn preset-command is-import" data-action="importTraitPresets" data-state="idle" aria-label="프리셋 가져오기" type="button"><i class="preset-command-indicator" aria-hidden="true"></i><svg aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24"><path d="M12 16V4m-4 4 4-4 4 4"></path><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path></svg><span class="preset-command-main"><strong>가져오기</strong><small class="preset-command-hint">파일 불러오기</small></span></button>
 <button class="btn subtle ui-action-btn preset-command is-update" data-action="updateTraitPreset" aria-label="프리셋 업데이트" type="button"><i class="preset-command-indicator" aria-hidden="true"></i><svg aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-5L4 8m0-5v5h5M4 13a8 8 0 0 0 14 5l2-2m0 5v-5h-5"></path></svg><span class="preset-command-main"><strong>업데이트</strong><small class="preset-command-hint">변경사항 반영</small></span></button>
 <button class="btn subtle ui-action-btn preset-command is-backup" data-action="backupTraitPresets" data-state="idle" aria-label="프리셋 백업" type="button"><i class="preset-command-indicator" aria-hidden="true"></i><svg aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24"><path d="M12 4v12m-4-4 4 4 4-4"></path><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path></svg><span class="preset-command-main"><strong>백업</strong><small class="preset-command-hint">프리셋 최신화</small></span></button>
+<button class="btn subtle ui-action-btn preset-command is-reset-command ui-reset-btn" data-action="resetAllTraitPresetState" disabled="" id="traitPresetResetAllBtn" aria-label="프리셋 초기화" type="button"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span class="preset-command-main"><strong>초기화</strong><small class="preset-command-hint">설정 초기화</small></span></button>
+<button type="button" class="btn subtle ui-action-btn preset-command is-support-command" data-trait-preset-support><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-chat"/></svg><span class="preset-command-main"><strong>제작자 문의</strong><small class="preset-command-hint">by VAERON</small></span></button>
+<button type="button" class="btn subtle ui-action-btn preset-command is-copy-command" aria-label="클리어 기록 복사" data-action="copyDpsClearRecord"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="preset-command-main"><strong>기록 복사</strong><small class="preset-command-hint">클리어 기록</small></span></button>
 </div>
 
 </div>
@@ -1409,7 +1354,7 @@ section:where(#buildDirectPane).dps-booting #buildDirectBody{margin:0;background
 
 </div>
 </div>
-<div class="trait-preset-footer"><button type="button" class="trait-preset-support" data-trait-preset-support><svg class="trait-preset-support-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#traitPresetGlyph-chat"/></svg><span class="trait-preset-support-copy"><strong>제작자 문의</strong><small>by VAERON</small></span><span class="trait-preset-support-by"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></span></button><button type="button" class="trait-preset-support trait-preset-clear-record" data-action="copyDpsClearRecord"><svg class="trait-preset-support-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><strong>클리어 기록 복사</strong></button></div></div></div>
+</div></div>
 <div id="traitPresetBackupOverlay" class="trait-preset-backup-overlay" hidden><section id="traitPresetBackupPanel" class="trait-preset-backup-panel" role="dialog" aria-modal="true" aria-labelledby="traitPresetBackupTitle" tabindex="-1"><header class="trait-preset-modal-head"><div class="trait-preset-modal-heading"><h2 id="traitPresetBackupTitle">프리셋 최신화</h2></div><button type="button" class="ui-icon-btn trait-preset-modal-close" data-trait-preset-backup-close="1" aria-label="프리셋 최신화 닫기">×</button></header><div class="trait-preset-modal-body trait-preset-backup-body" id="traitPresetBackupBody"></div></section></div>
 
     

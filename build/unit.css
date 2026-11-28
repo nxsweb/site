@@ -1,6 +1,5 @@
 /* 유닛 보드·쥬얼·슬롯 전용 스타일: 기능별 CSS 순서 유지 */
 /* ── 01 · 유닛·쥬얼·성소 기본 화면 ── */
-div:where(#buildDirectBody) .settings-polish #basicSettingsPanel1 .rune-stat-head{border-color:var(--settings-hairline);}
 div:where(#buildDirectBody) .right-analytics-workspace :is(.analytics-summary-group,.analytics-unit-summary-group){padding:10px 0 0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;}
 div:where(#buildDirectBody) .right-analytics-workspace .analytics-unit-summary-group{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-items:stretch;}
 div:where(#buildDirectBody):is(.unit-slot-modal-open,.sanctuary-slot-modal-open){overflow:hidden;}
@@ -9,7 +8,6 @@ div:where(#buildDirectBody) .unit-slot-modal-shell.is-open:not([hidden]){display
 div:where(#buildDirectBody) .unit-slot-modal-backdrop{position:absolute;inset:0;background:var(--ui-modal-backdrop-bg);backdrop-filter:var(--ui-modal-backdrop-blur);}
 div:where(#buildDirectBody) .unit-slot-modal-dialog{position:relative;z-index:1;display:grid;grid-template-rows:auto minmax(0,1fr) auto;width:min(620px,calc(calc(var(--dps-vw,1vw) * 100) - 32px));max-height:calc(calc(var(--dps-vh,1dvh) * 100) - 32px);min-height:0;overflow:hidden;border:1px solid var(--ui-modal-border);border-radius:var(--ui-modal-radius);background:var(--ui-panel-body-bg);box-shadow:var(--ui-modal-shadow);}
 div:where(#buildDirectBody) .unit-slot-modal-header{display:flex;align-items:center;gap:12px;padding:12px 18px;height:auto;min-height:var(--ui-integrated-head-height);max-height:none;background:var(--ui-integrated-head-bg);border-bottom:1px solid var(--ui-integrated-head-line);color:var(--ui-integrated-head-text);box-shadow:none;}
-div:where(#buildDirectBody) .unit-slot-modal-icon{display:grid;place-items:center;box-sizing:border-box;flex:0 0 30px;width:30px;height:30px;min-width:30px;padding:0;border:var(--builder-header-icon-border);border-radius:6px;background:var(--builder-header-icon-bg);color:#b4dafa;font-size:calc(13px * var(--app-font-scale));font-weight:600;font-variant-numeric:tabular-nums;line-height:1;box-shadow:none;}
 div:where(#buildDirectBody) .unit-slot-modal-heading{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
 div:where(#buildDirectBody) .unit-slot-modal-heading strong{color:var(--ui-integrated-head-text);font-size:var(--ui-main-title-font);font-weight:var(--ui-main-title-weight);text-shadow:none;}
 div:where(#buildDirectBody) .unit-slot-modal-heading small{color:#a9cde7;font-size:calc(10.75px * var(--app-font-scale));}
@@ -19,7 +17,7 @@ div:where(#buildDirectBody) .unit-slot-modal-shell .right-unit-slot-card.dps-bas
 div:where(#buildDirectBody) .unit-slot-modal-shell .right-unit-slot-card .dps-base-unit-entry{grid-template-columns:minmax(0,1fr);gap:8px;}
 div:where(#buildDirectBody) .unit-slot-modal-footer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:10px;padding:12px 18px;border-top:1px solid var(--ui-modal-border);background:var(--ui-panel-body-bg);}
 div:where(#buildDirectBody) .unit-slot-modal-footer .unit-slot-modal-done{grid-column:1/-1;}
-div:where(#buildDirectBody) .unit-slot-modal-done{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-width:0;min-height:40px;padding:8px 19px;border:1px solid #8596a5;border-radius:9px;background:var(--ui-button-active-bg);color:var(--ui-button-active-text);cursor:pointer;border-color:var(--ui-button-active-border);box-shadow:var(--ui-button-active-shadow);}
+div:where(#buildDirectBody) .unit-slot-modal-done{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-width:0;min-height:40px;padding:8px 19px;border:1px solid var(--ui-button-active-border);border-radius:9px;background:var(--ui-button-active-bg);color:var(--ui-button-active-text);cursor:pointer;box-shadow:var(--ui-button-active-shadow);}
 div:where(#buildDirectBody) .unit-slot-modal-done:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
 @media(max-width:600px){
   div:where(#buildDirectBody) .unit-slot-modal-shell{padding:7px;align-items:center;}
@@ -60,7 +58,7 @@ div:where(#buildDirectBody) .dps-base-unit-top .dps-base-unit-spec-dps .dps-lbl{
 div:where(#buildDirectBody) .unit-summary-label{color:#a4b8d0;font-size:calc(11px * var(--app-font-scale));line-height:1.25;}
 div:where(#buildDirectBody) .unit-summary-stage strong{color:#edf5ff;font-size:calc(29px * var(--app-font-scale));line-height:1;white-space:nowrap;}
 div:where(#buildDirectBody) .unit-summary-stage small{color:#bed0e3;font-size:calc(12px * var(--app-font-scale));line-height:1.15;}
-div:where(#buildDirectBody) .dps-base-unit-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;min-width:0;min-height:112px;padding:0;border-top:1px solid #304158;background:transparent;box-sizing:border-box;}
+div:where(#buildDirectBody) .dps-base-unit-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;min-width:0;min-height:112px;padding:0;border-top:1px solid var(--ui-accordion-line);background:transparent;box-sizing:border-box;}
 div:where(#buildDirectBody) .dps-base-unit-summary-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-width:0;min-height:112px;margin:0;padding:12px 4px;border:0;border-radius:0;background:transparent;text-align:center;box-sizing:border-box;}
 div:where(#buildDirectBody) .dps-base-unit-summary-item .dps-lbl{color:#9daec5;font-size:calc(11px * var(--app-font-scale));line-height:1.2;white-space:nowrap;}
 div:where(#buildDirectBody) .dps-base-unit-summary-item .dps-num{display:flex;align-items:baseline;justify-content:center;min-width:0;margin:0;color:#bceef4;font-family:Consolas,monospace;font-size:clamp(20px,calc(var(--dps-vw,1vw) * 2.4),31px);font-variant-numeric:tabular-nums;line-height:1.1;white-space:nowrap;}
@@ -69,19 +67,12 @@ div:where(#buildDirectBody) .dps-base-unit-summary-item .dps-num-unit{margin-lef
 div:where(#buildDirectBody) .dps-base-unit-results > .unit-achievement{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:0;width:100%;min-height:112px;margin:0;padding:9px 6px;border:0;border-radius:0;box-sizing:border-box;}
 div:where(#buildDirectBody) .unit-achievement-label{display:flex;align-items:center;justify-content:center;width:100%;color:#9daec5;font-size:calc(11px * var(--app-font-scale));line-height:1.2;}
 div:where(#buildDirectBody) .unit-achievement-value.dps-num{color:#bceef4;font-size:clamp(20px,calc(var(--dps-vw,1vw) * 2.4),31px);font-variant-numeric:tabular-nums;line-height:1.1;white-space:nowrap;}
-div:where(#buildDirectBody) .unit-achievement-help-section{display:grid;gap:6px;margin-top:8px;padding:8px;border:1px solid var(--ui-modal-border);border-radius:9px;background:#11151b;}
-div:where(#buildDirectBody) .unit-achievement-help-panel{display:grid;gap:5px;min-width:0;padding:7px;border:1px solid #303640;border-radius:7px;background:#0b0f15;}
-div:where(#buildDirectBody) .unit-achievement-help-panel[hidden]{display:none;}
-div:where(#buildDirectBody) .unit-achievement-help-panel h5{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin:0;font-size:12px;color:#eff8ff;}
-div:where(#buildDirectBody) .unit-achievement-help-panel ul{display:grid;gap:3px;margin:0;padding:0;list-style:none;}
-div:where(#buildDirectBody) .unit-achievement-help-panel li{display:flex;align-items:baseline;gap:7px;color:#dcecf8;}
-div:where(#buildDirectBody) .unit-achievement-help-panel li::before{content:"✓";color:#8fcaff;flex:none;}
-div:where(#buildDirectBody) .unit-slot-empty-guidance{grid-column:1/-1;margin:0;padding:12px;border:1px dashed #505c64;border-radius:9px;background:#0f1013;color:#c3dcf0;font-size:calc(12px * var(--app-font-scale));text-align:center;}
+div:where(#buildDirectBody) .unit-slot-empty-guidance{grid-column:1/-1;margin:0;padding:8px 0;border:0;background:transparent;color:#c3dcf0;font-size:calc(12px * var(--app-font-scale));text-align:center;}
 /* 쥬얼 설정: 활성화·비활성화 목록, 공통 구분선 및 결과 요약 */
 div:where(#buildDirectBody) #unitDetailsPanel1{margin-inline:calc(-1 * var(--dps-tab-edge,12px));min-width:0;}
 div:where(#buildDirectBody) .trait-preset-unit-jewel-settings-panel{overflow:visible;}
 div:where(#buildDirectBody) .dps-jewel-settings-body{height:auto;min-height:0;padding:0;overflow:visible;box-sizing:border-box;}
-div:where(#buildDirectBody) .dps-jewel-config-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0;width:100%;padding:0;background:#000;box-sizing:border-box;}
+div:where(#buildDirectBody) .dps-jewel-config-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0;width:100%;padding:0;background:var(--ui-panel-body-bg);box-sizing:border-box;}
 div:where(#buildDirectBody) .dps-jewel-group{min-width:0;}
 div:where(#buildDirectBody) .dps-jewel-group-heading{display:flex;align-items:center;gap:8px;padding:12px var(--dps-tab-edge,12px) 6px;color:#d1deec;}
 div:where(#buildDirectBody) .dps-jewel-group-heading h3{margin:0;color:inherit;font-size:calc(12px * var(--app-font-scale));font-weight:var(--ui-sub-title-weight);white-space:nowrap;}
@@ -89,9 +80,9 @@ div:where(#buildDirectBody) .dps-jewel-group-count{color:#8395a8;font-size:calc(
 div:where(#buildDirectBody) .dps-jewel-group[data-dps-jewel-group="inactive"] .dps-jewel-group-heading{color:#96a9bd;}
 div:where(#buildDirectBody) .dps-jewel-group-guide{margin:0;padding:0 var(--dps-tab-edge,12px) 12px;color:#929ba7;font-size:calc(11px * var(--app-font-scale));line-height:1.5;word-break:keep-all;}
 div:where(#buildDirectBody) .dps-jewel-group-list{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;}
-div:where(#buildDirectBody) .dps-jewel-card{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:0;min-width:0;padding:0;border:0;border-bottom:1px solid #27313d;border-radius:0;background:#000;box-sizing:border-box;}
-div:where(#buildDirectBody) .dps-jewel-card-head{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;align-items:center;gap:9px;min-width:0;width:100%;min-height:36px;padding:12px var(--dps-tab-edge,12px);border:0;border-radius:0;background:#000;color:#dceefb;text-align:left;font:inherit;box-shadow:none;box-sizing:border-box;cursor:pointer;}
-div:where(#buildDirectBody) .dps-jewel-card.is-expanded .dps-jewel-card-head{border-bottom:1px solid #27313d;background:#000;}
+div:where(#buildDirectBody) .dps-jewel-card{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:0;min-width:0;padding:0;border:0;border-bottom:1px solid var(--ui-accordion-line);border-radius:0;background:var(--ui-panel-body-bg);box-sizing:border-box;}
+div:where(#buildDirectBody) .dps-jewel-card-head{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;align-items:center;gap:9px;min-width:0;width:100%;min-height:36px;padding:12px var(--dps-tab-edge,12px);border:0;border-radius:0;background:var(--ui-panel-body-bg);color:#dceefb;text-align:left;font:inherit;box-shadow:none;box-sizing:border-box;cursor:pointer;}
+div:where(#buildDirectBody) .dps-jewel-card.is-expanded .dps-jewel-card-head{border-bottom:1px solid var(--ui-accordion-line);background:var(--ui-panel-body-bg);}
 div:where(#buildDirectBody) .dps-jewel-card .jewel-card-visual{flex-basis:30px;width:30px;height:30px;border-color:#3c648e;border-radius:9px;}
 div:where(#buildDirectBody) .dps-jewel-card.is-unconfigured .jewel-card-visual{border-color:#293747;}
 div:where(#buildDirectBody) .dps-jewel-card.is-mythic:not(.is-unconfigured) .jewel-card-visual{border-color:#c9a34e;box-shadow:inset 0 1px rgba(255,247,201,.14),0 0 11px rgba(240,184,67,.19);}
@@ -128,7 +119,7 @@ div:where(#buildDirectBody) .dps-jewel-field button[data-dps-jewel-field="mythic
 div:where(#buildDirectBody) .dps-jewel-card:not(.is-unconfigured) .dps-jewel-field button[value="N"]{background:#14283c;border-color:#528bc2;color:#9acbff;}
 div:where(#buildDirectBody) .dps-jewel-card:not(.is-unconfigured) .dps-jewel-field button[value="Y"]{background:#302710;border-color:#d4b638;color:#ffe08a;}
 div:where(#buildDirectBody) .dps-jewel-field :is(select,button[data-dps-jewel-field="mythic"]):focus-visible{outline:var(--nexus-focus-outline,2px solid #8fbcff);outline-offset:2px;}
-div:where(#buildDirectBody) .dps-jewel-final{margin:0;padding:7px 0 0;border-top:1px solid #2d4765;}
+div:where(#buildDirectBody) .dps-jewel-final{margin:12px 0 0;padding:12px 0 0;border-top:1px solid var(--ui-accordion-line);}
 div:where(#buildDirectBody) .dps-jewel-final-item{padding:8px 2px;gap:5px;}
 div:where(#buildDirectBody) .dps-jewel-final-item em{font-style:normal;font-size:calc(10.75px * var(--app-font-scale));}
 div:where(#buildDirectBody) .dps-jewel-final-item b{font-size:calc(18px * var(--app-font-scale));color:#eef6ff;}
@@ -147,7 +138,7 @@ div:where(#buildDirectBody) .dps-base-unit-fixed-qty{display:flex;align-items:ce
 div:where(#buildDirectBody) .dps-base-unit-board-cell{position:relative;min-width:0;}
 div:where(#buildDirectBody) .dps-base-unit-board-quantity{display:flex;align-items:center;min-width:0;height:31px;}
 div:where(#buildDirectBody) .dps-base-unit-board-quantity>.dps-base-unit-fixed-qty,div:where(#buildDirectBody) .dps-base-unit-board-quantity>.dps-base-unit-qty-control{width:100%;}
-div:where(#buildDirectBody) .dps-base-unit-fixed-qty.is-auto-value{border:1px solid var(--role-readonly-bd,#373c43);border-radius:var(--ui-control-radius);background:var(--role-readonly-bg,transparent);color:#eaf2ff;font-family:Consolas,monospace;}
+div:where(#buildDirectBody) .dps-base-unit-fixed-qty.is-auto-value{border:1px solid var(--role-readonly-bd,#373c43);border-radius:var(--ui-control-radius);background:var(--role-auto-result-bg);color:#eaf2ff;font-family:Consolas,monospace;}
 div:where(#buildDirectBody) .dps-base-unit-qty-control{display:grid;grid-template-columns:28px minmax(28px,1fr) 28px;gap:3px;min-width:0;}
 div:where(#buildDirectBody) .dps-base-unit-qty-input{border:1px solid var(--role-interactive-bd);border-radius:var(--ui-control-radius);background:var(--role-interactive-bg);color:#fff;font-family:Consolas,monospace;}
 div:where(#buildDirectBody) .dps-base-unit-qty-btn{padding:0;font-size:calc(12.5px * var(--app-font-scale));}
@@ -239,9 +230,8 @@ div:where(#buildDirectBody) .unit-slot-card-head>strong{color:#e6f6ff;font-size:
 div:where(#buildDirectBody) .unit-slot-card-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto;min-height:30px;}
 div:where(#buildDirectBody) .unit-slot-card-actions .unit-list-remove{display:grid;place-items:center;height:29px;min-height:29px;width:auto;min-width:31px;padding:2px 6px;border-radius:6px;font-size:16.75px;}
 div:where(#buildDirectBody) .unit-slot-card-main{display:flex;flex-direction:column;align-items:stretch;flex:1;gap:8px;width:100%;min-width:0;margin:0;padding:9px;background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;}
-div:where(#buildDirectBody) .unit-slot-card-main:hover{background:rgba(29,30,33,.07);outline-offset:-2px;}
 div:where(#buildDirectBody) .unit-slot-card-main:focus-visible{outline-offset:-2px;}
-div:where(#buildDirectBody) .unit-slot-add-card{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0;width:100%;min-height:76px;padding:12px;box-sizing:border-box;border:1px solid #47627f;border-radius:12px;background:#121a24;color:#d1e4f5;cursor:pointer;box-shadow:none;transition:none;}
+div:where(#buildDirectBody) .unit-slot-add-card{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0;width:100%;min-height:76px;padding:12px;box-sizing:border-box;border:1px solid var(--ui-button-border);border-radius:12px;background:var(--ui-button-bg);color:#d1e4f5;cursor:pointer;box-shadow:none;transition:none;}
 div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-slot-add-card:focus-visible{outline:var(--nexus-focus-outline,1px solid #84a8d5);outline-offset:-3px;box-shadow:none;}
 div:where(#buildDirectBody) .unit-slot-add-card:disabled{opacity:.5;cursor:not-allowed;}
 div:where(#buildDirectBody) .unit-slot-add-symbol{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:1px solid #627b96;background:linear-gradient(180deg,#354b62,#1a2a3b);color:#b4dafa;}
@@ -274,10 +264,8 @@ div:where(#buildDirectBody) .unit-slot-remove-cancel{background:var(--ui-button-
 div:where(#buildDirectBody) .unit-slot-remove-confirm{background:linear-gradient(135deg,#663445,#422330);border:1px solid #ad6e80;color:#fff1f4;}
 div:where(#buildDirectBody) .unit-slot-remove-dialog-actions button:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--role-manual-active-bd));outline-offset:2px;}
 div:where(#buildDirectBody) .unit-slot-heading{display:flex;align-items:center;min-width:0;gap:8px;}
-div:where(#buildDirectBody) .unit-slot-number{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;box-sizing:border-box;border:1px solid #545e65;border-radius:7px;background:#111215;color:#cae9ff;font:calc(12px * var(--app-font-scale))/1 Consolas,monospace;font-variant-numeric:tabular-nums;letter-spacing:.2px;}
 @media(max-width:520px){
   div:where(#buildDirectBody) .unit-slot-heading{gap:5px;}
-  div:where(#buildDirectBody) .unit-slot-number{flex-basis:26px;width:26px;height:26px;font-size:calc(11.25px * var(--app-font-scale));}
 }
 div:where(#buildDirectBody) .unit-sanctuary-panel{display:grid;min-width:0;gap:12px;margin:0;padding:0;border:0;border-radius:0;background:transparent;}
 div:where(#buildDirectBody) .unit-sanctuary-heading{display:flex;position:relative;align-items:center;justify-content:flex-start;gap:8px;margin:0;}
@@ -288,10 +276,8 @@ div:where(#buildDirectBody) #unitSanctuaryPanel :is(#unitSanctuaryGuideTitle,#un
 div:where(#buildDirectBody) .unit-sanctuary-slots{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;min-width:0;}
 div:where(#buildDirectBody) .unit-sanctuary-card{min-width:0;overflow:hidden;border:1px solid var(--ui-panel-border);border-radius:10px;background:var(--ui-panel-body-bg);}
 div:where(#buildDirectBody) .unit-sanctuary-card-head{display:flex;align-items:center;gap:7px;min-height:34px;padding:5px 10px;border-bottom:1px solid var(--ui-integrated-head-line);background:var(--ui-integrated-head-bg);}
-div:where(#buildDirectBody) .unit-sanctuary-card-head .unit-slot-number{display:grid;place-items:center;flex:0 0 26px;width:26px;height:24px;border-radius:5px;background:#1b3347;color:#b5d7fa;font:calc(10px * var(--app-font-scale))/1 Consolas,monospace;}
 div:where(#buildDirectBody) .unit-sanctuary-card-head strong{font-size:calc(11px * var(--app-font-scale));font-weight:600;color:#dceafa;}
 div:where(#buildDirectBody) .unit-sanctuary-card-head .unit-list-remove{margin-left:auto;min-width:28px;width:28px;min-height:28px;height:28px;padding:0;background:transparent;border-color:transparent;color:#9daec5;}
-div:where(#buildDirectBody) .unit-sanctuary-card-head .unit-list-remove:hover:not(:disabled){border-color:#9b6571;color:#ffccd4;}
 div:where(#buildDirectBody) .unit-sanctuary-card .unit-sanctuary-card-main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px;text-align:center;}
 div:where(#buildDirectBody) .unit-sanctuary-card-main>.unit-sanctuary-metric:only-child{grid-column:1/-1;}
 div:where(#buildDirectBody) .unit-sanctuary-skill-list{display:flex;justify-content:center;align-items:center;gap:6px;min-width:0;}
@@ -314,9 +300,9 @@ div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-top{display:grid;
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-top>div{min-width:0;min-height:96px;padding:14px 10px;gap:7px;}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .unit-summary-stage strong{font-size:calc(21px * var(--app-font-scale));}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .unit-summary-stage small{font-size:calc(11px * var(--app-font-scale));}
-div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results{display:grid;border-top:1px solid var(--ui-panel-border);grid-template-columns:repeat(3,minmax(0,1fr));grid-template-columns:var(--board-summary-columns);}
+div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results{display:grid;border-top:1px solid var(--ui-accordion-line);grid-template-columns:repeat(3,minmax(0,1fr));grid-template-columns:var(--board-summary-columns);}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results>.dps-base-unit-summary-item{min-height:100px;padding:16px 10px;gap:10px;border:0;}
-div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results>.dps-base-unit-expected{border-left:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results>.dps-base-unit-expected{border-left:1px solid var(--ui-accordion-line);}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-summary-item .dps-num{font-size:calc(28px * var(--app-font-scale));line-height:1.2;white-space:normal;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-spec-dps .dps-num{font-size:calc(23px * var(--app-font-scale));}
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results>.unit-achievement{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;grid-column:1/-1;min-height:0;padding:14px 18px 16px;border:0;border-top:1px solid var(--ui-panel-border);}
@@ -327,15 +313,12 @@ div:where(#buildDirectBody) .unit-board-slot-count{flex:none;white-space:nowrap;
 div:where(#buildDirectBody) .integrated-tab[aria-selected=true] .unit-board-slot-count{color:#a9c8ff;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-cards-grid{padding:0;grid-template-columns:minmax(0,1fr);gap:12px;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-overview-card{border-color:var(--ui-panel-border);border-radius:12px;box-shadow:none;transition:border-color .15s;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-overview-card:hover{border-color:var(--ui-button-hover-border);}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-head{gap:8px;min-height:48px;padding:9px 12px;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-heading{gap:10px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-number{flex:0 0 28px;width:28px;font-size:11px;height:26px;}
 :where(#buildDirectPane) .ub-card-title{display:grid;gap:2px;min-width:0;}
 div:where(#buildDirectBody) .ub-card-title .unit-slot-grade{color:#9ec4da;font-size:calc(10px * var(--app-font-scale));}
 :where(#buildDirectPane) .ub-card-title strong{color:#f1faff;font-size:calc(14px * var(--app-font-scale));line-height:1.4;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-actions .unit-list-remove{width:28px;min-width:28px;height:28px;min-height:28px;background:transparent;border-color:transparent;color:#9daec5;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-list-remove:hover{border-color:#9b6571;color:#ffccd4;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main{position:relative;isolation:isolate;gap:0;padding:12px;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-edit-target{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;min-width:0;min-height:0;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;cursor:pointer;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-edit-target:focus-visible{outline:var(--nexus-focus-outline,2px solid var(--ui-field-focus-border));outline-offset:-3px;}
@@ -348,7 +331,7 @@ div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-edit-target:focus-v
 :where(#buildDirectPane) .ub-metric>span{color:#9daec5;font-size:calc(10px * var(--app-font-scale));line-height:1.4;word-break:keep-all;}
 :where(#buildDirectPane) .ub-metric>b{color:#eaf2ff;font:calc(12px * var(--app-font-scale))/1.4 Consolas,monospace;overflow-wrap:anywhere;}
 :where(#buildDirectPane) .ub-metric.is-max-speed>span,:where(#buildDirectPane) .ub-metric.is-max-speed>b{color:#f5cd65;}
-:where(#buildDirectPane) .ub-applied{padding-top:12px;border-top:1px solid var(--ui-panel-border);}
+:where(#buildDirectPane) .ub-applied{padding-top:12px;}
 :where(#buildDirectPane) .ub-settings-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
 :where(#buildDirectPane) .ub-setting{display:grid;min-width:0;gap:3px;}
 :where(#buildDirectPane) .ub-setting>span{color:#9daec5;font-size:calc(10px * var(--app-font-scale));}
@@ -359,7 +342,7 @@ div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-heading strong{font-size:calc(17px * var(--app-font-scale));}
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-heading small{display:block;color:#9daec5;font-size:calc(11px * var(--app-font-scale));line-height:1.5;}
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-scroll{padding:22px;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker{align-items:end;padding:0 0 20px;margin:0;border-bottom:1px solid var(--ui-panel-border);display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding-bottom:20px;}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker{align-items:end;padding:0 0 12px;margin:0;border-bottom:1px solid var(--ui-accordion-line);display:grid;grid-template-columns:minmax(0,1fr);gap:10px;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker>.dps-base-unit-field{flex:1;max-width:480px;min-width:0;gap:8px;}
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .dps-base-unit-field-label{height:auto;min-height:0;justify-content:center;text-align:center;font-size:calc(11px * var(--app-font-scale));color:#9daec5;white-space:normal;}
 :where(#buildDirectPane) .ub-editor-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:stretch;gap:18px;padding-top:16px;}
@@ -374,10 +357,10 @@ div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-fixed-qt
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-void-power-control{display:flex;justify-content:space-between;align-items:center;gap:5px;padding:0 8px;width:100%;}
 :where(#buildDirectPane) .ub-fields .dps-base-unit-void-power-control small{font-size:calc(9px * var(--app-font-scale));white-space:nowrap;}
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .ub-editor-field :is(input,select,button):disabled{opacity:.45;cursor:not-allowed;}
-:where(#buildDirectPane) .ub-live-result{display:flex;flex-direction:column;justify-content:space-between;padding:16px;border:1px solid #34475c;border-radius:12px;background:#10161e;min-width:0;}
+:where(#buildDirectPane) .ub-live-result{display:flex;flex-direction:column;justify-content:space-between;padding:16px;border:1px solid #34475c;border-radius:12px;background:var(--role-auto-result-bg);min-width:0;}
 :where(#buildDirectPane) .ub-live-result .ub-metrics{grid-template-columns:minmax(0,1fr);padding:0;gap:0;}
-:where(#buildDirectPane) .ub-live-result .ub-metric{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--ui-panel-border);}
-div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-empty-guidance{margin-top:14px;color:#9daec5;font-size:11px;}
+:where(#buildDirectPane) .ub-live-result .ub-metric{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--ui-accordion-line);}
+div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-empty-guidance{margin-top:10px;color:#9daec5;font-size:11px;}
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-footer{padding:16px 22px;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));}
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-footer .unit-slot-modal-done{grid-column:2;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-settings{margin:0;padding:0;border:0;}
@@ -414,7 +397,7 @@ div:where(#buildDirectBody) #dpsUnitSlotModal .dps-base-unit-extra-slot :is(sele
 }
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) :is(.ub-unit-picker,.ub-editor-field,.dps-base-unit-extra-slot) .app-select-trigger{min-height:40px;font-size:calc(12px * var(--app-font-scale));}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-unit-picker .app-select-trigger{min-height:44px;font-size:calc(14px * var(--app-font-scale));}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--ui-accordion-line);}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-expansion-section[hidden]{display:none;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-slot-expansion-btn{display:flex;justify-content:center;align-items:center;gap:7px;width:100%;min-width:0;height:40px;min-height:40px;margin:0;padding:0 5px;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-fields .dps-base-unit-slot-expansion-btn>span{font:calc(12px * var(--app-font-scale))/1.2 Consolas,monospace;}
@@ -436,7 +419,7 @@ div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-basic-jewel{width:32%;}
   div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary :is(th,td){padding:8px 3px;}
   div:where(#buildDirectBody) :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) .unit-basic-summary table{font-size:calc(10px * var(--app-font-scale));}
 }
-div:where(#buildDirectBody) .right-analytics-workspace :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header){--context-caption-row:calc(26px * var(--app-font-scale));--context-value-row:calc(32px * var(--app-font-scale));--context-detail-row:calc(18px * var(--app-font-scale));--context-row-gap:5px;--context-pad-y:14px;display:grid;grid-template-rows:auto;align-items:stretch;width:100%;min-width:0;min-height:0;grid-template-columns:var(--board-summary-columns);}
+div:where(#buildDirectBody) .right-analytics-workspace :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header){--context-caption-row:calc(26px * var(--app-font-scale));--context-value-row:calc(32px * var(--app-font-scale));--context-detail-row:calc(18px * var(--app-font-scale));--context-row-gap:5px;--context-pad-y:10px;display:grid;grid-template-rows:auto;align-items:stretch;width:100%;min-width:0;min-height:0;grid-template-columns:var(--board-summary-columns);}
 div:where(#buildDirectBody) .right-analytics-workspace :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header)>div{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:var(--context-caption-row) var(--context-value-row) var(--context-detail-row);align-items:center;align-content:center;justify-items:center;gap:var(--context-row-gap);min-width:0;min-height:0;height:auto;margin:0;padding:var(--context-pad-y) 8px;text-align:center;grid-column:auto;border-right:1px solid var(--ui-panel-border);border-bottom:0;border-top:0;}
 div:where(#buildDirectBody) .right-analytics-workspace :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header)>div:last-child{border-right:0;}
 div:where(#buildDirectBody) .right-analytics-workspace :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header) :is(.right-hero-compact-mode,.dps-spec-board-dps,.dps-feature-heading){display:contents;}
@@ -468,7 +451,7 @@ div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results .dps-num{
 @media(max-width:360px){
   div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results .dps-num{font-size:calc(18px * var(--app-font-scale));}
 }
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion{padding:12px;background:var(--role-readonly-bg);border-top:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion{padding:12px;background:var(--role-readonly-bg);border-top:1px solid var(--ui-accordion-line);}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion[hidden]{display:none;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-expansion-rows{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-card{display:grid;min-width:0;border:1px solid var(--ui-panel-border);border-radius:8px;background:var(--ui-panel-body-bg);grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;gap:3px 6px;padding:7px;align-items:center;}
@@ -482,10 +465,10 @@ div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-extra-break>b{font-family:
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results>div:last-child{border-right:0;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-card-title{display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;gap:4px 9px;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-card-data{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-rows:auto 1fr;column-gap:16px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-dps{grid-column:1;grid-row:1;align-items:center;margin:0 0 9px;padding:0 0 9px;border-bottom:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-dps{grid-column:1;grid-row:1;align-items:center;margin:0 0 9px;padding:0 0 9px;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-dps>b{font-size:calc(25px * var(--app-font-scale));}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-metrics{grid-column:1;grid-row:2;align-self:end;padding:0;gap:8px;}
-div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-applied{grid-column:2;grid-row:1/3;display:grid;align-content:center;padding:0 0 0 16px;border-top:0;border-left:1px solid var(--ui-panel-border);}
+div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-applied{grid-column:2;grid-row:1/3;display:grid;align-content:center;padding:0 0 0 16px;border-top:0;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-settings-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px;}
 @container(max-width:420px){
   div:where(#buildDirectBody) #dpsBaseUnitSlotStack .ub-card-data{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);column-gap:10px;}
@@ -504,12 +487,12 @@ div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric{display:grid;gri
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric>span{width:100%;margin:0;padding:0;color:#9daec5;font-size:calc(11px * var(--app-font-scale));font-weight:400;line-height:1.4;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric>b{width:100%;min-width:0;margin:0;padding:0;color:#e6f3ff;font-family:inherit;font-size:calc(30px * var(--app-font-scale));font-weight:500;line-height:1.2;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric:first-child>b{color:#bceef4;}
-div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric:last-child{border-left:1px solid var(--ui-panel-border);}
+
 div:where(#buildDirectBody) #dpsUnitSlotModal .ub-result-metric:last-child>b{font-size:calc(15px * var(--app-font-scale));align-self:center;}
-div:where(#buildDirectBody) .analytics-polish :is(#statDpsSummary,.dps-base-unit-summary-row){border-color:#304158;box-shadow:none;background:linear-gradient(180deg,rgba(23,35,47,.15),transparent);}
+div:where(#buildDirectBody) .analytics-polish :is(#statDpsSummary,.dps-base-unit-summary-row){border-color:#304158;box-shadow:none;background:var(--ui-panel-body-bg);}
 div:where(#buildDirectBody) .analytics-polish :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header)>div{grid-template-rows:minmax(var(--context-caption-row),auto) minmax(var(--context-value-row),auto) minmax(var(--context-detail-row),auto);box-sizing:border-box;}
 div:where(#buildDirectBody) .analytics-polish :is(#statDpsSummary.board-context-header,#dpsBaseUnitSummary .board-context-header) :is(#dpsVal,.dps-base-unit-spec-dps>.dps-num){text-shadow:none;white-space:normal;overflow-wrap:anywhere;font-weight:500;}
-div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSummary .dps-base-unit-results{background:rgba(11,13,18,.4);}
+div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSummary .dps-base-unit-results{background:var(--role-auto-result-bg);}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSummary .dps-base-unit-results :is(.dps-num,.unit-achievement-value){max-width:100%;white-space:normal;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSummary .dps-base-unit-summary-item .dps-num{flex-wrap:wrap;row-gap:2px;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .ub-extra-card{box-shadow:none;}
@@ -519,7 +502,6 @@ div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .ub-card-tit
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .ub-card-title strong{min-width:0;max-width:100%;font-weight:500;overflow-wrap:anywhere;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .unit-slot-card-actions{flex:0 0 auto;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .unit-list-remove{border:1px solid transparent;border-radius:5px;color:#8795ac;}
-div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .unit-list-remove:hover{border-color:#644a58;background:#211b23;color:#edc6d1;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .ub-card-data{min-width:0;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .ub-dps{min-width:0;max-width:100%;flex-wrap:wrap;gap:4px 8px;}
 div:where(#buildDirectBody) .analytics-polish #dpsBaseUnitSlotStack .ub-dps>b{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;}
@@ -559,21 +541,21 @@ div:where(#buildDirectBody) .analytics-polish #statCompareGrid .stat-row > .sc-v
 /* 최적화 안내·성소 사용 방법 공통 본문 및 단계 */
 div:where(#buildDirectBody) :is(#battleModeGuideDetails,.sanctuary-guide-body) { --guide-text-inset:12px; color:var(--ui-text); }
 div:where(#buildDirectBody) #battleModeGuideDetails .battle-mode-guide-panel { width:100%; min-width:0; box-sizing:border-box; padding:12px 0 16px; }
-div:where(#buildDirectBody) :is(#battleModeGuideDetails,.sanctuary-guide-body) .guide-step { min-width:0; margin:0; padding:12px var(--guide-text-inset); border-bottom:1px solid var(--ui-line); }
+div:where(#buildDirectBody) :is(#battleModeGuideDetails,.sanctuary-guide-body) .guide-step { min-width:0; margin:0 var(--guide-text-inset); padding:12px 0; }
+div:where(#buildDirectBody) :is(#battleModeGuideDetails,.sanctuary-guide-body) .guide-step+.guide-step { border-top:1px solid var(--ui-accordion-line); }
 div:where(#buildDirectBody) :is(#battleModeGuideDetails,.sanctuary-guide-body) .guide-step-heading { display:flex; align-items:center; gap:8px; margin:0 0 8px; font-size:calc(13px * var(--app-font-scale)); font-weight:600; line-height:1.5; color:#dce5ef; }
-div:where(#buildDirectBody) .guide-step-number { display:grid; place-items:center; flex:0 0 26px; width:26px; height:26px; border:1px solid #40566c; box-sizing:border-box; border-radius:6px; background:#1b2735; color:#b4dafa; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums; }
 div:where(#buildDirectBody) :is(#battleModeGuideDetails,.sanctuary-guide-body) .guide-step p { margin:5px 0 0; color:var(--ui-sub); font-size:calc(12px * var(--app-font-scale)); line-height:1.65; word-break:keep-all; overflow-wrap:break-word; }
 div:where(#buildDirectBody) :is(#battleModeGuideDetails,.sanctuary-guide-body) .guide-step .guide-emphasis { color:#b4dafa; font-weight:500; }
-div:where(#buildDirectBody) :is(#battleModeGuideDetails,.sanctuary-guide-body) .guide-note { border-bottom:0; }
 div:where(#buildDirectBody) .guide-note h3 { margin:0 0 8px; color:#d6b477; font-size:calc(13px * var(--app-font-scale)); font-weight:600; }
-div:where(#buildDirectBody) #battleModeGuideDetails .battle-guide-comparison { width:100%; border-collapse:collapse; table-layout:fixed; margin:10px 0; }
+div:where(#buildDirectBody) #battleModeGuideDetails .battle-guide-comparison { width:100%; border-collapse:collapse; table-layout:fixed; margin:10px 0 0; }
 div:where(#buildDirectBody) #battleModeGuideDetails .battle-guide-label-col { width:44%; }
 div:where(#buildDirectBody) #battleModeGuideDetails .battle-guide-traits th:first-child { width:65%; }
-div:where(#buildDirectBody) #battleModeGuideDetails :is(th,td) { padding:8px 4px; border-bottom:1px solid var(--ui-line); font-size:calc(12px * var(--app-font-scale)); line-height:1.5; word-break:keep-all; overflow-wrap:break-word; }
+div:where(#buildDirectBody) #battleModeGuideDetails :is(th,td) { padding:8px 4px; border-bottom:1px solid var(--ui-accordion-line); font-size:calc(12px * var(--app-font-scale)); line-height:1.5; word-break:keep-all; overflow-wrap:break-word; }
 div:where(#buildDirectBody) #battleModeGuideDetails th { text-align:left; font-weight:500; }
-div:where(#buildDirectBody) #battleModeGuideDetails thead th { color:var(--ui-sub); border-top:1px solid var(--ui-line-strong); }
+div:where(#buildDirectBody) #battleModeGuideDetails thead th { color:var(--ui-sub); }
+div:where(#buildDirectBody) #battleModeGuideDetails .battle-guide-comparison tbody tr:last-child > :is(th,td) { border-bottom:0; }
 div:where(#buildDirectBody) #battleModeGuideDetails :is(td,thead th:not(:first-child)) { text-align:center; }
-div:where(#buildDirectBody) #battleModeGuideDetails .battle-guide-difference td strong { color:#d6b477; font-weight:600; }
+div:where(#buildDirectBody) #battleModeGuideDetails .battle-guide-difference td strong { color:inherit; font-weight:600; }
 div:where(#buildDirectBody) #battleModeGuideDetails .battle-guide-traits td { color:#a8c5e2; }
 @media (prefers-reduced-motion:reduce) {
   :where(#buildDirectPane) *,:where(#buildDirectPane)  *::before,:where(#buildDirectPane)  *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
@@ -607,7 +589,7 @@ div:where(#buildDirectBody) :is(.rune-card-heading,.buff-config-heading,
   .unit-sanctuary-heading) {
   min-height:36px; height:auto; max-height:none; display:flex; align-items:center; gap:8px;
   padding:8px 12px; margin:0 0 8px; background:transparent;
-  border:0; border-bottom:1px solid var(--ui-line-strong); border-radius:0; box-shadow:none;
+  border:0; border-radius:0; box-shadow:none;
   color:var(--ui-integrated-head-text); font-size:var(--studio-subheader-font); font-weight:600; line-height:1.4; letter-spacing:0;
 }
 div:where(#buildDirectBody) :is(.buff-config-heading strong,
@@ -620,7 +602,7 @@ div:where(#buildDirectBody) :is(.unit-slot-card-head,.unit-sanctuary-card-head) 
 }
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-header,div:where(#buildDirectBody) .trait-preset-backup-panel .trait-preset-modal-head { padding:12px var(--studio-header-pad); min-height:var(--studio-header-height); }
 div:where(#buildDirectBody) :is(#dpsUnitSlotModal,#dpsSanctuarySlotModal) .unit-slot-modal-heading strong,div:where(#buildDirectBody) .trait-preset-backup-panel .trait-preset-modal-head h2 { font-size:var(--studio-header-font); font-weight:600; line-height:1.4; letter-spacing:0; }
-div:where(#buildDirectBody) .trait-board-panel .trait-tier-panel > h4 { min-height:40px; padding:6px 12px; border-bottom:1px solid var(--ui-line-strong); box-shadow:none; }
+div:where(#buildDirectBody) .trait-board-panel .trait-tier-panel > h4 { min-height:40px; padding:6px 12px; }
 div:where(#buildDirectBody) .trait-board-panel .trait-tier-name { font-size:var(--studio-subheader-font); font-weight:600; line-height:1.4; }
 @media (max-width:1024px) {
   .builder-direct-pane { --studio-header-height:44px; }
@@ -635,14 +617,14 @@ div:where(#buildDirectBody) .right-analytics-workspace :is(.analytics-summary-gr
   border:0; border-radius:0; box-shadow:none; background:transparent; background-image:none;
 }
 div:where(#buildDirectBody) .right-analytics-workspace :is(.analytics-summary-group,.analytics-unit-summary-group) {
-  padding:12px 0 20px; border-bottom:1px solid var(--ui-line); overflow:visible;
+  padding:8px 0 12px; overflow:visible;
 }
 div:where(#buildDirectBody) .right-analytics-workspace #statDpsSummary.board-context-header,div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-summary-row { min-width:0; overflow:visible; }
 div:where(#buildDirectBody) .right-analytics-workspace #statDpsSummary.board-context-header > div,div:where(#buildDirectBody) #dpsBaseUnitSummary .board-context-header > div,div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results > :is(.dps-base-unit-summary-item,.unit-achievement) {
   border:0; background:transparent; box-shadow:none;
 }
 div:where(#buildDirectBody) #dpsBaseUnitSummary .dps-base-unit-results {
-  background:transparent; border-top:1px solid var(--ui-line); margin-top:8px;
+  background:transparent; margin-top:12px;
 }
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-cards-grid { gap:16px; }
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main { background:transparent; }
@@ -665,7 +647,7 @@ div:where(#buildDirectBody) #dpsCompareModalTitle { min-height:30px; font-size:v
 div:where(#buildDirectBody) #dpsCompareModal .dps-compare-close { width:28px; min-width:28px; height:28px; min-height:28px; }
 div:where(#buildDirectBody) .sanctuary-guide-body { width:100%; min-width:0; box-sizing:border-box; margin:0; padding:12px 0 16px; }
 div:where(#buildDirectBody) .sanctuary-guide-body p { margin:0; font-size:calc(12px * var(--app-font-scale)); line-height:1.65; color:var(--ui-sub); word-break:keep-all; overflow-wrap:break-word; }
-div:where(#buildDirectBody) .sanctuary-guide-intro { padding:0 var(--guide-text-inset) 16px; border-bottom:1px solid var(--ui-line); }
+div:where(#buildDirectBody) .sanctuary-guide-intro { padding:0 var(--guide-text-inset) 12px; }
 div:where(#buildDirectBody) .sanctuary-guide-steps { list-style:none; margin:0 0 16px; padding:0; }
 div:where(#buildDirectBody) .sanctuary-guide-ranges { width:100%; border-collapse:collapse; margin:0 0 16px; font-size:calc(12px * var(--app-font-scale)); }
 div:where(#buildDirectBody) .sanctuary-guide-ranges caption { text-align:left; font-weight:600; padding:0 var(--guide-text-inset) 8px; }
@@ -723,16 +705,6 @@ div:where(#buildDirectBody) #dpsBaseUnitSlotStack .has-expanded-units .unit-basi
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .has-expanded-units .unit-basic-limit-break{width:15%;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .has-expanded-units .unit-basic-jewel{width:31%;}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .has-expanded-units .unit-basic-member{color:#a8c5e2;}
-/* 두 종류의 슬롯 번호에 같은 고정 규격을 적용해 늘어남·어긋남 방지. */
-div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) :is(.unit-slot-card-head,.unit-sanctuary-card-head) .unit-slot-number {
-  display:inline-flex; align-items:center; justify-content:center; align-self:center;
-  flex:0 0 28px; width:28px; min-width:28px; max-width:28px;
-  height:24px; min-height:24px; max-height:24px; padding:0; margin:0;
-  position:static; transform:none; overflow:hidden; box-sizing:border-box;
-  border:1px solid var(--ui-line-strong); border-radius:4px; background:transparent;
-  color:var(--ui-sub); font:500 calc(11px * var(--app-font-scale))/1 var(--font-main);
-  font-variant-numeric:tabular-nums; letter-spacing:0; text-align:center; box-shadow:none;
-}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-heading { align-items:center; gap:8px; min-width:0; }
 div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-card-head { align-items:center; gap:8px; }
 /* ── 04 · 탭 배치·반응형 화면 ── */
@@ -756,7 +728,6 @@ div:where(#buildDirectBody).is-tabbed .mobile-section-tabs .mobile-tab-glyph { d
 div:where(#buildDirectBody).is-tabbed .mobile-section-tabs .mobile-section-tab[aria-selected=true] {
   background:transparent; color:var(--ui-text); border-bottom-color:var(--ui-button-active-border); box-shadow:none;
 }
-div:where(#buildDirectBody).is-tabbed .mobile-section-tabs .mobile-section-tab:hover { background:transparent; color:var(--ui-text); }
 div:where(#buildDirectBody).is-tabbed .mobile-section-tabs .mobile-section-tab:active { transform:none; }
 div:where(#buildDirectBody).is-tabbed .mobile-page { scroll-padding-top:calc(var(--app-header-h,44px) + var(--mobile-tabs-h,44px) + 8px); }
 /* 스크롤 동작은 유지하고 스크롤바 표시만 모든 영역에서 숨긴다. */
@@ -774,12 +745,6 @@ div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack
   display:flex; align-items:center; gap:8px; border:0; border-bottom:1px solid var(--ui-line-strong);
   border-radius:0; background:var(--ui-integrated-head-bg); box-shadow:none;
 }
-div:where(#buildDirectBody) .right-analytics-workspace :is(#dpsBaseUnitSlotStack,#unitSanctuaryPanel) :is(.unit-slot-card-head,.unit-sanctuary-card-head) .unit-slot-number {
-  flex:0 0 28px; width:28px; min-width:28px; max-width:28px;
-  height:24px; min-height:24px; max-height:24px; margin:0; padding:0;
-  border:1px solid var(--ui-button-border); border-radius:4px;
-  background:var(--role-manual-input-bg); color:var(--ui-text);
-}
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-card-main { box-sizing:border-box; width:100%; padding:12px; border:0; border-radius:0; }
 div:where(#buildDirectBody) #unitSanctuaryPanel .unit-sanctuary-slots { gap:12px; }
 div:where(#buildDirectBody) #dpsBaseUnitSlotStack .unit-slot-overview-card.is-selected { border-color:var(--ui-button-active-border); }
@@ -793,9 +758,8 @@ div:where(#buildDirectBody) .workspace-section-title {
   letter-spacing:0;
 }
 div:where(#buildDirectBody) .basic-info-resource-card,div:where(#buildDirectBody) .goal-settings-card { min-width:0; }
-div:where(#buildDirectBody) .settings-polish .basic-info-lane-group + .basic-info-lane-group { margin-top:12px; padding-top:16px; }
 div:where(#buildDirectBody) .trait-build-merged-panel .trait-build-section + .trait-build-section {
-  margin-top:0; border-top:1px solid var(--ui-unified-line-strong);
+  margin-top:0; border-top:1px solid var(--ui-accordion-line);
 }
 div:where(#buildDirectBody) .trait-build-merged-panel .trait-build-section > .trait-limit-guide-heading .workspace-section-title { padding:0; }
 div:where(#buildDirectBody) .trait-standalone-panel { margin-top:20px; }
@@ -806,8 +770,7 @@ div:where(#buildDirectBody) .right-analytics-workspace .unit-sanctuary-heading {
 div:where(#buildDirectBody) {
   --studio-head-line:#2c333d;
   --studio-head-accent:#7196c4;
-  --studio-control-bg:#171d25;
-  --studio-control-hover:#202a37;
+  --studio-control-bg:var(--ui-button-bg);
 }
 div:where(#buildDirectBody) :is(.basic-goal-title,.integrated-build-heading,.right-workspace-head,.trait-utility-section-head,
   .trait-preset-modal-head,.unit-slot-modal-header,.dps-compare-header,.additional-rune-dialog-head),div:where(#buildDirectBody) #dpsCompareModal > .dps-compare-header {
@@ -828,7 +791,7 @@ div:where(#buildDirectBody) :is(.unit-slot-card-head,.unit-sanctuary-card-head) 
   background:#101318 !important; border-bottom-color:var(--studio-head-line) !important;
 }
 /* 탐색 기능: 헤더 탭의 공통 밑줄형 디자인. 기존 높이·분할·스크롤 유지. */
-div:where(#buildDirectBody) :is(.integrated-tabs,.dps-compare-tabs) { background:var(--ui-panel-body-bg); }
+div:where(#buildDirectBody) :is(.integrated-tabs,.dps-compare-tabs) { background:var(--ui-integrated-subhead-bg); }
 div:where(#buildDirectBody) :is(.integrated-tabs,.dps-compare-tabs) > button[role=tab] {
   appearance:none; border:0; border-bottom:2px solid transparent; border-radius:0;
   background:transparent; color:#929faf; box-shadow:none; text-shadow:none;
@@ -846,16 +809,11 @@ div:where(#buildDirectBody) :is(.integrated-tabs,.dps-compare-tabs) > button[rol
 div:where(#buildDirectBody) :is(.hdr.app-header,.right-workspace-head,.trait-preset-modal-head,.unit-slot-modal-header,
   .dps-compare-header,.unit-sanctuary-heading,.unit-slot-card-head,.unit-sanctuary-card-head)
   :is(button:not(.additional-settings-button,.ui-reset-btn),a.ui-action-btn) {
-  border-color:#3b4655; border-radius:6px; background:var(--studio-control-bg);
+  border-color:var(--ui-button-border); border-radius:6px; background:var(--studio-control-bg);
   color:#b9c9dc; box-shadow:none; text-shadow:none;
 }
-div:where(#buildDirectBody) :is(.hdr.app-header,.right-workspace-head,.trait-preset-modal-head,.unit-slot-modal-header,
-  .dps-compare-header,.unit-sanctuary-heading,.unit-slot-card-head,.unit-sanctuary-card-head)
-  :is(button:not(.additional-settings-button,.ui-reset-btn),a.ui-action-btn):hover:not(:disabled) {
-  background:var(--studio-control-hover); border-color:#6a87ac; color:#e3ebf6;
-}
 div:where(#buildDirectBody) :is(.trait-preset-modal-close,.unit-slot-modal-close,.dps-compare-close) {
-  border:1px solid #3b4655; background:var(--studio-control-bg); color:#b9c9dc;
+  border:1px solid var(--ui-button-border); background:var(--studio-control-bg); color:#b9c9dc;
   border-radius:6px; box-shadow:none; font-weight:400;
 }
 div:where(#buildDirectBody) :is(.trait-preset-modal-close,.unit-slot-modal-close,.dps-compare-close,
@@ -866,7 +824,7 @@ div:where(#buildDirectBody) :is(.trait-preset-modal-close,.unit-slot-modal-close
 /* ── 05 · 유닛 헤더·비교표·성소 정보 ── */
 div:where(#buildDirectBody) .right-analytics-workspace .unit-sanctuary-heading {
   background:transparent; background-image:none; border-radius:0;
-  border:0; border-bottom:1px solid var(--studio-head-line);
+  border:0;
   box-shadow:none; padding:12px 0; margin:0 0 12px;
   overflow:visible; clip-path:none;
 }
@@ -877,17 +835,17 @@ div:where(#buildDirectBody) .right-analytics-workspace .unit-sanctuary-heading h
 
 /* DPS 비교표: 기존 행·열을 보존하고 읽는 기준과 교차 위치를 드러낸다. */
 div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody th {
-  position:sticky; left:0; z-index:3; border-right-color:#586a80;
+  position:sticky; left:0; z-index:3; border-right:1px solid #40566c;
 }
 div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix thead th:first-child { left:0; z-index:5; }
 div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody td.is-reference-column:not(.is-current) {
-  background:#1a2939; color:#e0eef7;
+  background:#172738; color:#e0eef7;
 }
-div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody tr.is-reference-row td:not(.is-current) {
-  border-top:1px solid #58728d; border-bottom-color:#58728d; color:#deebf7;
+div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody tr.is-reference-row td:not(.is-current):not(.is-reference-column) {
+  background:#15202b; border-bottom-color:#58728d; color:#deebf7;
 }
 div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody td.is-current {
-  background:#29445e; color:#fff; box-shadow:inset 0 0 0 2px #bad1e9; text-shadow:none;
+  background:#304b65; color:#fff; box-shadow:inset 0 0 0 2px #bad1e9; text-shadow:none;
   font-weight:700;
 }
 div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody td.is-unavailable {
@@ -896,7 +854,6 @@ div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody td.is-una
 div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody tr:hover td:not(.is-current) {
   background:#253448; color:#edf3fa;
 }
-div:where(#buildDirectBody) #dpsCompareModal .dps-compare-matrix tbody tr:nth-child(5n) :is(th,td) { border-bottom-color:#526173; }
 div:where(#buildDirectBody) #dpsCompareModal .dps-compare-floor-table tbody tr.is-current :is(th,td) {
   background:#29445e; text-shadow:none;
 }
@@ -910,15 +867,11 @@ div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-section 
   border-radius:0; background:transparent; box-shadow:none; overflow:visible;
 }
 div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-section + .basic-settings-inline-section {
-  margin-top:22px; padding-top:22px;
+  margin-top:0; padding-top:0; border-top:1px solid var(--ui-accordion-line);
 }
-/* 두 설정 영역의 분리선은 한 번만 표시하고 양끝을 본문 가장자리에서 띄운다. */
-div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-section + .basic-settings-inline-section::before {
-  content:""; position:absolute; top:0; left:14px; right:14px;
-  height:1px; background:var(--ui-line-strong); pointer-events:none;
-}
+
 div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-box-header {
-  display:block; min-height:0; margin:0 14px; padding:14px 0 0;
+  display:block; min-height:0; margin:0 14px; padding:12px 0 0;
   border:0; border-radius:0; background:transparent; box-shadow:none;
 }
 div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-title {
@@ -930,7 +883,7 @@ div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-title {
 div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-title::before,div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-title::after { content:none; }
 @media(max-width:600px) {
   div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-box-header { margin:0 10px; padding:12px 0 0; }
-  div:where(#buildDirectBody) #basicSettingsPanel2 .basic-settings-inline-section + .basic-settings-inline-section::before { left:10px; right:10px; }
+
 }
 
 /* ── 07 · 목표·투자 제한·최적화 화면 ── */

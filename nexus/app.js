@@ -203,7 +203,7 @@
     const compareUnitByGradeName = (a, b) =>
         getGradeIndex(b.grade) - getGradeIndex(a.grade) ||
         a.name.localeCompare(b.name);
-    const getUnitsFromIds = (ids) => Array.from(ids).map(uid => unitMap.get(uid)).filter(Boolean);
+    const getUnitsFromIds = (ids) => Array.from(ids, uid => unitMap.get(uid)).filter(Boolean);
     const getUnitsFromMap = (map) => getUnitsFromIds(map.keys()).sort(compareUnitForDisplay);
     /* ==========================================================================
        03. 데이터·상태·캐시·저장
@@ -1500,7 +1500,7 @@
         const resetSelectionBtn = getEl('btnResetSelection');
         if (resetSelectionBtn) resetSelectionBtn.disabled = activeUnits.size === 0;
         const currentTab = SYSTEM_CONFIG.tabs[_activeTabIdx];
-        const visibleItems = _unitboardCollection ? getUnitboardCollectionItems(_unitboardCollection) : getUnitboardVisibleItems().filter(u => u.category === currentTab?.key);
+        const visibleItems = _unitboardCollection ? getUnitboardCollectionItems(_unitboardCollection) : getUnitboardVisibleItems(u => u.category === currentTab?.key);
         const categoryTitle = getEl('archiveCategoryTitle'), archiveCount = getEl('archiveCount'), selectAllBtn = getEl('btnSelectAllTab');
         if (categoryTitle) categoryTitle.textContent = _unitboardCollection === 'favorites' ? '즐겨찾기' : currentTab?.name || '';
         if (archiveCount) archiveCount.textContent = `${visibleItems.length} UNITS`;
@@ -1652,12 +1652,16 @@
             a.name.localeCompare(b.name);
     }
 
-    function getUnitboardVisibleItems() {
-        return Array.from(unitMap.values()).filter(isUnitboardVisibleUnit);
+    function getUnitboardVisibleItems(predicate) {
+        const items = [];
+        for (const unit of unitMap.values()) {
+            if (isUnitboardVisibleUnit(unit) && (!predicate || predicate(unit))) items.push(unit);
+        }
+        return items;
     }
 
     function getUnitboardCollectionItems(collection) {
-        return collection === 'favorites' ? getUnitboardVisibleItems().filter(u => _favorites.has(u.id)).sort(getUnitboardSort) : [];
+        return collection === 'favorites' ? getUnitboardVisibleItems(u => _favorites.has(u.id)).sort(getUnitboardSort) : [];
     }
     function buildUnitboardCollection(collection) {
         const items = getUnitboardCollectionItems(collection);
@@ -1687,7 +1691,7 @@
         if (!group || group.dataset.rendered === '1') return;
         if (key === 'favorites') group.innerHTML = buildUnitboardCollection(key);
         else {
-            const items = getUnitboardVisibleItems().filter(unit => unit.category === key).sort(getUnitboardSort);
+            const items = getUnitboardVisibleItems(unit => unit.category === key).sort(getUnitboardSort);
             if (key === '저그중립') {
                 const arm = items.findIndex(unit => unit.id === '데하카의오른팔');
                 if (arm >= 0 && items.some(unit => unit.id === '데하카고치')) {
@@ -1802,7 +1806,7 @@
 
     function toggleSelectAllTab() {
         const currentTab = SYSTEM_CONFIG.tabs[_activeTabIdx];
-        const visible = _unitboardCollection ? getUnitboardCollectionItems(_unitboardCollection) : getUnitboardVisibleItems().filter(u => u.category === currentTab?.key);
+        const visible = _unitboardCollection ? getUnitboardCollectionItems(_unitboardCollection) : getUnitboardVisibleItems(u => u.category === currentTab?.key);
         const items = visible.filter(isSelectableUnitboardUnit);
         if (!items.length) return;
         if (items.every(item => activeUnits.has(item.id))) items.forEach(item => activeUnits.delete(item.id));

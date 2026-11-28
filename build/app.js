@@ -142,7 +142,7 @@ function requestConfirmAction(key,message,run,trigger=null){
     return run();
   }
   clearConfirmAction();
-  const label=trigger?.matches('.ui-reset-btn') ? trigger.querySelector(':scope > span') : null;
+  const label=trigger?.matches('.ui-reset-btn') ? (trigger.querySelector(':scope > span > strong') || trigger.querySelector(':scope > span')) : null;
   pendingConfirmAction={key,trigger,label,original:label?.textContent,description:trigger?.getAttribute('aria-description'),until:now+delay,timer:setTimeout(clearConfirmAction,delay)};
   if(trigger){
     trigger.classList.add('is-confirming');
@@ -168,8 +168,9 @@ function vs(id){const el=$(id); return el ? el.value : '';}
 function normalizeXpInput(){
   const el=$('xp');
   if(!el) return 1;
-  const n=Math.max(1, v('xp'));
-  if(v('xp')!==n) el.value=String(n.toLocaleString('ko-KR'));
+  const current=v('xp');
+  const n=Math.max(1, current);
+  if(current!==n) el.value=String(n.toLocaleString('ko-KR'));
   return n;
 }
 function setElementProp(id, prop, value){const el=$(id); const next=value==null?'':String(value); if(el && el[prop]!==next) el[prop]=next;}
@@ -331,7 +332,7 @@ function additionalRuneCardHtml(rune,index){
   const kinds=[['none','선택 안함'],['ap','마법공격력'],['ua','유닛 가속'],['td','총 데미지'],['harmony','총 데미지 + 유닛 가속']];
   const awakening=['없음','a','b','c','d','e','f','g'];
   return `<article class="additional-rune-card" data-additional-rune-card="${index}" data-rune-grade="${grade}">
-    <header class="additional-rune-card-title"><strong>룬 ${index+1}</strong><span data-additional-rune-grade>${RUNE_GRADE_NAMES[grade]}</span><button type="button" class="additional-rune-reset ui-reset-btn" data-additional-rune-reset="${index}" aria-label="룬 ${index+1} 초기화" title="룬 ${index+1} 초기화" ${(readonly || !rune.registered)?'disabled':''}><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg></button></header>
+    <header class="additional-rune-card-title"><strong>룬 ${index+1}</strong><span data-additional-rune-grade>${RUNE_GRADE_NAMES[grade]}</span>${readonly?'<span class="additional-rune-main-label">메인룬</span>':`<button type="button" class="additional-rune-reset ui-reset-btn" data-additional-rune-reset="${index}" aria-label="룬 ${index+1} 초기화" title="룬 ${index+1} 초기화" ${!rune.registered?'disabled':''}><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg></button>`}</header>
     <div class="additional-rune-stat-heading"><span aria-hidden="true"></span><span>기본 스텟</span><span>개조 스텟</span></div>
     ${statLine('공격력','ad','modAD')}
     <div class="additional-rune-stat-line"><select data-additional-rune-index="${index}" data-additional-rune-field="specialType" aria-label="룬 ${index+1} 특수 스탯" ${readonly?'disabled':''}>${kinds.map(([key,label])=>option(key,label,rune.specialType)).join('')}</select><span class="additional-rune-special-value">${input('specialValue')}</span><i aria-hidden="true"></i></div>
@@ -360,7 +361,7 @@ function syncAdditionalRuneCard(index,rune){
   if(special) special.disabled=index===0 || rune.specialType==='none';
   card.querySelectorAll('[data-additional-rune-field="specialType"], [data-additional-rune-field="reinf"], [data-additional-rune-field="asc"]').forEach(el=>{el.disabled=index===0;});
   const reset=card.querySelector('[data-additional-rune-reset]');
-  if(reset) reset.disabled=index===0 || !rune.registered;
+  if(reset) reset.disabled=!rune.registered;
 }
 function closeAdditionalRuneModal(){
   const modal=$('additionalRuneModal');
@@ -446,34 +447,16 @@ function hydrateRuneChoiceFromHidden(){
   valueEl.value=String(selected ? v(selected[1]) : 0);
   syncRuneChoice();
 }
-function setSelectButton(id,value){
-  const el=$(id);
-  if(!el) return;
-  if(['aprRunePlus','sepRunePlus'].includes(id) && Number(value)>v(id.replace('Plus','Normal'))) return;
-  el.value=value;
-  syncSelectButtons();
-  commitAppUpdate();
-}
-function syncSelectButtons(){
-  const runePlusLimits={};
+function syncMonthlyRuneLimits(){
   ['aprRune','sepRune'].forEach(prefix=>{
     const normal=$(prefix+'Normal');
     const plus=$(prefix+'Plus');
     if(!normal || !plus) return;
     const limit=Math.max(0,Math.min(6,Number(normal.value)||0));
-    runePlusLimits[plus.id]=limit;
     if(Number(plus.value)>limit) plus.value=String(limit);
     [...plus.options].forEach(option=>{
       const disabled=Number(option.value)>limit;
       if(option.disabled!==disabled) option.disabled=disabled;
-    });
-  });
-  qsa('.seg-btns[data-target]').forEach(group=>{
-    const id=group.dataset.target;
-    const val=$(id)?.value;
-    group.querySelectorAll('button[data-value]').forEach(btn=>{
-      if(Object.hasOwn(runePlusLimits,id)) btn.disabled=Number(btn.dataset.value)>runePlusLimits[id];
-      setClassState(btn, 'active', btn.dataset.value===val);
     });
   });
 }
@@ -488,22 +471,6 @@ function syncDonationBuffControl(){
   if(!select) return;
   const value=activeDonationBuffType();
   if(select.value!==value) select.value=value;
-  qsa('.donation-buff-grid button[data-value]').forEach(button=>{
-    const selected=button.dataset.value===value;
-    button.classList.toggle('active',selected);
-    button.setAttribute('aria-pressed',selected ? 'true' : 'false');
-  });
-}
-function setDonationBuffType(value){
-  const select=$('donationBuffType');
-  if(!select) return false;
-  const normalized=normalizeDonationBuffType(value);
-  INV[116]=donationInvestmentFromType(normalized);
-  select.value=normalized;
-  syncDonationBuffControl();
-  syncSelectButtons();
-  commitAppUpdate();
-  return true;
 }
 const originalDifficultyOptions=[];
 const lastValidDifficultyByMode=new Map();
@@ -762,7 +729,7 @@ function renderResourceSummary(s){
   syncSpBankDisplay();
 }
 function syncControlDisplays(){
-  [syncSelectButtons,syncDonationBuffControl,syncBuffChoiceButtons,syncBattleMode,syncSpBankApplyControl,syncDifficultyTargetControls,syncErosionControlElements,syncPowerBlessOptions,syncSpecDpsSpeedSwitch,normalizeAllDpsBaseUnitQuantityInputs,formatAllMoneyInputs].forEach(fn=>fn());
+  [syncMonthlyRuneLimits,syncDonationBuffControl,syncBuffChoiceButtons,syncBattleMode,syncSpBankApplyControl,syncDifficultyTargetControls,syncErosionControlElements,syncPowerBlessOptions,syncSpecDpsSpeedSwitch,normalizeAllDpsBaseUnitQuantityInputs,formatAllMoneyInputs].forEach(fn=>fn());
 }
 function syncSpBankApplyControl(){
   const select=$('spBankApply');
@@ -1388,9 +1355,9 @@ const FIELD_REGISTRY={
   erosionStack:{kind:'목표설정',name:'어비스 침식 스택',save:true},
   jewelErosionRes:{kind:'목표설정',name:'어비스 심연 내성',save:true},
   aprRuneNormal:{kind:'룬효과 버프',name:'4월 일반',save:true},
-  aprRunePlus:{kind:'룬효과 버프',name:'4월 강화(+)',save:true},
+  aprRunePlus:{kind:'룬효과 버프',name:'4월 강화+',save:true},
   sepRuneNormal:{kind:'룬효과 버프',name:'9월 일반',save:true},
-  sepRunePlus:{kind:'룬효과 버프',name:'9월 강화(+)',save:true},
+  sepRunePlus:{kind:'룬효과 버프',name:'9월 강화+',save:true},
   overEnhance:{kind:'룬효과 버프',name:'오버핸스',save:true},
   repairEnhance:{kind:'룬효과 버프',name:'리페핸스',save:true},
   enhanceMaster:{kind:'룬효과 버프',name:'강화의 달인',save:true},
@@ -1644,40 +1611,36 @@ function traitNextInvestmentLabel(row,isMax,cost){
   if(row===45 && !isCoopMode()) return '협동전 전용';
   return isMax ? '✓ 마스터 완료' : `다음 투자 · ${fullNumber(cost)}`;
 }
+function traitTierSummaryHtml(invested,maximum,mastered){
+  return mastered?'✓ 전체 마스터':`<span class="trait-summary-current">${fullNumber(invested)}</span><span class="trait-summary-separator">/</span><span class="trait-summary-max">${fullNumber(maximum)}</span>`;
+}
 function buildTraitBoard(){
   const body=$('traitBody');
   if(!body) return;
+  const traitsByTier=new Map(TIERS.map(tier=>[tier,[]]));
+  for(const trait of TRAITS){
+    if(trait[0]!==116) traitsByTier.get(trait[2])?.push(trait);
+  }
+  const abyss=isAbyssDifficulty();
   body.innerHTML=TIERS.map((tier,tierIndex)=>{
-    const tierTraits=TRAITS.filter(t=>t[2]===tier && t[0]!==116);
-    const eligibleTierTraits=tierTraits;
-    const tierInvested=eligibleTierTraits.reduce((sum,t)=>sum+(INV[t[0]]||0),0);
-    const tierMaximum=eligibleTierTraits.reduce((sum,t)=>sum+(TMAX[t[0]]||999),0);
-    const tierMastered=eligibleTierTraits.length>0 && eligibleTierTraits.every(t=>(INV[t[0]]||0)>=(TMAX[t[0]]||999));
-    const tierSummary=tierInvested>0
-      ? `<span class="collapsed-summary trait-tier-summary${tierMastered?' is-mastered':''}">${tierMastered?'✓ 전체 마스터':`${fullNumber(tierInvested)} / ${fullNumber(tierMaximum)}`}</span>`
-      : '';
-    const rows=tierTraits.map((t,index)=>{
+    const tierTraits=traitsByTier.get(tier);
+    const rows=tierTraits.map(t=>{
       const [row,name,,type,rate]=t;
       const n=INV[row]||0, mx=TMAX[row]||999;
       const isMax=n>=mx;
       const cost=nextCost(row);
       // 어비스 난이도의 특성별 계수는 기존 DPS 계산과 동일하게 표시한다.
-      const currentRate=isAbyssDifficulty() ? ({133:15,134:7.5,135:1.5,136:3}[row] ?? rate) : rate;
+      const currentRate=abyss ? ({133:15,134:7.5,135:1.5,136:3}[row] ?? rate) : rate;
       const rStr=row===58?'강화수 +1':row===96?'2단 강화 +0.5':traitEffectText(row,type,currentRate);
       return `<article class="tr trait-invest-card${isMax?' is-mastered':''}" data-trait-id="${row}">
-        <div class="trait-invest-main">
-          <span class="trait-invest-index" aria-hidden="true">${String(index+1).padStart(2,'0')}</span>
-          <div class="trait-row-detail">
-            <div class="trait-invest-topline"><div class="tr-name">${escapeHtml(name)}</div><div class="tr-type"><span class="trait-effect-text">${escapeHtml(rStr)}</span><span class="trait-cost-chip ${isMax?'is-complete':''}">${traitNextInvestmentLabel(row,isMax,cost)}</span></div></div>
-          </div>
-        </div>
+        <div class="trait-invest-topline"><div class="tr-name">${escapeHtml(name)}</div><div class="tr-type"><span class="trait-effect-text">${escapeHtml(rStr)}</span><span class="trait-cost-chip ${isMax?'is-complete':''}">${traitNextInvestmentLabel(row,isMax,cost)}</span></div></div>
         <div class="tr-ctrl" aria-label="${escapeHtml(name)} 투자 조절">
-          <button type="button" class="ui-step-btn" data-action="traitAdjust" data-row="${row}" data-delta="-1" ${n<=0?'disabled':''} aria-label="${escapeHtml(name)} 1 환불">−</button>
           <div class="trait-value-pair">
+            <button type="button" class="ui-step-btn" data-action="traitAdjust" data-row="${row}" data-delta="-1" ${n<=0?'disabled':''} aria-label="${escapeHtml(name)} 1 환불">−</button>
             <input class="tv-input" type="text" inputmode="numeric" value="${n}" data-row="${row}" aria-label="${escapeHtml(name)} 현재 투자">
-            <span class="trait-max-sep">/</span><span class="trait-max-val">${mx}</span>
+            <span class="trait-max-val">/ ${mx}</span>
+            <button type="button" class="ui-step-btn" data-action="traitAdjust" data-row="${row}" data-delta="1" ${isMax?'disabled':''} aria-label="${escapeHtml(name)} 1 투자">+</button>
           </div>
-          <button type="button" class="ui-step-btn" data-action="traitAdjust" data-row="${row}" data-delta="1" ${isMax?'disabled':''} aria-label="${escapeHtml(name)} 1 투자">+</button>
           <button type="button" class="ui-action-btn trait-master-btn" data-action="traitMax" data-row="${row}" ${isMax?'disabled':''}>마스터</button>
           ${mx>=50 ? `<div class="trait-quick-actions">
             ${[10,50].map(step=>`<button type="button" data-action="traitQuickAdjust" data-row="${row}" data-step="${step}" ${mx-n<step?'disabled':''} aria-label="${escapeHtml(name)} ${step}회 추가 투자">+${step}</button>`).join('')}
@@ -1687,10 +1650,11 @@ function buildTraitBoard(){
     }).join('');
     const isExpanded=expandedTraitTiers.has(tier);
     return `<section class="trait-group trait-tier-panel${isExpanded?' is-expanded':''}" data-tier-index="${tierIndex+1}" data-tier="${tier}">
-      <h4><button type="button" class="trait-tier-toggle" data-action="toggleTraitTier" data-tier="${tier}" aria-expanded="${isExpanded}" aria-controls="traitTierContent${tierIndex+1}"><span class="trait-title"><span class="trait-tier-index" aria-hidden="true">${String(tierIndex+1).padStart(2,'0')}</span><span class="trait-tier-name">${tier}</span></span>${tierSummary}</button><span class="trait-tools"><button type="button" class="ui-action-btn mini-btn master" data-action="masterTier" data-tier="${tier}">구간 마스터</button><button type="button" class="ui-action-btn mini-btn reset ui-reset-btn" data-action="resetTier" data-tier="${tier}"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>초기화</span></button></span></h4>
+      <h4><button type="button" class="trait-tier-toggle" data-action="toggleTraitTier" data-tier="${tier}" aria-expanded="${isExpanded}" aria-controls="traitTierContent${tierIndex+1}"><span class="trait-title"><span class="trait-tier-index" aria-hidden="true">${String(tierIndex+1).padStart(2,'0')}</span><span class="trait-tier-name">${tier}</span></span></button><span class="trait-tools"><button type="button" class="ui-action-btn mini-btn master" data-action="masterTier" data-tier="${tier}">구간 마스터</button><button type="button" class="ui-action-btn mini-btn reset ui-reset-btn" data-action="resetTier" data-tier="${tier}"><svg class="ui-command-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#dpsUiResetGlyph"/></svg><span>초기화</span></button></span></h4>
       <div class="trait-invest-list" id="traitTierContent${tierIndex+1}" ${isExpanded?'':'hidden'}>${rows}</div>
     </section>`;
   }).join('');
+  return traitsByTier;
 }
 const traitBoardNodes=new WeakMap();
 function updateTraits(){
@@ -1699,12 +1663,13 @@ function updateTraits(){
   if(!body) return;
   let cached=traitBoardNodes.get(body);
   if(!cached || !cached.groups[0]?.panel.isConnected){
-    buildTraitBoard();
+    const traitsByTier=buildTraitBoard();
+    const panelsByTier=new Map(Array.from(body.children,el=>[el.dataset.tier,el]));
     cached={groups:TIERS.map(tier=>{
-      const panel=Array.from(body.children).find(el=>el.dataset.tier===tier);
-      return {tier,panel,toggle:panel.querySelector('.trait-tier-toggle'),list:panel.querySelector('.trait-invest-list'),traits:TRAITS.filter(t=>t[2]===tier && t[0]!==116).map(trait=>{
+      const panel=panelsByTier.get(tier);
+      return {tier,panel,toggle:panel.querySelector('.trait-tier-toggle'),list:panel.querySelector('.trait-invest-list'),traits:traitsByTier.get(tier).map(trait=>{
         const card=panel.querySelector(`[data-trait-id="${trait[0]}"]`);
-        return {trait,card,input:card.querySelector('.tv-input'),cost:card.querySelector('.trait-cost-chip'),effect:card.querySelector('.trait-effect-text'),buttons:[...card.querySelectorAll('button')],summary:null};
+        return {trait,card,input:card.querySelector('.tv-input'),cost:card.querySelector('.trait-cost-chip'),effect:card.querySelector('.trait-effect-text'),buttons:[...card.querySelectorAll('button')]};
       })};
     })};
     traitBoardNodes.set(body,cached);
@@ -1729,8 +1694,8 @@ function updateTraits(){
     }
     let summary=group.toggle.querySelector('.trait-tier-summary');
     if(invested>0){
-      if(!summary){summary=document.createElement('span');summary.className='collapsed-summary trait-tier-summary';group.toggle.append(summary);}
-      text(summary,mastered?'✓ 전체 마스터':`${fullNumber(invested)} / ${fullNumber(maximum)}`);
+      if(!summary){summary=document.createElement('span');summary.className='trait-tier-summary';group.toggle.append(summary);}
+      setHTMLIfChanged(summary,traitTierSummaryHtml(invested,maximum,mastered));
       summary.classList.toggle('is-mastered',mastered);
     }else summary?.remove();
     const expanded=expandedTraitTiers.has(group.tier);
@@ -1991,7 +1956,6 @@ function clearAll(){
   }
 }
 /* ── 11 · 화면 설정·승단 ── */
-/* 11-A · 글자 크기·화면 설정 */
 /* 11-A · 넥서스 공통 글씨 크기 설정 · 메인/독립 창 동기화 */
 function getFontScale(){
   const raw=DPS_ROOT.style.getPropertyValue('--app-font-scale');
@@ -2015,7 +1979,7 @@ function loadFontScale(){
 window.NEXUS_SET_BUILDER_FONT_SCALE=scale=>applyFontScale(scale,{fromHost:true});
 window.addEventListener('storage',event=>{if(event.key===DPS_CONFIG.storage.fontKey)loadFontScale();});
 window.NEXUS_PREPARE_BUILDER_WINDOW=()=>saveState({silent:true});
-/* 11-C · 더제로 승단 행 정의·선택지 생성 */
+/* 11-B · 더제로 승단 행 정의·선택지 생성 */
 
 const ZERO_PENANCE_ROWS=[
   'Practice','Very Easy','Easy','Normal','Hard','Very Hard','Hell','Inferno','Lunatic','Holic','Epic','Ultimate','Impossible','The Final'
@@ -2166,7 +2130,7 @@ function updateZeroScoreCalculator(state=collectZeroScoreState()){
         if(achieved) achievedCount++;
         const scoreText=achieved?'✓ 달성':`+${fullNumber(score)}`;
         const scoreClass=achieved?' zero-progress-achieved':score>0?' is-pending':'';
-        progressRows.push(`<span class="zero-progress-kind">${cells[0]}</span><b aria-label="${cells[0]} 현재 ${cells[1]||'미입력'}">${cells[1]}</b><b aria-label="${cells[0]} 목표 ${cells[2]||'미입력'}">${cells[2]}</b><b class="zero-progress-score${scoreClass}" aria-label="${cells[0]} ${achieved?'목표 달성':`목표 추가점수 +${fullNumber(score)}`}">${scoreText}</b>`);
+        progressRows.push(`<span class="zero-progress-kind">${cells[0]}</span><b aria-label="${cells[0]} 현재 ${cells[1]||'미입력'}">${cells[1]||'—'}</b><span class="zero-progress-arrow" aria-hidden="true">→</span><b aria-label="${cells[0]} 목표 ${cells[2]||'미입력'}">${cells[2]||'—'}</b><b class="zero-progress-score${scoreClass}" aria-label="${cells[0]} ${achieved?'목표 달성':`목표 추가점수 +${fullNumber(score)}`}">${scoreText}</b>`);
       };
       progress(tower?'일반탑':'일반',saved.current,saved.target,normalResult.score);
       if(tower){
@@ -2368,8 +2332,6 @@ const ACTION_HANDLERS={
   backupTraitPresets:(...args)=>window.DpsPreset.openBackup(...args),
   importTraitPresets:(...args)=>window.DpsPreset.openImport(...args),
   zeroScoreStar:(trigger)=>toggleZeroScoreStar(trigger),
-  selectButton:(trigger)=>setSelectButton(trigger.closest('.seg-btns')?.dataset.target, trigger.dataset.value),
-  donationBuff:(trigger)=>setDonationBuffType(trigger.dataset.value),
   traitAdjust:(trigger)=>{
     if(Date.now()<traitHoldSuppressClickUntil) return false;
     return adjustTraitBy(+trigger.dataset.row,+trigger.dataset.delta,1);
@@ -2476,7 +2438,7 @@ function bindReactiveInputs(){
     }
     if(TRAIT_LIMIT_INPUT_IDS.has(target.id) && String(target.value).replace(/,/g,'').trim()==='0') syncTraitLimitInputDisplay(target);
     if(target.id==='donationBuffType'){ INV[116]=donationInvestmentFromType(target.value); syncDonationBuffControl(); }
-    if(target.matches('select')) syncSelectButtons();
+    if(target.matches('select')) syncMonthlyRuneLimits();
     if(target.matches('.buff-choice-input')){
       if(DPS_UNIT_LINKED_BUFF_UNITS[target.id]) updateDpsUnitFromLinkedBuff(target);
       syncBuffChoiceButtons();
